@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: ebe32477e223d7e4ba28d2a3a9dd783f
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298128
+  packageName: Fantasy Kingdom | 3D Sample Project
+  packageVersion: 1.1.0
+  assetPath: Assets/Scripts/Interfaces/IInputProvider.cs
+  uploadId: 992462

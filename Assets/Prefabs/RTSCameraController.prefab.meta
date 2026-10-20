@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a6ae84f3500aa7e49a5fa36f710e50cf
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 298128
+  packageName: Fantasy Kingdom | 3D Sample Project
+  packageVersion: 1.1.0
+  assetPath: Assets/Prefabs/RTSCameraController.prefab
+  uploadId: 992462
