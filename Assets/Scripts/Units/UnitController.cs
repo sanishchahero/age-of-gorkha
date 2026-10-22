@@ -233,6 +233,32 @@ namespace Gorkha.Units
                     if (food != null) food.gameObject.SetActive(_carriedType == ResourceType.Food);
                 }
             }
+
+            UpdateToolVisual();
+        }
+
+        public void UpdateToolVisual()
+        {
+            if (!IsVillager) return;
+
+            Transform toolWood = null;
+            Transform toolStone = null;
+            Transform toolFood = null;
+
+            foreach (var t in GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name == "Tool_Wood") toolWood = t;
+                else if (t.name == "Tool_Stone") toolStone = t;
+                else if (t.name == "Tool_Food") toolFood = t;
+            }
+
+            bool isStone = _carriedType == ResourceType.Stone;
+            bool isFood = _carriedType == ResourceType.Food;
+            bool isWood = !isStone && !isFood;
+
+            if (toolWood != null) toolWood.gameObject.SetActive(isWood);
+            if (toolStone != null) toolStone.gameObject.SetActive(isStone);
+            if (toolFood != null) toolFood.gameObject.SetActive(isFood);
         }
 
         /// <summary>
@@ -336,8 +362,12 @@ namespace Gorkha.Units
             }
         }
 
+        private bool _isDying = false;
+
         private void Die()
         {
+            if (_isDying) return;
+            _isDying = true;
             _currentHealth = 0;
             AllUnits.Remove(this);
 
@@ -351,8 +381,28 @@ namespace Gorkha.Units
                 GorkhaPlayableHUD.SpawnFloatingText(transform.position + Vector3.up * 2.2f, $"+{_bountyGold} Gold Bounty!", Color.yellow);
             }
 
+            if (_selectionRing != null) Destroy(_selectionRing);
+            if (_healthBar != null) Destroy(_healthBar.gameObject);
+            foreach (var col in GetComponentsInChildren<Collider>()) col.enabled = false;
+
+            if (_behaviorRoutine != null)
+            {
+                StopCoroutine(_behaviorRoutine);
+                _behaviorRoutine = null;
+            }
+
             GorkhaVFX.SpawnPlacementDust(transform.position, Vector2.one * 0.9f);
-            Destroy(gameObject);
+
+            if (_animator != null)
+            {
+                _animator.PlayDeathCollapse(() => {
+                    Destroy(gameObject);
+                });
+            }
+            else
+            {
+                Destroy(gameObject, 0.5f);
+            }
         }
 
         public static UnitController FindNearestHostileTarget(Vector3 origin, float maxRange)
@@ -987,7 +1037,7 @@ namespace Gorkha.Units
 
                     if (_animator != null)
                     {
-                        _animator.PlayHarvestChop(() => {
+                        _animator.PlayFarmCultivate(() => {
                             _carriedAmount += 5.0;
                             _carriedType = ResourceType.Food;
                             UpdateSackVisual();

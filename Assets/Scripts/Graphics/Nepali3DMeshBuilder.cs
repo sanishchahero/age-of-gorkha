@@ -1555,6 +1555,13 @@ namespace Gorkha.Graphics
                 CreateSubMesh("PickBeak", CreatePyramidMesh(0.055f, 0.12f), GorkhaMaterials.ForgedSteel, root.transform, new Vector3(0, 0.30f, 0.22f), Quaternion.Euler(90, 0, 0));
                 CreateSubMesh("PickChisel", CreatePyramidMesh(0.055f, 0.08f), GorkhaMaterials.ForgedSteel, root.transform, new Vector3(0, 0.30f, -0.21f), Quaternion.Euler(-90, 0, 0));
             }
+            else if (type == ResourceType.Food)
+            {
+                // Authentic Nepali Curved Sickle (Hasiya / Khurpa)
+                CreateSubMesh("SickleTang", CreateCubeMesh(new Vector3(0.025f, 0.10f, 0.04f)), GorkhaMaterials.ForgedSteel, root.transform, new Vector3(0, 0.33f, 0));
+                CreateSubMesh("SickleBladeBase", CreateCubeMesh(new Vector3(0.015f, 0.08f, 0.18f)), GorkhaMaterials.ForgedSteel, root.transform, new Vector3(0, 0.38f, 0.08f), Quaternion.Euler(20f, 0, 0));
+                CreateSubMesh("SickleBladeTip", CreateCubeMesh(new Vector3(0.012f, 0.06f, 0.16f)), GorkhaMaterials.ForgedSteel, root.transform, new Vector3(0, 0.36f, 0.22f), Quaternion.Euler(65f, 0, 0));
+            }
             else
             {
                 // Woodcutter Broadaxe
@@ -1773,8 +1780,14 @@ namespace Gorkha.Graphics
                 Transform spineBone       = FindChildRecursive(charInstance.transform, "Spine_02") ?? FindChildRecursive(charInstance.transform, "Spine_01");
                 Transform syntyHipL       = FindChildRecursive(charInstance.transform, "UpperLeg_L");
                 Transform syntyHipR       = FindChildRecursive(charInstance.transform, "UpperLeg_R");
+                Transform kneeL           = FindChildRecursive(charInstance.transform, "LowerLeg_L");
+                Transform kneeR           = FindChildRecursive(charInstance.transform, "LowerLeg_R");
+                Transform ankleL          = FindChildRecursive(charInstance.transform, "Ankle_L");
+                Transform ankleR          = FindChildRecursive(charInstance.transform, "Ankle_R");
                 Transform syntyShoulderL  = FindChildRecursive(charInstance.transform, "Shoulder_L");
                 Transform syntyShoulderR  = FindChildRecursive(charInstance.transform, "Shoulder_R");
+                Transform elbowL          = FindChildRecursive(charInstance.transform, "Elbow_L");
+                Transform elbowR          = FindChildRecursive(charInstance.transform, "Elbow_R");
                 Transform hips            = FindChildRecursive(charInstance.transform, "Hips");
 
                 // Disable modern/generic hair when equipping enclosed headgear
@@ -1885,8 +1898,12 @@ namespace Gorkha.Graphics
                         break;
 
                     case UnitType.Villager:
-                        // High-Fidelity Woodcutter Axe / Mining Pickaxe in Right Hand
+                        // Dynamic Toolset in Right Hand: Woodcutter Axe, Mining Pickaxe, and Farming Sickle
                         BuildVillagerTool(rWeaponSocket, ResourceType.Wood, new Vector3(0.04f, -0.10f, 0.14f), Quaternion.Euler(50f, 0, 0));
+                        var pick = BuildVillagerTool(rWeaponSocket, ResourceType.Stone, new Vector3(0.04f, -0.10f, 0.14f), Quaternion.Euler(50f, 0, 0));
+                        if (pick != null) pick.SetActive(false);
+                        var sickle = BuildVillagerTool(rWeaponSocket, ResourceType.Food, new Vector3(0.04f, -0.10f, 0.14f), Quaternion.Euler(50f, 0, 0));
+                        if (sickle != null) sickle.SetActive(false);
                         // Authentic Woven Bamboo Doko Basket with Forehead Namlo Tumpline & Dynamic Timber/Stone Payload
                         BuildDokoBasket(backSocket, headBone);
                         break;
@@ -1911,7 +1928,23 @@ namespace Gorkha.Graphics
 
                 // 6. Attach Articulated Procedural Animator & Apply Class Ready Stance
                 var syntyAnim = model.AddComponent<UnitProceduralAnimator>();
-                syntyAnim.SetupLimbs(syntyHipL, syntyHipR, syntyShoulderL, syntyShoulderR, hips ?? model.transform, headBone);
+                syntyAnim.SetupFullHumanoidRig(
+                    hips: hips,
+                    spine: spineBone,
+                    head: headBone,
+                    hipL: syntyHipL,
+                    kneeL: kneeL,
+                    ankleL: ankleL,
+                    hipR: syntyHipR,
+                    kneeR: kneeR,
+                    ankleR: ankleR,
+                    shoulderL: syntyShoulderL,
+                    elbowL: elbowL,
+                    handL: handL,
+                    shoulderR: syntyShoulderR,
+                    elbowR: elbowR,
+                    handR: handR
+                );
                 syntyAnim.SetUnitClass(unitType, isHostile);
 
                 BoxCollider syntyCol = root.AddComponent<BoxCollider>();
@@ -2003,6 +2036,10 @@ namespace Gorkha.Graphics
 
                 case UnitType.Villager:
                     BuildVillagerTool(shoulderR.transform, ResourceType.Wood, new Vector3(0.04f, -0.35f, 0.16f), Quaternion.Euler(45f, 0, 0));
+                    var pPick = BuildVillagerTool(shoulderR.transform, ResourceType.Stone, new Vector3(0.04f, -0.35f, 0.16f), Quaternion.Euler(45f, 0, 0));
+                    if (pPick != null) pPick.SetActive(false);
+                    var pSickle = BuildVillagerTool(shoulderR.transform, ResourceType.Food, new Vector3(0.04f, -0.35f, 0.16f), Quaternion.Euler(45f, 0, 0));
+                    if (pSickle != null) pSickle.SetActive(false);
                     BuildDokoBasket(torso.transform, head.transform);
                     break;
 
