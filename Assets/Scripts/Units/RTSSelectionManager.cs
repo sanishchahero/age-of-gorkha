@@ -503,6 +503,14 @@ namespace Gorkha.Units
                     ExecuteHarvestOrder(resNode);
                     return;
                 }
+
+                // 2b. Check if clicked a farm with villagers
+                var farmBuilding = hit.collider.GetComponentInParent<BuildingInstance>();
+                if (farmBuilding != null && farmBuilding.Data != null && farmBuilding.Data.buildingType == BuildingType.Farm && farmBuilding.State == BuildingState.Active)
+                {
+                    ExecuteFarmOrder(farmBuilding);
+                    return;
+                }
             }
 
             // 3. Ground Click: March group in formation
@@ -578,6 +586,35 @@ namespace Gorkha.Units
                 GorkhaPlayableHUD.SpawnFloatingText(
                     node.transform.position + Vector3.up * 2.2f,
                     "Only Villagers Can Harvest Resources!",
+                    Color.red);
+            }
+        }
+
+        private void ExecuteFarmOrder(BuildingInstance farm)
+        {
+            int villagersAssigned = 0;
+            foreach (var u in SelectedUnits)
+            {
+                if (u != null && u.IsAlive && u.IsVillager)
+                {
+                    u.AssignFarmTask(farm);
+                    villagersAssigned++;
+                }
+            }
+
+            if (villagersAssigned > 0)
+            {
+                GorkhaVoiceBarks.PlayHarvestOrderBark(SelectedUnits[0]);
+                GorkhaPlayableHUD.SpawnFloatingText(
+                    farm.transform.position + Vector3.up * 2.2f,
+                    $"🌾 Tending Terraced Farm ({villagersAssigned} Villagers)",
+                    Color.yellow);
+            }
+            else
+            {
+                GorkhaPlayableHUD.SpawnFloatingText(
+                    farm.transform.position + Vector3.up * 2.2f,
+                    "Only Villagers Can Tend Farms!",
                     Color.red);
             }
         }

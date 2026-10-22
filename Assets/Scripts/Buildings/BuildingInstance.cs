@@ -90,11 +90,13 @@ namespace Gorkha.Buildings
             if (!AllBuildings.Contains(this)) AllBuildings.Add(this);
             EnsureVisuals();
             UpdateVisuals();
+            ResourceManager.Instance?.RecalculateStorageCapacities();
         }
 
         private void OnDisable()
         {
             AllBuildings.Remove(this);
+            ResourceManager.Instance?.RecalculateStorageCapacities();
         }
 
         private void Start()
@@ -233,6 +235,8 @@ namespace Gorkha.Buildings
             {
                 ResourceManager.Instance.AddProductionRate(_data.productionType, _data.baseProductionRate);
             }
+
+            ResourceManager.Instance?.RecalculateStorageCapacities();
         }
 
         public bool StartUpgrade()
@@ -403,6 +407,18 @@ namespace Gorkha.Buildings
                         case BuildingType.Trap:
                             _completedVisual = Nepali3DMeshBuilder.BuildSpikeTrap(transform);
                             break;
+                        case BuildingType.Granary:
+                            _completedVisual = Nepali3DMeshBuilder.BuildGranary(transform);
+                            break;
+                        case BuildingType.TimberYard:
+                            _completedVisual = Nepali3DMeshBuilder.BuildTimberYard(transform);
+                            break;
+                        case BuildingType.SlateDepot:
+                            _completedVisual = Nepali3DMeshBuilder.BuildSlateDepot(transform);
+                            break;
+                        case BuildingType.Vault:
+                            _completedVisual = Nepali3DMeshBuilder.BuildVault(transform);
+                            break;
                         default:
                             _completedVisual = Nepali3DMeshBuilder.BuildTownCenter(transform);
                             break;
@@ -424,6 +440,10 @@ namespace Gorkha.Buildings
                         BuildingType.Kaman => 450,
                         BuildingType.Wall => 600,
                         BuildingType.Farm => 350,
+                        BuildingType.Granary => 500,
+                        BuildingType.TimberYard => 500,
+                        BuildingType.SlateDepot => 600,
+                        BuildingType.Vault => 800,
                         BuildingType.WoodCamp => 400,
                         BuildingType.StoneQuarry => 450,
                         BuildingType.House => 300,

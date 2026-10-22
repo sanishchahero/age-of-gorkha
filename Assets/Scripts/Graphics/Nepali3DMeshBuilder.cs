@@ -559,6 +559,122 @@ namespace Gorkha.Graphics
         }
 
         /// <summary>
+        /// Generates a Traditional Newari Elevated Granary (Bhakari/Dhukuti) (CoC Food Storage ECO-01).
+        /// </summary>
+        public static GameObject BuildGranary(Transform parent = null)
+        {
+            GameObject root = new GameObject("Granary_3D");
+            if (parent != null) root.transform.SetParent(parent, false);
+
+            CreateSubMesh("GranaryPlinth", CreateCubeMesh(new Vector3(2.8f, 0.25f, 2.8f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.125f, 0));
+
+            float pOff = 1.15f;
+            Vector3[] stilts = { new Vector3(-pOff, 0.55f, -pOff), new Vector3(pOff, 0.55f, -pOff), new Vector3(pOff, 0.55f, pOff), new Vector3(-pOff, 0.55f, pOff) };
+            foreach (var s in stilts)
+            {
+                CreateSubMesh("TimberStilt", CreateCylinderMesh(0.12f, 0.60f), GorkhaMaterials.PagodaWood, root.transform, s);
+            }
+
+            CreateSubMesh("GrainChamber", CreateCubeMesh(new Vector3(2.4f, 1.4f, 2.4f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 1.55f, 0));
+            CreateSubMesh("GranaryRoof", CreatePyramidMesh(3.0f, 0.75f, flare: 0.35f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 2.45f, 0));
+
+            CreateSubMesh("GrainSack1", CreateCubeMesh(new Vector3(0.35f, 0.25f, 0.45f)), GorkhaMaterials.WheatField, root.transform, new Vector3(-0.55f, 0.95f, -1.05f), Quaternion.Euler(0, 15f, 0));
+            CreateSubMesh("GrainSack2", CreateCubeMesh(new Vector3(0.32f, 0.22f, 0.42f)), GorkhaMaterials.WheatField, root.transform, new Vector3(0.55f, 0.95f, -1.05f), Quaternion.Euler(0, -20f, 0));
+
+            BoxCollider col = root.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, 1.4f, 0);
+            col.size = new Vector3(2.8f, 2.8f, 2.8f);
+
+            return root;
+        }
+
+        /// <summary>
+        /// Generates a Mountain Timber Yard & Lumber Stockpile (CoC Wood Storage ECO-01).
+        /// </summary>
+        public static GameObject BuildTimberYard(Transform parent = null)
+        {
+            GameObject root = new GameObject("TimberYard_3D");
+            if (parent != null) root.transform.SetParent(parent, false);
+
+            CreateSubMesh("TimberYardPlinth", CreateCubeMesh(new Vector3(3.0f, 0.20f, 3.0f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.10f, 0));
+
+            float cOff = 1.25f;
+            Vector3[] canopyPillars = { new Vector3(-cOff, 1.0f, -cOff), new Vector3(cOff, 1.0f, -cOff), new Vector3(cOff, 1.0f, cOff), new Vector3(-cOff, 1.0f, cOff) };
+            foreach (var p in canopyPillars)
+            {
+                CreateSubMesh("CanopyPillar", CreateCylinderMesh(0.10f, 1.8f), GorkhaMaterials.PagodaWood, root.transform, p);
+            }
+            CreateSubMesh("CanopyRoof", CreatePyramidMesh(3.2f, 0.65f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 2.1f, 0));
+
+            CreateSubMesh("LogStack1", CreateCylinderMesh(0.14f, 1.8f), GorkhaMaterials.SalWoodTimber, root.transform, new Vector3(-0.6f, 0.45f, 0), Quaternion.Euler(90f, 0, 0));
+            CreateSubMesh("LogStack2", CreateCylinderMesh(0.14f, 1.8f), GorkhaMaterials.SalWoodTimber, root.transform, new Vector3(-0.35f, 0.45f, 0), Quaternion.Euler(90f, 0, 0));
+            CreateSubMesh("LogStack3", CreateCylinderMesh(0.14f, 1.8f), GorkhaMaterials.SalWoodTimber, root.transform, new Vector3(-0.48f, 0.70f, 0), Quaternion.Euler(90f, 0, 0));
+
+            CreateSubMesh("LogStack4", CreateCylinderMesh(0.13f, 1.6f), GorkhaMaterials.SalWoodTimber, root.transform, new Vector3(0.5f, 0.45f, 0), Quaternion.Euler(90f, 0, 0));
+            CreateSubMesh("LogStack5", CreateCylinderMesh(0.13f, 1.6f), GorkhaMaterials.SalWoodTimber, root.transform, new Vector3(0.75f, 0.45f, 0), Quaternion.Euler(90f, 0, 0));
+
+            CreateSubMesh("SawTrestle", CreateCubeMesh(new Vector3(0.18f, 0.55f, 0.85f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 0.45f, -1.0f));
+
+            BoxCollider col = root.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, 1.2f, 0);
+            col.size = new Vector3(3.0f, 2.4f, 3.0f);
+
+            return root;
+        }
+
+        /// <summary>
+        /// Generates a Mountain Slate Depot & Quarry Stockpile (CoC Stone Storage ECO-01).
+        /// </summary>
+        public static GameObject BuildSlateDepot(Transform parent = null)
+        {
+            GameObject root = new GameObject("SlateDepot_3D");
+            if (parent != null) root.transform.SetParent(parent, false);
+
+            CreateSubMesh("DepotPlinth", CreateCubeMesh(new Vector3(3.0f, 0.30f, 3.0f)), GorkhaMaterials.StoneSlate, root.transform, new Vector3(0, 0.15f, 0));
+
+            CreateSubMesh("StoneBinL", CreateCubeMesh(new Vector3(0.85f, 0.75f, 2.2f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(-0.95f, 0.65f, 0));
+            CreateSubMesh("StoneBinR", CreateCubeMesh(new Vector3(0.85f, 0.75f, 2.2f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0.95f, 0.65f, 0));
+
+            CreateSubMesh("SlateStack1", CreateCubeMesh(new Vector3(0.65f, 0.60f, 0.65f)), GorkhaMaterials.StoneSlate, root.transform, new Vector3(-0.95f, 0.85f, -0.5f));
+            CreateSubMesh("SlateStack2", CreateCubeMesh(new Vector3(0.65f, 0.75f, 0.65f)), GorkhaMaterials.StoneSlate, root.transform, new Vector3(0.95f, 0.90f, 0.5f));
+            CreateSubMesh("CenterBlock", CreateCubeMesh(new Vector3(0.90f, 0.65f, 0.90f)), GorkhaMaterials.StoneSlate, root.transform, new Vector3(0, 0.60f, 0));
+
+            CreateSubMesh("CraneMast", CreateCylinderMesh(0.10f, 2.4f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(1.1f, 1.4f, -1.1f));
+            CreateSubMesh("CraneBoom", CreateCylinderMesh(0.08f, 1.6f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0.6f, 2.5f, -0.6f), Quaternion.Euler(0, 45f, 35f));
+
+            BoxCollider col = root.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, 1.3f, 0);
+            col.size = new Vector3(3.0f, 2.6f, 3.0f);
+
+            return root;
+        }
+
+        /// <summary>
+        /// Generates a Fortified Royal Vault / Treasury (CoC Gold Storage ECO-01).
+        /// </summary>
+        public static GameObject BuildVault(Transform parent = null)
+        {
+            GameObject root = new GameObject("Vault_3D");
+            if (parent != null) root.transform.SetParent(parent, false);
+
+            CreateSubMesh("VaultPlinth", CreateCubeMesh(new Vector3(2.8f, 0.35f, 2.8f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.175f, 0));
+            CreateSubMesh("VaultCore", CreateCubeMesh(new Vector3(2.2f, 1.8f, 2.2f)), GorkhaMaterials.TerracottaBrick, root.transform, new Vector3(0, 1.20f, 0));
+            CreateSubMesh("VaultIronBands", CreateCubeMesh(new Vector3(2.24f, 0.15f, 2.24f)), GorkhaMaterials.DarkHammeredIron, root.transform, new Vector3(0, 1.15f, 0));
+
+            CreateSubMesh("VaultRoof", CreatePyramidMesh(2.8f, 0.70f, flare: 0.30f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 2.25f, 0));
+            CreateSubMesh("VaultGajur", CreatePyramidMesh(0.35f, 0.65f), GorkhaMaterials.MetallicGoldGajur, root.transform, new Vector3(0, 2.95f, 0));
+
+            CreateSubMesh("VaultDoor", CreateCubeMesh(new Vector3(0.70f, 1.15f, 0.12f)), GorkhaMaterials.DarkHammeredIron, root.transform, new Vector3(0, 0.90f, -1.12f));
+            CreateSubMesh("TreasureChest", CreateCubeMesh(new Vector3(0.50f, 0.35f, 0.35f)), GorkhaMaterials.PolishedBrass, root.transform, new Vector3(0.85f, 0.50f, -0.85f), Quaternion.Euler(0, -30f, 0));
+
+            BoxCollider col = root.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, 1.5f, 0);
+            col.size = new Vector3(2.8f, 3.0f, 2.8f);
+
+            return root;
+        }
+
+        /// <summary>
         /// Generates dynamic connected fortification wall segments (CoC & AoE style).
         /// </summary>
         public static GameObject BuildWallSegment(Transform parent, int level, bool north, bool south, bool east, bool west)
@@ -1367,10 +1483,26 @@ namespace Gorkha.Graphics
             payload.transform.SetParent(root.transform, false);
             payload.transform.localPosition = new Vector3(0, 0.28f, 0);
 
-            // Wood logs stack
-            CreateSubMesh("TimberLog1", CreateCylinderMesh(0.08f, 0.40f), GorkhaMaterials.PagodaWood, payload.transform, new Vector3(-0.06f, 0, 0), Quaternion.Euler(75f, 0, 0));
-            CreateSubMesh("TimberLog2", CreateCylinderMesh(0.08f, 0.42f), GorkhaMaterials.PagodaWood, payload.transform, new Vector3( 0.06f, 0, 0), Quaternion.Euler(80f, 15f, 0));
-            CreateSubMesh("TimberLog3", CreateCylinderMesh(0.07f, 0.38f), GorkhaMaterials.PagodaWood, payload.transform, new Vector3( 0f, 0.08f, 0.02f), Quaternion.Euler(70f, -10f, 0));
+            // 1. Wood logs group
+            GameObject woodGroup = new GameObject("Payload_Wood");
+            woodGroup.transform.SetParent(payload.transform, false);
+            CreateSubMesh("TimberLog1", CreateCylinderMesh(0.08f, 0.40f), GorkhaMaterials.PagodaWood, woodGroup.transform, new Vector3(-0.06f, 0, 0), Quaternion.Euler(75f, 0, 0));
+            CreateSubMesh("TimberLog2", CreateCylinderMesh(0.08f, 0.42f), GorkhaMaterials.PagodaWood, woodGroup.transform, new Vector3( 0.06f, 0, 0), Quaternion.Euler(80f, 15f, 0));
+            CreateSubMesh("TimberLog3", CreateCylinderMesh(0.07f, 0.38f), GorkhaMaterials.PagodaWood, woodGroup.transform, new Vector3( 0f, 0.08f, 0.02f), Quaternion.Euler(70f, -10f, 0));
+
+            // 2. Stone slate rocks group
+            GameObject stoneGroup = new GameObject("Payload_Stone");
+            stoneGroup.transform.SetParent(payload.transform, false);
+            CreateSubMesh("SlateRock1", CreateCubeMesh(new Vector3(0.18f, 0.14f, 0.16f)), GorkhaMaterials.StoneSlate, stoneGroup.transform, new Vector3(-0.05f, 0.02f, 0), Quaternion.Euler(15f, 25f, -10f));
+            CreateSubMesh("SlateRock2", CreateCubeMesh(new Vector3(0.16f, 0.15f, 0.15f)), GorkhaMaterials.StoneSlate, stoneGroup.transform, new Vector3(0.06f, 0.03f, 0.02f), Quaternion.Euler(-10f, 40f, 15f));
+            CreateSubMesh("SlateRock3", CreateCubeMesh(new Vector3(0.14f, 0.12f, 0.14f)), GorkhaMaterials.StoneSlate, stoneGroup.transform, new Vector3(0f, 0.12f, -0.02f), Quaternion.Euler(20f, -15f, 5f));
+
+            // 3. Food wheat sheaves group
+            GameObject foodGroup = new GameObject("Payload_Food");
+            foodGroup.transform.SetParent(payload.transform, false);
+            CreateSubMesh("WheatSheaf1", CreateCylinderMesh(0.07f, 0.38f), GorkhaMaterials.WheatField, foodGroup.transform, new Vector3(-0.05f, 0.05f, 0), Quaternion.Euler(80f, -10f, 0));
+            CreateSubMesh("WheatSheaf2", CreateCylinderMesh(0.07f, 0.40f), GorkhaMaterials.WheatField, foodGroup.transform, new Vector3(0.05f, 0.06f, 0), Quaternion.Euler(82f, 12f, 0));
+            CreateSubMesh("WheatSheaf3", CreateCylinderMesh(0.06f, 0.36f), GorkhaMaterials.WheatField, foodGroup.transform, new Vector3(0f, 0.12f, 0.02f), Quaternion.Euler(75f, 0, 0));
 
             // Also name a child ResourceSack for backwards compatibility
             GameObject legacyAlias = new GameObject("ResourceSack");

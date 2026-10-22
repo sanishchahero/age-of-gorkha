@@ -23,7 +23,8 @@ namespace Gorkha.Units
         IdlePatrol,
         MovingToNode,
         Harvesting,
-        DeliveringToDropOff
+        DeliveringToDropOff,
+        WorkingFarm
     }
 
     /// <summary>
@@ -47,6 +48,7 @@ namespace Gorkha.Units
         [Header("Villager Gathering (AoE)")]
         [SerializeField] private VillagerWorkState _workState = VillagerWorkState.IdlePatrol;
         [SerializeField] private ResourceNode _targetNode;
+        [SerializeField] private BuildingInstance _targetFarm;
         [SerializeField] private double _carriedAmount = 0.0;
         [SerializeField] private double _carryCapacity = 15.0;
         [SerializeField] private ResourceType _carriedType = ResourceType.Wood;
@@ -208,7 +210,7 @@ namespace Gorkha.Units
             Transform sack = null;
             foreach (var t in GetComponentsInChildren<Transform>(true))
             {
-                if (t.name == "ResourceSack" || t.name == "DokoPayload")
+                if (t.name == "DokoPayload" || t.name == "ResourceSack")
                 {
                     sack = t;
                     break;
@@ -217,7 +219,19 @@ namespace Gorkha.Units
 
             if (sack != null)
             {
-                sack.gameObject.SetActive(_carriedAmount > 0.5);
+                bool hasCargo = _carriedAmount > 0.5;
+                sack.gameObject.SetActive(hasCargo);
+
+                if (hasCargo)
+                {
+                    Transform wood = sack.Find("Payload_Wood");
+                    Transform stone = sack.Find("Payload_Stone");
+                    Transform food = sack.Find("Payload_Food");
+
+                    if (wood != null) wood.gameObject.SetActive(_carriedType == ResourceType.Wood);
+                    if (stone != null) stone.gameObject.SetActive(_carriedType == ResourceType.Stone);
+                    if (food != null) food.gameObject.SetActive(_carriedType == ResourceType.Food);
+                }
             }
         }
 
@@ -406,15 +420,51 @@ namespace Gorkha.Units
             return best;
         }
 
+        public static ResourceNode FindNearestNodeOfType(Vector3 origin, ResourceType yieldType, float maxRange)
+        {
+            ResourceNode best = null;
+            float bestDistSq = maxRange * maxRange;
+
+            for (int i = 0; i < ResourceNode.AllNodes.Count; i++)
+            {
+                var n = ResourceNode.AllNodes[i];
+                if (n != null && !n.IsDepleted && n.YieldType == yieldType)
+                {
+                    float dSq = (n.transform.position - origin).sqrMagnitude;
+                    if (dSq < bestDistSq)
+                    {
+                        bestDistSq = dSq;
+                        best = n;
+                    }
+                }
+            }
+
+            return best;
+        }
+
         public void AssignHarvestTask(ResourceNode node)
         {
             if (node == null || node.IsDepleted || _isHostile) return;
 
             _hasManualOrder = false;
             _manualTargetUnit = null;
+            _targetFarm = null;
             _targetNode = node;
             _workState = VillagerWorkState.MovingToNode;
             _carriedType = node.YieldType;
+            UpdateSackVisual();
+        }
+
+        public void AssignFarmTask(BuildingInstance farm)
+        {
+            if (farm == null || farm.State != BuildingState.Active || _isHostile) return;
+
+            _hasManualOrder = false;
+            _manualTargetUnit = null;
+            _targetNode = null;
+            _targetFarm = farm;
+            _workState = VillagerWorkState.WorkingFarm;
+            _carriedType = ResourceType.Food;
             UpdateSackVisual();
         }
 
@@ -424,6 +474,7 @@ namespace Gorkha.Units
             _manualDestination = destination;
             _manualTargetUnit = null;
             _targetNode = null;
+            _targetFarm = null;
             _workState = VillagerWorkState.IdlePatrol;
             UpdateSackVisual();
         }
@@ -462,7 +513,7 @@ namespace Gorkha.Units
                 {
                     yield return HandleHostileRaidBehavior();
                 }
-                else if (_unitType == UnitType.Villager && _targetNode != null)
+                else if (_unitType == UnitType.Villager && (_targetNode != null || _targetFarm != null))
                 {
                     yield return HandleVillagerWorkLoop();
                 }
@@ -790,6 +841,14 @@ namespace Gorkha.Units
 
         private IEnumerator HandleVillagerWorkLoop()
         {
+            // Case A: Working Farm
+            if (_targetFarm != null)
+            {
+                yield return HandleFarmWorkLoop();
+                yield break;
+            }
+
+            // Case B: Harvesting Resource Node (Tree or Boulder)
             // 1. Walk to Resource Node
             _workState = VillagerWorkState.MovingToNode;
             while (_targetNode != null && !_targetNode.IsDepleted && Vector3.Distance(transform.position, _targetNode.transform.position) > 1.6f)
@@ -800,12 +859,15 @@ namespace Gorkha.Units
 
             if (_targetNode == null || _targetNode.IsDepleted)
             {
-                _targetNode = null;
-                _workState = VillagerWorkState.IdlePatrol;
-                yield break;
+                _targetNode = FindNearestNodeOfType(transform.position, _carriedType, 14.0f);
+                if (_targetNode == null)
+                {
+                    _workState = VillagerWorkState.IdlePatrol;
+                    yield break;
+                }
             }
 
-            // 2. Harvest at Node (AoE Work Rhythm with Articulated Chopping)
+            // 2. Harvest at Node (AoE Work Rhythm with Articulated Chopping / Mining)
             _workState = VillagerWorkState.Harvesting;
             float harvestTimer = 0f;
             while (_targetNode != null && !_targetNode.IsDepleted && _carriedAmount < _carryCapacity)
@@ -815,6 +877,15 @@ namespace Gorkha.Units
                 if (harvestTimer >= 1.25f)
                 {
                     harvestTimer = 0f;
+
+                    if (_carriedType == ResourceType.Wood)
+                    {
+                        GorkhaAudio.PlayWoodChop();
+                    }
+                    else if (_carriedType == ResourceType.Stone)
+                    {
+                        GorkhaAudio.PlayStonePick();
+                    }
 
                     if (_animator != null)
                     {
@@ -858,17 +929,104 @@ namespace Gorkha.Units
                     ResourceManager.Instance.AddResource(_carriedType, _carriedAmount);
                 }
 
-                GorkhaAudio.PlayHarvest();
+                GorkhaAudio.PlayDeposit();
                 GorkhaVoiceBarks.PlayDepositSuccessBark(this, (int)_carriedAmount, _carriedType.ToString());
+                GorkhaPlayableHUD.SpawnFloatingText(dropOffPos + Vector3.up * 2.8f, $"+{(int)_carriedAmount} {_carriedType}", Color.yellow);
                 _carriedAmount = 0.0;
                 UpdateSackVisual();
             }
 
-            // If node is still alive, walk back to harvest more!
+            // 4. Auto-Chain: If node is depleted or missing, find nearest adjacent node!
             if (_targetNode == null || _targetNode.IsDepleted)
             {
-                _targetNode = null;
+                _targetNode = FindNearestNodeOfType(transform.position, _carriedType, 14.0f);
+                if (_targetNode == null)
+                {
+                    _workState = VillagerWorkState.IdlePatrol;
+                }
+            }
+        }
+
+        private IEnumerator HandleFarmWorkLoop()
+        {
+            if (_targetFarm == null || _targetFarm.State != BuildingState.Active)
+            {
+                _targetFarm = null;
                 _workState = VillagerWorkState.IdlePatrol;
+                yield break;
+            }
+
+            Vector3 farmCenter = _targetFarm.transform.position;
+
+            // 1. Walk to Terraced Farm
+            _workState = VillagerWorkState.MovingToNode;
+            while (_targetFarm != null && _targetFarm.State == BuildingState.Active && Vector3.Distance(transform.position, farmCenter) > 2.0f)
+            {
+                MoveTowardPoint(farmCenter, 1.8f);
+                yield return null;
+            }
+
+            if (_targetFarm == null || _targetFarm.State != BuildingState.Active)
+            {
+                _targetFarm = null;
+                _workState = VillagerWorkState.IdlePatrol;
+                yield break;
+            }
+
+            // 2. Cultivate & Harvest wheat crops
+            _workState = VillagerWorkState.Harvesting;
+            float harvestTimer = 0f;
+            while (_targetFarm != null && _targetFarm.State == BuildingState.Active && _carriedAmount < _carryCapacity)
+            {
+                harvestTimer += Time.deltaTime;
+
+                if (harvestTimer >= 1.25f)
+                {
+                    harvestTimer = 0f;
+                    GorkhaAudio.PlayWheatRustle();
+
+                    if (_animator != null)
+                    {
+                        _animator.PlayHarvestChop(() => {
+                            _carriedAmount += 5.0;
+                            _carriedType = ResourceType.Food;
+                            UpdateSackVisual();
+                        });
+                    }
+                    else
+                    {
+                        _carriedAmount += 5.0;
+                        _carriedType = ResourceType.Food;
+                        UpdateSackVisual();
+                    }
+                }
+
+                yield return null;
+            }
+
+            // 3. Deliver Food to Granary or Town Center
+            _workState = VillagerWorkState.DeliveringToDropOff;
+            Vector3 dropOffPos = FindBestDropOffPoint(ResourceType.Food);
+
+            while (Vector3.Distance(transform.position, dropOffPos) > 2.0f)
+            {
+                MoveTowardPoint(dropOffPos, 1.8f);
+                yield return null;
+            }
+
+            // Deposit food
+            if (_carriedAmount > 0)
+            {
+                if (ResourceManager.Instance != null)
+                {
+                    ResourceManager.Instance.AddResource(ResourceType.Food, _carriedAmount);
+                }
+
+                GorkhaAudio.PlayDeposit();
+                GorkhaVoiceBarks.PlayDepositSuccessBark(this, (int)_carriedAmount, "Food");
+                GorkhaPlayableHUD.SpawnFloatingText(dropOffPos + Vector3.up * 2.8f, $"+{(int)_carriedAmount} Food", new Color(1f, 0.9f, 0.3f));
+                _carriedAmount = 0.0;
+                UpdateSackVisual();
             }
         }
 
@@ -882,8 +1040,9 @@ namespace Gorkha.Units
                 if (b == null || b.State != BuildingState.Active || b.Data == null) continue;
 
                 bool isMatch = b.Data.buildingType == BuildingType.TownCenter ||
-                               (type == ResourceType.Wood && b.Data.buildingType == BuildingType.WoodCamp) ||
-                               (type == ResourceType.Stone && b.Data.buildingType == BuildingType.StoneQuarry);
+                               (type == ResourceType.Wood && (b.Data.buildingType == BuildingType.WoodCamp || b.Data.buildingType == BuildingType.TimberYard)) ||
+                               (type == ResourceType.Stone && (b.Data.buildingType == BuildingType.StoneQuarry || b.Data.buildingType == BuildingType.SlateDepot)) ||
+                               (type == ResourceType.Food && (b.Data.buildingType == BuildingType.Farm || b.Data.buildingType == BuildingType.Granary));
 
                 if (isMatch)
                 {

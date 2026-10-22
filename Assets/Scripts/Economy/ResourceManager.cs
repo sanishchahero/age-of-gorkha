@@ -35,6 +35,26 @@ namespace Gorkha.Economy
         [Header("Kingdom Peace Shield (DEF-05)")]
         [SerializeField] private float _shieldTimer = 720f; // 12 minutes starting treaty shield
 
+        [Header("Population Caps (AoE)")]
+        [SerializeField] private int _basePopulationCap = 10;
+        private int _maxPopulation = 10;
+
+        public int CurrentPopulation
+        {
+            get
+            {
+                int count = 0;
+                foreach (var u in Gorkha.Units.UnitController.AllUnits)
+                {
+                    if (u != null && !u.IsHostile && u.IsAlive) count++;
+                }
+                return count;
+            }
+        }
+
+        public int MaxPopulation => _maxPopulation;
+        public bool CanSupportUnit() => CurrentPopulation < _maxPopulation;
+
         private readonly Dictionary<ResourceType, ResourceBalance> _balances = new();
 
         public float ShieldRemainingSeconds => Mathf.Max(0f, _shieldTimer);
@@ -67,6 +87,84 @@ namespace Gorkha.Economy
             InitializeBalance(ResourceType.Iron, _initialIron, 0.0);
             InitializeBalance(ResourceType.Gold, _initialGold, 0.5);
             InitializeBalance(ResourceType.Gems, _initialGems, 0.0);
+        }
+
+        private void Start()
+        {
+            RecalculateStorageCapacities();
+        }
+
+        /// <summary>
+        /// Recalculates total kingdom storage capacity based on active Town Center,
+        /// Granaries, Timber Yards, Slate Depots, and Vaults (CoC ECO-01).
+        /// Also calculates maximum population capacity supported by Houses (AoE).
+        /// </summary>
+        public void RecalculateStorageCapacities()
+        {
+            double baseFoodCap = 500.0;
+            double baseWoodCap = 500.0;
+            double baseStoneCap = 500.0;
+            double baseGoldCap = 250.0;
+            double baseIronCap = 200.0;
+            double baseGemsCap = 9999.0;
+            int popCap = _basePopulationCap;
+
+            foreach (var b in Gorkha.Buildings.BuildingInstance.AllBuildings)
+            {
+                if (b == null || b.State == Gorkha.Buildings.BuildingState.Destroyed || b.Data == null) continue;
+                int lvl = Mathf.Max(1, b.Level);
+
+                // Town Center grants base capacity across all resources
+                if (b.Data.buildingType == Gorkha.Buildings.BuildingType.TownCenter)
+                {
+                    baseFoodCap += 500.0 * lvl;
+                    baseWoodCap += 500.0 * lvl;
+                    baseStoneCap += 500.0 * lvl;
+                    baseGoldCap += 250.0 * lvl;
+                    popCap += 5 * lvl;
+                }
+                // Dedicated Storages
+                else if (b.Data.buildingType == Gorkha.Buildings.BuildingType.Granary || (b.Data.isStorage && b.Data.storageType == ResourceType.Food))
+                {
+                    baseFoodCap += b.Data.baseStorageCapacity * lvl;
+                }
+                else if (b.Data.buildingType == Gorkha.Buildings.BuildingType.TimberYard || (b.Data.isStorage && b.Data.storageType == ResourceType.Wood))
+                {
+                    baseWoodCap += b.Data.baseStorageCapacity * lvl;
+                }
+                else if (b.Data.buildingType == Gorkha.Buildings.BuildingType.SlateDepot || (b.Data.isStorage && b.Data.storageType == ResourceType.Stone))
+                {
+                    baseStoneCap += b.Data.baseStorageCapacity * lvl;
+                }
+                else if (b.Data.buildingType == Gorkha.Buildings.BuildingType.Vault || (b.Data.isStorage && b.Data.storageType == ResourceType.Gold))
+                {
+                    baseGoldCap += b.Data.baseStorageCapacity * lvl;
+                }
+                // Houses provide population capacity
+                else if (b.Data.buildingType == Gorkha.Buildings.BuildingType.House)
+                {
+                    popCap += (b.Data.populationCapacity > 0 ? b.Data.populationCapacity : 5) * lvl;
+                }
+            }
+
+            SetCapacityInternal(ResourceType.Food, baseFoodCap);
+            SetCapacityInternal(ResourceType.Wood, baseWoodCap);
+            SetCapacityInternal(ResourceType.Stone, baseStoneCap);
+            SetCapacityInternal(ResourceType.Iron, baseIronCap);
+            SetCapacityInternal(ResourceType.Gold, baseGoldCap);
+            SetCapacityInternal(ResourceType.Gems, baseGemsCap);
+
+            _maxPopulation = popCap;
+            OnResourcesChanged?.Invoke();
+        }
+
+        private void SetCapacityInternal(ResourceType type, double capacity)
+        {
+            if (_balances.TryGetValue(type, out var bal))
+            {
+                bal.capacity = capacity;
+                bal.amount = Math.Min(bal.capacity, bal.amount);
+            }
         }
 
         private void InitializeBalance(ResourceType type, double amount, double rate)

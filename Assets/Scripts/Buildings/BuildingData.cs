@@ -17,7 +17,11 @@ namespace Gorkha.Buildings
         Wall,
         Gate,
         Kaman,
-        Trap
+        Trap,
+        Granary,
+        TimberYard,
+        SlateDepot,
+        Vault
     }
 
     [Serializable]
@@ -52,6 +56,11 @@ namespace Gorkha.Buildings
         public ResourceType productionType;
         public double baseProductionRate = 0.0;
         public int populationCapacity = 0;
+
+        [Header("Storage Capacity (CoC ECO-01)")]
+        public bool isStorage = false;
+        public ResourceType storageType = ResourceType.Food;
+        public double baseStorageCapacity = 1000.0;
 
         public Dictionary<ResourceType, double> GetCostDictionary(int level = 0)
         {

@@ -68,6 +68,7 @@ namespace Gorkha.UI
         private UnitController _selectedUnit;
         private readonly List<FloatingTextItem> _floatingTexts = new();
         private float _lastClickTime = 0f;
+        private int _selectedBuildCategory = 0; // 0 = Resources & Storage, 1 = Military & Defenses
 
         // Custom GUI Textures
         private Texture2D _cardBgTex;
@@ -297,6 +298,15 @@ namespace Gorkha.UI
                             GorkhaVoiceBarks.PlayHarvestOrderBark(_selectedUnit);
                             return;
                         }
+
+                        var farm = hit.collider.GetComponentInParent<BuildingInstance>();
+                        if (farm != null && farm.Data != null && farm.Data.buildingType == BuildingType.Farm && farm.State == BuildingState.Active && _selectedUnit.IsVillager)
+                        {
+                            _selectedUnit.AssignFarmTask(farm);
+                            GorkhaVoiceBarks.PlayHarvestOrderBark(_selectedUnit);
+                            SpawnFloatingText(farm.transform.position + Vector3.up * 2f, "🌾 Tending Terraced Farm!", Color.yellow);
+                            return;
+                        }
                     }
 
                     Plane ground = new Plane(Vector3.up, Vector3.zero);
@@ -503,6 +513,23 @@ namespace Gorkha.UI
                 DrawResourcePill("🪨 Stone", ResourceManager.Instance.Stone, ResourceManager.Instance.GetCapacity(ResourceType.Stone), ResourceManager.Instance.GetRate(ResourceType.Stone), new Color(0.75f, 0.78f, 0.82f));
                 DrawResourcePill("🪙 Gold", ResourceManager.Instance.Gold, ResourceManager.Instance.GetCapacity(ResourceType.Gold), ResourceManager.Instance.GetRate(ResourceType.Gold), new Color(1.0f, 0.84f, 0.0f));
                 DrawResourcePill("💎 Gems", ResourceManager.Instance.Gems, 9999, 0, new Color(0.35f, 0.85f, 1.0f));
+
+                // Population Cap (AoE ECO-02)
+                int curPop = ResourceManager.Instance.CurrentPopulation;
+                int maxPop = ResourceManager.Instance.MaxPopulation;
+                Color popCol = curPop >= maxPop ? new Color(1.0f, 0.45f, 0.45f) : new Color(0.65f, 0.90f, 1.0f);
+                GUILayout.BeginVertical(GUILayout.Width(76));
+                GUI.color = popCol;
+                GUILayout.Label($"👥 <b>{curPop}/{maxPop}</b>", _subHeaderStyle);
+                GUI.color = Color.white;
+                float popPct = maxPop > 0 ? Mathf.Clamp01((float)curPop / maxPop) : 0f;
+                Rect popGaugeRect = GUILayoutUtility.GetRect(70, 4, GUILayout.ExpandWidth(true));
+                GUI.DrawTexture(popGaugeRect, _progressBarBgTex);
+                if (popPct > 0.01f)
+                {
+                    GUI.DrawTexture(new Rect(popGaugeRect.x, popGaugeRect.y, popGaugeRect.width * popPct, popGaugeRect.height), _progressBarFillTex);
+                }
+                GUILayout.EndVertical();
             }
 
             // Dakshya Karmi / Builder Tracker (CoC style)
@@ -613,7 +640,7 @@ namespace Gorkha.UI
             bool isPlacing = BuildingPlacementController.Instance != null && BuildingPlacementController.Instance.IsPlacing;
 
             float dockWidth = Mathf.Min(vWidth - 24f, 1100f);
-            float dockHeight = isPlacing ? 60f : 84f;
+            float dockHeight = isPlacing ? 60f : 86f;
             float xPos = (vWidth - dockWidth) * 0.5f;
             _bottomDockRect = new Rect(xPos, vHeight - dockHeight - 8f, dockWidth, dockHeight);
 
@@ -641,47 +668,88 @@ namespace Gorkha.UI
             }
             else
             {
-                GUILayout.Label("🏰 <b>Build:</b>", _subHeaderStyle, GUILayout.Width(54));
+                // Category Tabs on Left
+                GUILayout.BeginVertical(GUILayout.Width(116));
+                GUIStyle activeCategoryStyle = _goldButtonStyle;
+                GUIStyle inactiveCategoryStyle = _buttonStyle;
 
-                if (GUILayout.Button("🌾 <b>Farm</b>\n<size=11><color=#D4B070>30W</color> • +2.5/s</size>", _dockCardStyle))
+                if (GUILayout.Button("🌾 Economy", _selectedBuildCategory == 0 ? activeCategoryStyle : inactiveCategoryStyle, GUILayout.Height(32)))
                 {
-                    StartBlueprintPlacement(BuildingType.Farm, "Terraced Farm", 2, 2, ResourceType.Food, 2.5, woodCost: 30);
+                    _selectedBuildCategory = 0;
+                    GorkhaAudio.PlayClick();
                 }
-                if (GUILayout.Button("🪵 <b>Wood Camp</b>\n<size=11><color=#D4B070>30F</color> • +2.0/s</size>", _dockCardStyle))
+                if (GUILayout.Button("⚔️ Military", _selectedBuildCategory == 1 ? activeCategoryStyle : inactiveCategoryStyle, GUILayout.Height(32)))
                 {
-                    StartBlueprintPlacement(BuildingType.WoodCamp, "Woodcutter Camp", 2, 2, ResourceType.Wood, 2.0, foodCost: 30);
+                    _selectedBuildCategory = 1;
+                    GorkhaAudio.PlayClick();
                 }
-                if (GUILayout.Button("🪨 <b>Quarry</b>\n<size=11><color=#D4B070>50W</color> • +1.0/s</size>", _dockCardStyle))
+                GUILayout.EndVertical();
+
+                GUILayout.Space(6);
+
+                if (_selectedBuildCategory == 0)
                 {
-                    StartBlueprintPlacement(BuildingType.StoneQuarry, "Stone Quarry", 2, 2, ResourceType.Stone, 1.0, woodCost: 50);
+                    // Economy & Storage Tab (CoC ECO-01 + AoE ECO-02)
+                    if (GUILayout.Button("🌾 <b>Farm</b>\n<size=11><color=#D4B070>30W</color> • +2.5/s</size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.Farm, "Terraced Farm", 2, 2, ResourceType.Food, 2.5, woodCost: 30);
+                    }
+                    if (GUILayout.Button("🪵 <b>Wood Camp</b>\n<size=11><color=#D4B070>30F</color> • +2.0/s</size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.WoodCamp, "Woodcutter Camp", 2, 2, ResourceType.Wood, 2.0, foodCost: 30);
+                    }
+                    if (GUILayout.Button("🪨 <b>Quarry</b>\n<size=11><color=#D4B070>50W</color> • +1.0/s</size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.StoneQuarry, "Stone Quarry", 2, 2, ResourceType.Stone, 1.0, woodCost: 50);
+                    }
+                    if (GUILayout.Button("🏠 <b>House</b>\n<size=11><color=#D4B070>40W</color> • +5 Pop</size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.House, "Newari House", 2, 2, ResourceType.Food, 0.0, woodCost: 40);
+                    }
+                    if (GUILayout.Button("🌾 <b>Granary</b>\n<size=11><color=#D4B070>80W, 40S</color> • +1k Food</size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.Granary, "Granary (Bhakari)", 2, 2, ResourceType.Food, 0.0, woodCost: 80, stoneCost: 40, isStorage: true, storageType: ResourceType.Food, storageCapacity: 1000);
+                    }
+                    if (GUILayout.Button("🪵 <b>Timber Yard</b>\n<size=11><color=#D4B070>80W, 40S</color> • +1k Wood</size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.TimberYard, "Timber Yard", 2, 2, ResourceType.Wood, 0.0, woodCost: 80, stoneCost: 40, isStorage: true, storageType: ResourceType.Wood, storageCapacity: 1000);
+                    }
+                    if (GUILayout.Button("🪨 <b>Slate Depot</b>\n<size=11><color=#D4B070>80W, 40S</color> • +1k Stone</size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.SlateDepot, "Slate Depot", 2, 2, ResourceType.Stone, 0.0, woodCost: 80, stoneCost: 40, isStorage: true, storageType: ResourceType.Stone, storageCapacity: 1000);
+                    }
+                    if (GUILayout.Button("🪙 <b>Vault</b>\n<size=11><color=#D4B070>100W, 60S</color> • +1k Gold</size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.Vault, "Treasury Vault (Dhukuti)", 2, 2, ResourceType.Gold, 0.0, woodCost: 100, stoneCost: 60, isStorage: true, storageType: ResourceType.Gold, storageCapacity: 1000);
+                    }
                 }
-                if (GUILayout.Button("⚔️ <b>Barracks</b>\n<size=11><color=#D4B070>100W, 50S</color></size>", _dockCardStyle))
+                else
                 {
-                    StartBlueprintPlacement(BuildingType.Barracks, "Kot (Barracks)", 2, 2, ResourceType.Food, 0.0, woodCost: 100, stoneCost: 50);
-                }
-                if (GUILayout.Button("🏠 <b>House</b>\n<size=11><color=#D4B070>40W</color> • +5 Pop</size>", _dockCardStyle))
-                {
-                    StartBlueprintPlacement(BuildingType.House, "Newari House", 2, 2, ResourceType.Food, 0.0, woodCost: 40);
-                }
-                if (GUILayout.Button("🏹 <b>Tower</b>\n<size=11><color=#D4B070>60W, 40S</color></size>", _dockCardStyle))
-                {
-                    StartBlueprintPlacement(BuildingType.Watchtower, "Watchtower", 2, 2, ResourceType.Food, 0.0, woodCost: 60, stoneCost: 40);
-                }
-                if (GUILayout.Button("🧱 <b>Wall</b>\n<size=11><color=#D4B070>10W</color> • 1x1</size>", _dockCardStyle))
-                {
-                    StartBlueprintPlacement(BuildingType.Wall, "Fortification Wall", 1, 1, ResourceType.Food, 0.0, woodCost: 10);
-                }
-                if (GUILayout.Button("💣 <b>Kaman</b>\n<size=11><color=#D4B070>75W, 50S</color></size>", _dockCardStyle))
-                {
-                    StartBlueprintPlacement(BuildingType.Kaman, "Kaman Cannon", 2, 2, ResourceType.Food, 0.0, woodCost: 75, stoneCost: 50);
-                }
-                if (GUILayout.Button("🕳️ <b>Trap</b>\n<size=11><color=#D4B070>20W, 10S</color></size>", _dockCardStyle))
-                {
-                    StartBlueprintPlacement(BuildingType.Trap, "Spike Trap", 1, 1, ResourceType.Food, 0.0, woodCost: 20, stoneCost: 10);
-                }
-                if (GUILayout.Button("⚔️ <b>Raid!</b>\n<size=11><color=#FF6666>Bandits</color></size>", _dangerButtonStyle, GUILayout.Width(74)))
-                {
-                    SpawnHostileRaidWave();
+                    // Military & Fortifications Tab
+                    if (GUILayout.Button("⚔️ <b>Barracks</b>\n<size=11><color=#D4B070>100W, 50S</color></size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.Barracks, "Kot (Barracks)", 2, 2, ResourceType.Food, 0.0, woodCost: 100, stoneCost: 50);
+                    }
+                    if (GUILayout.Button("🏹 <b>Tower</b>\n<size=11><color=#D4B070>60W, 40S</color></size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.Watchtower, "Watchtower", 2, 2, ResourceType.Food, 0.0, woodCost: 60, stoneCost: 40);
+                    }
+                    if (GUILayout.Button("🧱 <b>Wall</b>\n<size=11><color=#D4B070>10W</color> • 1x1</size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.Wall, "Fortification Wall", 1, 1, ResourceType.Food, 0.0, woodCost: 10);
+                    }
+                    if (GUILayout.Button("💣 <b>Kaman</b>\n<size=11><color=#D4B070>75W, 50S</color></size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.Kaman, "Kaman Cannon", 2, 2, ResourceType.Food, 0.0, woodCost: 75, stoneCost: 50);
+                    }
+                    if (GUILayout.Button("🕳️ <b>Trap</b>\n<size=11><color=#D4B070>20W, 10S</color></size>", _dockCardStyle))
+                    {
+                        StartBlueprintPlacement(BuildingType.Trap, "Spike Trap", 1, 1, ResourceType.Food, 0.0, woodCost: 20, stoneCost: 10);
+                    }
+                    if (GUILayout.Button("⚔️ <b>Raid!</b>\n<size=11><color=#FF6666>Bandits</color></size>", _dangerButtonStyle, GUILayout.Width(74)))
+                    {
+                        SpawnHostileRaidWave();
+                    }
                 }
             }
 
@@ -721,7 +789,7 @@ namespace Gorkha.UI
             }
         }
 
-        private void StartBlueprintPlacement(BuildingType type, string name, int w, int h, ResourceType prodType, double rate, double woodCost = 0, double foodCost = 0, double stoneCost = 0)
+        private void StartBlueprintPlacement(BuildingType type, string name, int w, int h, ResourceType prodType, double rate, double woodCost = 0, double foodCost = 0, double stoneCost = 0, bool isStorage = false, ResourceType storageType = ResourceType.Food, double storageCapacity = 1000.0)
         {
             GorkhaAudio.PlayClick();
 
@@ -734,6 +802,9 @@ namespace Gorkha.UI
             data.productionType = prodType;
             data.baseProductionRate = rate;
             data.constructionDurationSeconds = 6.0f;
+            data.isStorage = isStorage;
+            data.storageType = storageType;
+            data.baseStorageCapacity = storageCapacity;
             data.prefab = FantasyKingdomAssetRegistry.GetPrefab(type);
 
             if (woodCost > 0) data.baseCost.Add(new ResourceCost { type = ResourceType.Wood, amount = woodCost });
@@ -753,7 +824,13 @@ namespace Gorkha.UI
             if (b == null) return;
 
             float modalWidth = 480f;
-            float modalHeight = b.Data != null && b.Data.buildingType == BuildingType.Barracks ? 430f : 320f;
+            float modalHeight = 320f;
+            if (b.Data != null)
+            {
+                if (b.Data.buildingType == BuildingType.Barracks) modalHeight = 440f;
+                else if (b.Data.buildingType == BuildingType.TownCenter) modalHeight = 410f;
+                else if (b.Data.isStorage) modalHeight = 360f;
+            }
             float xPos = (vWidth - modalWidth) * 0.5f;
             _inspectorRect = new Rect(xPos, vHeight - modalHeight - 96f, modalWidth, modalHeight);
 
@@ -836,6 +913,22 @@ namespace Gorkha.UI
                     }
                 }
 
+                if (b.Data != null && b.Data.isStorage)
+                {
+                    double curAmt = ResourceManager.Instance != null ? ResourceManager.Instance.GetAmount(b.Data.storageType) : 0;
+                    double maxCap = ResourceManager.Instance != null ? ResourceManager.Instance.GetCapacity(b.Data.storageType) : 1000;
+                    GUILayout.Label($"📦 Kingdom {b.Data.storageType} Stored: <b>{(int)curAmt} / {(int)maxCap}</b>", _subHeaderStyle);
+
+                    float fillPct = Mathf.Clamp01((float)(curAmt / Math.Max(1.0, maxCap)));
+                    Rect storRect = GUILayoutUtility.GetRect(modalWidth - 28, 10);
+                    GUI.DrawTexture(storRect, _progressBarBgTex);
+                    if (fillPct > 0.01f)
+                    {
+                        GUI.DrawTexture(new Rect(storRect.x + 2, storRect.y + 2, (storRect.width - 4) * fillPct, storRect.height - 4), _progressBarFillTex);
+                    }
+                    GUILayout.Label($"<size=11><color=#A0E0A0>Adds +{(int)(b.Data.baseStorageCapacity * b.Level)} to kingdom maximum storage</color></size>", _subHeaderStyle);
+                }
+
                 // Upgrade Building Button
                 if (b.Data != null)
                 {
@@ -896,6 +989,30 @@ namespace Gorkha.UI
                 GUILayout.EndHorizontal();
             }
 
+            // If Town Center: Civilian Recruitment Section (AoE ECO-02)
+            if (b.Data != null && b.Data.buildingType == BuildingType.TownCenter && b.State == BuildingState.Active)
+            {
+                GUILayout.Space(8);
+                GUILayout.Label("👨‍🌾 <b>Civilian Recruitment:</b>", _headerStyle);
+
+                bool popFull = ResourceManager.Instance != null && !ResourceManager.Instance.CanSupportUnit();
+                bool hasFood = ResourceManager.Instance != null && ResourceManager.Instance.Food >= 50;
+
+                GUILayout.BeginHorizontal();
+                GUI.enabled = !popFull && hasFood;
+                if (GUILayout.Button("🌾 Train Villager (Kisan)\n<size=11>50 Food • +1 Laborer</size>", _buttonStyle, GUILayout.Height(46)))
+                {
+                    TrainVillager(50);
+                }
+                GUI.enabled = true;
+                GUILayout.EndHorizontal();
+
+                if (popFull)
+                {
+                    GUILayout.Label("<color=#FF6666>⚠️ Population limit reached! Build more Houses.</color>", _subHeaderStyle);
+                }
+            }
+
             GUILayout.EndVertical();
             GUILayout.EndArea();
         }
@@ -904,6 +1021,13 @@ namespace Gorkha.UI
         {
             GorkhaAudio.PlayClick();
 
+            if (ResourceManager.Instance != null && !ResourceManager.Instance.CanSupportUnit())
+            {
+                GorkhaAudio.PlayError();
+                SpawnFloatingText(_selectedBuilding != null ? _selectedBuilding.transform.position + Vector3.up * 2.5f : Vector3.zero, "Population Cap Reached! Build Houses.", Color.red);
+                return;
+            }
+
             var cost = new Dictionary<ResourceType, double>();
             if (foodCost > 0) cost[ResourceType.Food] = foodCost;
             if (woodCost > 0) cost[ResourceType.Wood] = woodCost;
@@ -911,7 +1035,7 @@ namespace Gorkha.UI
             if (ResourceManager.Instance != null && !ResourceManager.Instance.SpendResources(cost))
             {
                 GorkhaAudio.PlayError();
-                SpawnFloatingText(_selectedBuilding.transform.position + Vector3.up * 2.5f, "Need More Food/Wood!", Color.red);
+                SpawnFloatingText(_selectedBuilding != null ? _selectedBuilding.transform.position + Vector3.up * 2.5f : Vector3.zero, "Need More Food/Wood!", Color.red);
                 return;
             }
 
@@ -927,6 +1051,38 @@ namespace Gorkha.UI
 
             GorkhaAudio.PlayRecruit();
             SpawnFloatingText(spawnPos + Vector3.up * 2f, $"{type} Enlisted!", Color.green);
+        }
+
+        private void TrainVillager(double foodCost = 50)
+        {
+            GorkhaAudio.PlayClick();
+
+            if (ResourceManager.Instance != null && !ResourceManager.Instance.CanSupportUnit())
+            {
+                GorkhaAudio.PlayError();
+                SpawnFloatingText(_selectedBuilding != null ? _selectedBuilding.transform.position + Vector3.up * 2.5f : Vector3.zero, "Population Cap Reached! Build Houses.", Color.red);
+                return;
+            }
+
+            var cost = new Dictionary<ResourceType, double> { { ResourceType.Food, foodCost } };
+            if (ResourceManager.Instance != null && !ResourceManager.Instance.SpendResources(cost))
+            {
+                GorkhaAudio.PlayError();
+                SpawnFloatingText(_selectedBuilding != null ? _selectedBuilding.transform.position + Vector3.up * 2.5f : Vector3.zero, "Need 50 Food to Train Villager!", Color.red);
+                return;
+            }
+
+            Vector3 spawnPos = _selectedBuilding != null
+                ? _selectedBuilding.transform.position + new Vector3(2.5f, 0, -2.5f)
+                : new Vector3(24f, 0, 24f);
+
+            GameObject unitObj = new GameObject("Unit_Villager");
+            unitObj.transform.position = spawnPos;
+            var controller = unitObj.AddComponent<UnitController>();
+            controller.SetUnitType(UnitType.Villager);
+
+            GorkhaAudio.PlayRecruit();
+            SpawnFloatingText(spawnPos + Vector3.up * 2f, "🌾 Villager (Kisan) Recruited!", Color.green);
         }
 
         private string FormatCostString(Dictionary<ResourceType, double> cost)

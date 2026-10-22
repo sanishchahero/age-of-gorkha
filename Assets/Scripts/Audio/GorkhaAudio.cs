@@ -69,6 +69,12 @@ namespace Gorkha.Audio
         private AudioClip _arrowImpactClip;
         private AudioClip _structureBreachClip;
 
+        // Villager Gathering & Economy SFX (Phase 1 AoE + CoC)
+        private AudioClip _woodChopClip;
+        private AudioClip _stonePickClip;
+        private AudioClip _wheatRustleClip;
+        private AudioClip _depositClip;
+
         private void Awake()
         {
             if (_instance != null && _instance != this)
@@ -78,20 +84,34 @@ namespace Gorkha.Audio
             }
             _instance = this;
 
-            // Guarantee an AudioListener is in the scene so audio actually renders to speaker output
-            AudioListener listener = FindAnyObjectByType<AudioListener>();
-            if (listener == null)
+            // Guarantee exactly ONE active AudioListener in the scene so audio renders cleanly
+            AudioListener[] allListeners = FindObjectsByType<AudioListener>();
+            AudioListener primaryListener = null;
+
+            Camera mainCam = Camera.main;
+            if (mainCam != null)
             {
-                Camera mainCam = Camera.main;
-                if (mainCam != null)
+                primaryListener = mainCam.GetComponent<AudioListener>();
+                if (primaryListener == null) primaryListener = mainCam.gameObject.AddComponent<AudioListener>();
+            }
+            else if (allListeners.Length > 0)
+            {
+                primaryListener = allListeners[0];
+            }
+            else
+            {
+                primaryListener = gameObject.AddComponent<AudioListener>();
+            }
+
+            foreach (var l in allListeners)
+            {
+                if (l != null && l != primaryListener)
                 {
-                    listener = mainCam.gameObject.AddComponent<AudioListener>();
-                }
-                else
-                {
-                    listener = gameObject.AddComponent<AudioListener>();
+                    if (Application.isPlaying) Destroy(l);
+                    else DestroyImmediate(l);
                 }
             }
+
             AudioListener.pause = false;
             AudioListener.volume = 1.0f;
 
@@ -135,6 +155,44 @@ namespace Gorkha.Audio
             _bowTwangClip = CreateBowTwangClip();
             _arrowImpactClip = CreateArrowImpactClip();
             _structureBreachClip = CreateStructureBreachClip();
+
+            // Phase 1 Villager & Storage Clips
+            _woodChopClip = CreateWoodChopClip();
+            _stonePickClip = CreateStonePickClip();
+            _wheatRustleClip = CreateWheatRustleClip();
+            _depositClip = CreateDepositClip();
+        }
+
+        public static void PlayWoodChop(float volume = 0.90f)
+        {
+            if (Instance != null && !Instance._isMuted && Instance._woodChopClip != null && Instance._sfxSource != null)
+            {
+                Instance._sfxSource.PlayOneShot(Instance._woodChopClip, volume);
+            }
+        }
+
+        public static void PlayStonePick(float volume = 0.90f)
+        {
+            if (Instance != null && !Instance._isMuted && Instance._stonePickClip != null && Instance._sfxSource != null)
+            {
+                Instance._sfxSource.PlayOneShot(Instance._stonePickClip, volume);
+            }
+        }
+
+        public static void PlayWheatRustle(float volume = 0.85f)
+        {
+            if (Instance != null && !Instance._isMuted && Instance._wheatRustleClip != null && Instance._sfxSource != null)
+            {
+                Instance._sfxSource.PlayOneShot(Instance._wheatRustleClip, volume);
+            }
+        }
+
+        public static void PlayDeposit(float volume = 0.95f)
+        {
+            if (Instance != null && !Instance._isMuted && Instance._depositClip != null && Instance._sfxSource != null)
+            {
+                Instance._sfxSource.PlayOneShot(Instance._depositClip, volume);
+            }
         }
 
         private void StartAmbientWind()
@@ -897,6 +955,112 @@ namespace Gorkha.Audio
             }
 
             AudioClip clip = AudioClip.Create("StructureBreach", numSamples, 1, sampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
+        }
+
+        private AudioClip CreateWoodChopClip()
+        {
+            const int sampleRate = 44100;
+            const float duration = 0.18f;
+            int numSamples = (int)(sampleRate * duration);
+            float[] samples = new float[numSamples];
+            var rand = new System.Random(101);
+
+            for (int i = 0; i < numSamples; i++)
+            {
+                float t = (float)i / sampleRate;
+                float env = Mathf.Exp(-t * 26f);
+
+                // Woody impact pitch drop: 280Hz -> 65Hz
+                float freq = Mathf.Lerp(280f, 65f, t / duration);
+                float woodTone = Mathf.Sin(2f * Mathf.PI * freq * t);
+                float barkCrunch = (float)(rand.NextDouble() * 2.0 - 1.0) * Mathf.Exp(-t * 55f);
+
+                samples[i] = (woodTone * 0.70f + barkCrunch * 0.45f) * env * 0.92f;
+            }
+
+            AudioClip clip = AudioClip.Create("WoodChop", numSamples, 1, sampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
+        }
+
+        private AudioClip CreateStonePickClip()
+        {
+            const int sampleRate = 44100;
+            const float duration = 0.22f;
+            int numSamples = (int)(sampleRate * duration);
+            float[] samples = new float[numSamples];
+            var rand = new System.Random(202);
+
+            for (int i = 0; i < numSamples; i++)
+            {
+                float t = (float)i / sampleRate;
+                float env = Mathf.Exp(-t * 18f);
+
+                // Sharp metallic pickaxe ring (2700Hz + 1920Hz harmonic)
+                float metalRing1 = Mathf.Sin(2f * Mathf.PI * 2700f * t);
+                float metalRing2 = Mathf.Sin(2f * Mathf.PI * 1920f * t) * 0.6f;
+                float flintCrack = (float)(rand.NextDouble() * 2.0 - 1.0) * Mathf.Exp(-t * 80f);
+
+                samples[i] = ((metalRing1 + metalRing2) * 0.65f + flintCrack * 0.45f) * env * 0.88f;
+            }
+
+            AudioClip clip = AudioClip.Create("StonePick", numSamples, 1, sampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
+        }
+
+        private AudioClip CreateWheatRustleClip()
+        {
+            const int sampleRate = 44100;
+            const float duration = 0.32f;
+            int numSamples = (int)(sampleRate * duration);
+            float[] samples = new float[numSamples];
+            var rand = new System.Random(303);
+
+            for (int i = 0; i < numSamples; i++)
+            {
+                float t = (float)i / sampleRate;
+                float env = Mathf.Sin(Mathf.PI * (t / duration)); // Smooth bell envelope
+
+                // Grain stalk swish
+                float noise = (float)(rand.NextDouble() * 2.0 - 1.0);
+                float gentleTone = Mathf.Sin(2f * Mathf.PI * 440f * t) * 0.15f;
+
+                samples[i] = (noise * 0.7f + gentleTone) * env * 0.70f;
+            }
+
+            AudioClip clip = AudioClip.Create("WheatRustle", numSamples, 1, sampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
+        }
+
+        private AudioClip CreateDepositClip()
+        {
+            const int sampleRate = 44100;
+            const float duration = 0.45f;
+            int numSamples = (int)(sampleRate * duration);
+            float[] samples = new float[numSamples];
+
+            // Rising 3-tone arpeggio (C5 -> E5 -> G5) + heavy chest thud
+            float[] chord = { 523.25f, 659.25f, 783.99f };
+            float step = duration / 3f;
+
+            for (int i = 0; i < numSamples; i++)
+            {
+                float t = (float)i / sampleRate;
+                int idx = Mathf.Clamp((int)(t / step), 0, chord.Length - 1);
+                float localT = t - (idx * step);
+
+                float freq = chord[idx];
+                float chime = Mathf.Sin(2f * Mathf.PI * freq * t) * Mathf.Exp(-localT * 9f);
+                float chestThud = Mathf.Sin(2f * Mathf.PI * 90f * t) * Mathf.Exp(-t * 12f) * 0.5f;
+
+                samples[i] = (chime * 0.8f + chestThud) * 0.90f;
+            }
+
+            AudioClip clip = AudioClip.Create("DepositResource", numSamples, 1, sampleRate, false);
             clip.SetData(samples, 0);
             return clip;
         }

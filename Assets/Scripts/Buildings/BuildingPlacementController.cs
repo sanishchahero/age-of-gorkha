@@ -136,6 +136,18 @@ namespace Gorkha.Buildings
                     case BuildingType.Watchtower:
                         Nepali3DMeshBuilder.BuildWatchtower(_previewInstance.transform);
                         break;
+                    case BuildingType.Granary:
+                        Nepali3DMeshBuilder.BuildGranary(_previewInstance.transform);
+                        break;
+                    case BuildingType.TimberYard:
+                        Nepali3DMeshBuilder.BuildTimberYard(_previewInstance.transform);
+                        break;
+                    case BuildingType.SlateDepot:
+                        Nepali3DMeshBuilder.BuildSlateDepot(_previewInstance.transform);
+                        break;
+                    case BuildingType.Vault:
+                        Nepali3DMeshBuilder.BuildVault(_previewInstance.transform);
+                        break;
                     case BuildingType.Kaman:
                         Nepali3DMeshBuilder.BuildKamanCannon(_previewInstance.transform, 1);
                         break;

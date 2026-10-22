@@ -460,12 +460,18 @@ namespace Gorkha.Graphics
         #endregion
 
         public static Material RedBrick => GetMaterial("M_NepaliRedBrick", new Color(0.72f, 0.24f, 0.18f), metallic: 0.05f, smoothness: 0.25f);
+        public static Material TerracottaBrick => RedBrick;
         public static Material PagodaWood => GetMaterial("M_SalWood", new Color(0.28f, 0.16f, 0.08f), metallic: 0.05f, smoothness: 0.3f);
+        public static Material SalWoodTimber => SalWoodDark;
         public static Material GoldenGajur => GetMaterial("M_GoldenGajur", new Color(0.96f, 0.78f, 0.15f), metallic: 0.15f, smoothness: 0.25f);
+        public static Material MetallicGoldGajur => GoldenGajur;
         public static Material SlateStone => GetMaterial("M_HimalayanSlate", new Color(0.42f, 0.44f, 0.46f), metallic: 0.15f, smoothness: 0.2f);
+        public static Material StoneSlate => SlateStone;
         public static Material AlpineGrass => GrassTileTerrainMat;
         public static Material TerraceDirt => GetMaterial("M_TerraceDirt", new Color(0.48f, 0.35f, 0.22f), metallic: 0.02f, smoothness: 0.1f);
         public static Material GoldenWheat => GetMaterial("M_GoldenWheat", new Color(0.92f, 0.72f, 0.25f), metallic: 0.0f, smoothness: 0.1f);
+        public static Material WheatField => GoldenWheat;
+        public static Material DarkHammeredIron => DarkIron;
         public static Material WhitePlaster => GetMaterial("M_WhitePlaster", new Color(0.92f, 0.90f, 0.85f), metallic: 0.05f, smoothness: 0.4f);
         public static Material RoyalRedFlag
         {

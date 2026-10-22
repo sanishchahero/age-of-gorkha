@@ -84,11 +84,11 @@ flowchart LR
 
 | Task ID | Feature Title | Inspiration | Priority | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **ECO-01** | **Resource Storage & Capacity Cap System** | CoC | **P0** | ⏳ Planned |
-| **ECO-02** | **Villager Work Loop (Tree Chopping & Stone Mining)** | AoE | **P0** | ⏳ Planned |
-| **ECO-03** | **Builder / Craftsman Management (Dakshya Karmi)** | CoC | **P1** | ⏳ Planned |
-| **ECO-04** | **Building Relocation & Smooth Drag-to-Move** | CoC | **P1** | ⏳ Planned |
-| **ECO-05** | **Mini-Map Navigation & Radar View** | AoE | **P1** | ⏳ Planned |
+| **ECO-01** | **Resource Storage & Capacity Cap System** | CoC | **P0** | ✅ Completed |
+| **ECO-02** | **Villager Work Loop (Tree Chopping & Stone Mining)** | AoE | **P0** | ✅ Completed |
+| **ECO-03** | **Builder / Craftsman Management (Dakshya Karmi)** | CoC | **P1** | ✅ Completed |
+| **ECO-04** | **Building Relocation & Smooth Drag-to-Move** | CoC | **P1** | ✅ Completed |
+| **ECO-05** | **Mini-Map Navigation & Radar View** | AoE | **P1** | ✅ Completed |
 
 ### Detailed Specifications
 
@@ -137,11 +137,11 @@ flowchart LR
 
 | Task ID | Feature Title | Inspiration | Priority | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **DEF-01** | **Placeable & Connectable Fortification Walls** | CoC / AoE | **P0** | ⏳ Planned |
-| **DEF-02** | **Archer Watchtowers with Auto-Targeting Radius** | CoC / AoE | **P0** | ⏳ Planned |
-| **DEF-03** | **Kaman (Mountain Cannon) Heavy Defense** | CoC | **P1** | ⏳ Planned |
-| **DEF-04** | **Himalayan Concealed Traps (Pit Traps & Rolling Logs)** | CoC | **P1** | ⏳ Planned |
-| **DEF-05** | **Settlement Shield & Peace Treaty Timer** | CoC | **P2** | ⏳ Planned |
+| **DEF-01** | **Placeable & Connectable Fortification Walls** | CoC / AoE | **P0** | ✅ Completed |
+| **DEF-02** | **Archer Watchtowers with Auto-Targeting Radius** | CoC / AoE | **P0** | ✅ Completed |
+| **DEF-03** | **Kaman (Mountain Cannon) Heavy Defense** | CoC | **P1** | ✅ Completed |
+| **DEF-04** | **Himalayan Concealed Traps (Pit Traps & Rolling Logs)** | CoC | **P1** | ✅ Completed |
+| **DEF-05** | **Settlement Shield & Peace Treaty Timer** | CoC | **P2** | ✅ Completed |
 
 ### Detailed Specifications
 
