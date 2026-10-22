@@ -33,6 +33,7 @@ flowchart LR
 | **UX-03** | **Signature CoC Harvest Bubbles & Floating Popups** | CoC | **P0** | ✅ Completed |
 | **UX-04** | **Precision 3D Building Placement Grid & Snap Audio** | CoC / AoE | **P0** | ✅ Completed |
 | **UX-05** | **Cinematic RTS Camera Inertia & Edge Panning** | AoE | **P1** | ✅ Completed |
+| **GFX-05** | **Articulated Humanoid Kinematics & Dynamic Toolset** | AoE / CoC | **P0** | ✅ Completed |
 
 ### Detailed Specifications (Phase 0)
 
@@ -77,6 +78,17 @@ flowchart LR
 - Smooth damping inertia for keyboard WASD and mouse-drag panning.
 - Optional RTS edge panning (moving mouse to viewport boundary pans the view).
 - Smooth exponential zoom and double-click building focus.
+
+#### GFX-05: Articulated Humanoid Kinematics & Dynamic Toolset
+- **15-Bone Skeletal Kinematics:** Full joint chain articulation across Hips, Spine_02, Head, Thighs, Knees, Ankles, Shoulders, Elbows, and Hands. Eliminates rigid pendulum movement with realistic knee flexion ($42^\circ$), ankle ground pitch, and elbow arm flexion.
+- **Independent Pelvic Sway & Step Bounce:** Hips bounce vertically ($0.038\text{m}$) and sway with stride cycles while upper-body spine counter-balances torque.
+- **Authentic Stances & Combat Attacks:**
+  - *Khukuri Warriors:* Dynamic waist guard stance with raised buckler; multi-axis cross-cleave attack with torso windup and recovery.
+  - *Spearmen:* Phalanx spear-ready stance; forward thrust piston lunge with recoil recovery.
+  - *Archers:* Scout stance with notched arrow; bowstring pull with shoulder draw and physical recoil kick.
+  - *Villagers:* Forward-leaning counter-balance stance for heavy back-mounted Doko loads; authentic two-handed overhead chop and farm cultivation.
+- **Dynamic Villager Toolset:** Right hand dynamically equips Woodcutter Broadaxe, Slate Mining Pickaxe, or forged steel Curved Sickle (*Hasiya* / *Khurpa*) matching the gathered resource.
+- **Damage Reaction & Death Physics:** Instant flinch wobble on taking damage, and physical multi-joint collapse animation on defeat before dissolution.
 
 ---
 
