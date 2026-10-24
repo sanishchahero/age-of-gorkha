@@ -166,10 +166,10 @@ namespace Gorkha.Editor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("<color=#00FF7F><b>[Gorkha 3D]</b> All Unit 3D Prefabs regenerated with Synty POLYGON character models!</color>");
+            Debug.Log("<color=#00FF7F><b>[Gorkha 3D]</b> All Unit 3D Prefabs regenerated with Mixamo character models!</color>");
         }
 
-        [MenuItem("Gorkha/Upgrade Scene Units to Synty Models", false, 11)]
+        [MenuItem("Gorkha/Upgrade Scene Units to Mixamo Models", false, 11)]
         public static void UpgradeSceneUnits()
         {
             var units = Object.FindObjectsByType<UnitController>(FindObjectsSortMode.None);
@@ -180,7 +180,7 @@ namespace Gorkha.Editor
                 EditorUtility.SetDirty(u.gameObject);
                 count++;
             }
-            Debug.Log($"<color=#00FF7F><b>[Gorkha 3D]</b> Successfully upgraded {count} scene units to Synty 3D models!</color>");
+            Debug.Log($"<color=#00FF7F><b>[Gorkha 3D]</b> Successfully upgraded {count} scene units to Mixamo 3D models!</color>");
         }
     }
 }
