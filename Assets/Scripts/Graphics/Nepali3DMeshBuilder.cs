@@ -1858,8 +1858,9 @@ namespace Gorkha.Graphics
                 }
 
                 // Apply authentic materials: Peasant texture for villagers, warrior texture for soldiers
+                bool isCustomGorkhali = charPrefab.name.Contains("Gorkhali_Warrior");
                 bool isPeasant = charPrefab.name.Contains("Peasent") || charPrefab.name.Contains("Peasant");
-                Material charMat = FantasyKingdomAssetRegistry.GetCharacterMaterial(isPeasant, isHostile);
+                Material charMat = isCustomGorkhali ? null : FantasyKingdomAssetRegistry.GetCharacterMaterial(isPeasant, isHostile);
 
                 if (charMat != null)
                 {
@@ -1896,8 +1897,8 @@ namespace Gorkha.Graphics
                     if (femaleHair != null) femaleHair.gameObject.SetActive(false);
                 }
 
-                // 2. Attach Proud Gorkhali Mustache on adult male soldiers
-                if (!isFemale && !isHostile && headBone != null && unitType != UnitType.Villager)
+                // 2. Attach Proud Gorkhali Mustache on adult male soldiers (Synty models only; custom model has native mustache)
+                if (!isCustomGorkhali && !isFemale && !isHostile && headBone != null && unitType != UnitType.Villager)
                 {
                     GameObject mustachePrefab = FantasyKingdomAssetRegistry.LoadAttachmentPrefab("moustache");
                     if (mustachePrefab != null)
@@ -1915,8 +1916,8 @@ namespace Gorkha.Graphics
                     }
                 }
 
-                // 3. Equip Culturally Authentic Headwear
-                if (headBone != null)
+                // 3. Equip Culturally Authentic Headwear (Synty models only; custom model has native Dhaka Topi)
+                if (!isCustomGorkhali && headBone != null)
                 {
                     if (isHostile)
                     {
@@ -1953,13 +1954,13 @@ namespace Gorkha.Graphics
                 // 4. Equip Armor, Pauldrons, Patuka Sashes & Hip Scabbards
                 Transform sashRoot = hips != null ? hips : (spineBone != null ? spineBone : model.transform);
 
-                if (unitType == UnitType.Spearman || unitType == UnitType.KhukuriWarrior)
+                if (!isCustomGorkhali && (unitType == UnitType.Spearman || unitType == UnitType.KhukuriWarrior))
                 {
                     // Layered Lamellar Shoulder Pauldrons
                     BuildLamellarPauldrons(syntyShoulderL, syntyShoulderR, isHostile);
                 }
 
-                if (unitType == UnitType.KhukuriWarrior)
+                if (!isCustomGorkhali && unitType == UnitType.KhukuriWarrior)
                 {
                     // Wrapped Royal Scarlet Patuka Waist Sash
                     CreateSubMesh("PatukaSash", CreateCubeMesh(new Vector3(0.38f, 0.14f, 0.30f)), GorkhaMaterials.LeatherPatuka, sashRoot, new Vector3(0, 0.04f, 0));
