@@ -1213,6 +1213,31 @@ namespace Gorkha.Graphics
 
         public static GameObject BuildKhukuriBlade(Transform parent, Vector3 localPos = default, Quaternion localRot = default, bool isBandit = false)
         {
+            // 1. Try High-Fidelity Blender Historical FBX Asset
+            GameObject fbxPrefab = Resources.Load<GameObject>("GorkhaWeapons/Gorkha_Khukuri_Historical");
+            if (fbxPrefab != null)
+            {
+                GameObject fbxInstance = UnityEngine.Object.Instantiate(fbxPrefab, parent);
+                fbxInstance.name = "Weapon_Khukuri";
+                fbxInstance.transform.localPosition = localPos;
+                fbxInstance.transform.localRotation = localRot == default ? Quaternion.identity : localRot;
+                fbxInstance.transform.localScale = Vector3.one * 1.0f;
+                foreach (var c in fbxInstance.GetComponentsInChildren<Collider>())
+                {
+                    if (Application.isPlaying) UnityEngine.Object.Destroy(c);
+                    else UnityEngine.Object.DestroyImmediate(c);
+                }
+                if (isBandit)
+                {
+                    foreach (var r in fbxInstance.GetComponentsInChildren<Renderer>())
+                    {
+                        r.material = GorkhaMaterials.DarkIron;
+                    }
+                }
+                return fbxInstance;
+            }
+
+            // Fallback: Procedural Geometry
             GameObject root = new GameObject("Weapon_Khukuri");
             if (parent != null) root.transform.SetParent(parent, false);
             root.transform.localPosition = localPos;
@@ -1259,6 +1284,23 @@ namespace Gorkha.Graphics
 
         public static GameObject BuildSpear(Transform parent, Vector3 localPos = default, Quaternion localRot = default)
         {
+            // 1. Try High-Fidelity Blender Historical FBX Asset
+            GameObject fbxPrefab = Resources.Load<GameObject>("GorkhaWeapons/Gorkha_Bhala_Spear");
+            if (fbxPrefab != null)
+            {
+                GameObject fbxInstance = UnityEngine.Object.Instantiate(fbxPrefab, parent);
+                fbxInstance.name = "Weapon_Spear";
+                fbxInstance.transform.localPosition = localPos;
+                fbxInstance.transform.localRotation = localRot == default ? Quaternion.identity : localRot;
+                fbxInstance.transform.localScale = Vector3.one * 1.0f;
+                foreach (var c in fbxInstance.GetComponentsInChildren<Collider>())
+                {
+                    if (Application.isPlaying) UnityEngine.Object.Destroy(c);
+                    else UnityEngine.Object.DestroyImmediate(c);
+                }
+                return fbxInstance;
+            }
+
             GameObject root = new GameObject("Weapon_Spear");
             if (parent != null) root.transform.SetParent(parent, false);
             root.transform.localPosition = localPos;
@@ -1284,6 +1326,23 @@ namespace Gorkha.Graphics
 
         public static GameObject BuildRecurveBow(Transform parent, Vector3 localPos = default, Quaternion localRot = default)
         {
+            // 1. Try High-Fidelity Blender Historical FBX Asset
+            GameObject fbxPrefab = Resources.Load<GameObject>("GorkhaWeapons/Gorkha_Recurve_Bow");
+            if (fbxPrefab != null)
+            {
+                GameObject fbxInstance = UnityEngine.Object.Instantiate(fbxPrefab, parent);
+                fbxInstance.name = "Weapon_RecurveBow";
+                fbxInstance.transform.localPosition = localPos;
+                fbxInstance.transform.localRotation = localRot == default ? Quaternion.identity : localRot;
+                fbxInstance.transform.localScale = Vector3.one * 1.0f;
+                foreach (var c in fbxInstance.GetComponentsInChildren<Collider>())
+                {
+                    if (Application.isPlaying) UnityEngine.Object.Destroy(c);
+                    else UnityEngine.Object.DestroyImmediate(c);
+                }
+                return fbxInstance;
+            }
+
             GameObject root = new GameObject("Weapon_RecurveBow");
             if (parent != null) root.transform.SetParent(parent, false);
             root.transform.localPosition = localPos;
@@ -1340,6 +1399,23 @@ namespace Gorkha.Graphics
 
         public static GameObject BuildBucklerShield(Transform parent, Vector3 localPos = default, Quaternion localRot = default)
         {
+            // 1. Try High-Fidelity Blender Historical FBX Asset
+            GameObject fbxPrefab = Resources.Load<GameObject>("GorkhaWeapons/Gorkha_Dhal_Shield");
+            if (fbxPrefab != null)
+            {
+                GameObject fbxInstance = UnityEngine.Object.Instantiate(fbxPrefab, parent);
+                fbxInstance.name = "Armor_BucklerShield";
+                fbxInstance.transform.localPosition = localPos;
+                fbxInstance.transform.localRotation = localRot == default ? Quaternion.identity : localRot;
+                fbxInstance.transform.localScale = Vector3.one * 1.0f;
+                foreach (var c in fbxInstance.GetComponentsInChildren<Collider>())
+                {
+                    if (Application.isPlaying) UnityEngine.Object.Destroy(c);
+                    else UnityEngine.Object.DestroyImmediate(c);
+                }
+                return fbxInstance;
+            }
+
             GameObject root = new GameObject("Armor_BucklerShield");
             if (parent != null) root.transform.SetParent(parent, false);
             root.transform.localPosition = localPos;
@@ -1514,6 +1590,26 @@ namespace Gorkha.Graphics
 
         public static GameObject BuildVillagerTool(Transform parent, ResourceType type, Vector3 localPos = default, Quaternion localRot = default)
         {
+            // For Food (farming), check Blender Historical Hasiya Sickle
+            if (type == ResourceType.Food)
+            {
+                GameObject sicklePrefab = Resources.Load<GameObject>("GorkhaWeapons/Gorkha_Hasiya_Sickle");
+                if (sicklePrefab != null && parent != null)
+                {
+                    GameObject sickleInstance = UnityEngine.Object.Instantiate(sicklePrefab, parent);
+                    sickleInstance.name = "Tool_" + type;
+                    sickleInstance.transform.localPosition = localPos;
+                    sickleInstance.transform.localRotation = localRot == default ? Quaternion.identity : localRot;
+                    sickleInstance.transform.localScale = Vector3.one * 1.0f;
+                    foreach (var c in sickleInstance.GetComponentsInChildren<Collider>())
+                    {
+                        if (Application.isPlaying) Object.Destroy(c);
+                        else Object.DestroyImmediate(c);
+                    }
+                    return sickleInstance;
+                }
+            }
+
             // First check if high-fidelity Synty weapon asset is present
             GameObject toolPrefab = FantasyKingdomAssetRegistry.LoadWeaponPrefab(type);
             if (toolPrefab != null && parent != null)

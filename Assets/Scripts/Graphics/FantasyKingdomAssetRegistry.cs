@@ -450,6 +450,13 @@ namespace Gorkha.Graphics
         /// </summary>
         public static GameObject LoadCharacterPrefab(UnitType unitType, bool isFemale = false)
         {
+            // 1. Check for High-Fidelity Custom Blender Historical Gorkhali Rig
+            if (unitType != UnitType.Villager && !isFemale)
+            {
+                GameObject customWarrior = Resources.Load<GameObject>("GorkhaCharacters/Gorkhali_Warrior_Historical");
+                if (customWarrior != null) return customWarrior;
+            }
+
             if (unitType == UnitType.Villager)
             {
                 string peasantPath = isFemale ? PREFAB_POLYGON_PEASANT_FEMALE : PREFAB_POLYGON_PEASANT_MALE;
