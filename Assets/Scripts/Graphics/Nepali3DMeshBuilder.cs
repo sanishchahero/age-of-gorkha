@@ -1852,6 +1852,134 @@ namespace Gorkha.Graphics
             return null;
         }
 
+        private static readonly Dictionary<string, Material> _mixamoMaterialCache = new();
+
+        /// <summary>
+        /// Retrieves or creates authentic high-fidelity URP Lit materials with diffuse and normal maps for Mixamo models.
+        /// </summary>
+        public static Material GetOrCreateMixamoMaterial(string matKey, string diffuseTexName, string normalTexName = null)
+        {
+            if (_mixamoMaterialCache.TryGetValue(matKey, out var cached) && cached != null)
+                return cached;
+
+            // 1. Try loading pre-configured material from Resources
+            Material mat = Resources.Load<Material>("CharacterMaterials/" + matKey);
+#if UNITY_EDITOR
+            if (mat == null)
+            {
+                mat = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Materials/Characters/" + matKey + ".mat");
+            }
+#endif
+            if (mat == null)
+            {
+                // 2. Create runtime URP Lit material dynamically
+                Shader urpLit = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                mat = new Material(urpLit);
+                mat.name = matKey;
+
+                Texture2D diffuse = Resources.Load<Texture2D>("CharacterTextures/" + diffuseTexName);
+#if UNITY_EDITOR
+                if (diffuse == null)
+                {
+                    diffuse = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/Textures/Characters/" + diffuseTexName + ".png");
+                }
+#endif
+                if (diffuse != null)
+                {
+                    mat.SetTexture("_BaseMap", diffuse);
+                    mat.mainTexture = diffuse;
+                }
+
+                if (!string.IsNullOrEmpty(normalTexName))
+                {
+                    Texture2D normal = Resources.Load<Texture2D>("CharacterTextures/" + normalTexName);
+#if UNITY_EDITOR
+                    if (normal == null)
+                    {
+                        normal = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/Textures/Characters/" + normalTexName + ".png");
+                    }
+#endif
+                    if (normal != null)
+                    {
+                        mat.SetTexture("_BumpMap", normal);
+                        mat.EnableKeyword("_NORMALMAP");
+                    }
+                }
+
+                mat.SetColor("_BaseColor", Color.white);
+                mat.color = Color.white;
+            }
+
+            _mixamoMaterialCache[matKey] = mat;
+            return mat;
+        }
+
+        /// <summary>
+        /// Assigns authentic high-resolution textures (diffuse and normal maps) to Mixamo character models.
+        /// </summary>
+        public static void ApplyMixamoMaterials(GameObject charInstance, UnitType unitType)
+        {
+            if (charInstance == null) return;
+
+            switch (unitType)
+            {
+                case UnitType.KhukuriWarrior:
+                {
+                    Material mat = GetOrCreateMixamoMaterial("Mat_KhukuriWarrior", "maria_diffuse", "maria_normal");
+                    foreach (var r in charInstance.GetComponentsInChildren<Renderer>(true))
+                    {
+                        if (r.name.Contains("ShadowDisc") || r.name.Contains("Weapon") || r.name.Contains("Blade") || r.name.Contains("Shield")) continue;
+                        r.sharedMaterial = mat;
+                    }
+                    break;
+                }
+                case UnitType.Spearman:
+                {
+                    Material mat = GetOrCreateMixamoMaterial("Mat_Spearman", "Paladin_diffuse", "Paladin_normal");
+                    foreach (var r in charInstance.GetComponentsInChildren<Renderer>(true))
+                    {
+                        if (r.name.Contains("ShadowDisc") || r.name.Contains("Weapon") || r.name.Contains("Spear") || r.name.Contains("Shield")) continue;
+                        r.sharedMaterial = mat;
+                    }
+                    break;
+                }
+                case UnitType.Archer:
+                {
+                    Material clothesMat = GetOrCreateMixamoMaterial("Mat_Archer_Clothes", "Erika_Archer_Clothes_diffuse", "Erika_Archer_Clothes_normal");
+                    Material bodyMat    = GetOrCreateMixamoMaterial("Mat_Archer_Body", "FemaleFitA_Body_diffuse", "FemaleFitA_StdNM");
+                    Material eyeMat     = GetOrCreateMixamoMaterial("Mat_Archer_Eyelash", "FemaleFitA_eyelash_diffuse");
+
+                    foreach (var r in charInstance.GetComponentsInChildren<Renderer>(true))
+                    {
+                        if (r.name.Contains("ShadowDisc") || r.name.Contains("Weapon") || r.name.Contains("Bow") || r.name.Contains("Quiver")) continue;
+                        if (r.name.Contains("Body")) r.sharedMaterial = bodyMat;
+                        else if (r.name.Contains("Eye") || r.name.Contains("Eyelash")) r.sharedMaterial = eyeMat;
+                        else r.sharedMaterial = clothesMat;
+                    }
+                    break;
+                }
+                case UnitType.Villager:
+                {
+                    Material mat = GetOrCreateMixamoMaterial("Mat_Villager", "Peasant_Girl_diffuse", "Peasant_Girl_normal");
+                    foreach (var r in charInstance.GetComponentsInChildren<Renderer>(true))
+                    {
+                        if (r.name.Contains("ShadowDisc") || r.name.Contains("Weapon") || r.name.Contains("Tool") || r.name.Contains("Doko")) continue;
+                        r.sharedMaterial = mat;
+                    }
+                    break;
+                }
+                default:
+                {
+                    Material mat = GetOrCreateMixamoMaterial("Mat_KhukuriWarrior", "maria_diffuse", "maria_normal");
+                    foreach (var r in charInstance.GetComponentsInChildren<Renderer>(true))
+                    {
+                        r.sharedMaterial = mat;
+                    }
+                    break;
+                }
+            }
+        }
+
         /// <summary>
         /// Generates a complete stylized military or civilian unit equipped with class weapons, shields, and headwear.
         /// Integrates Mixamo high-fidelity character FBX models and custom rigs, with seamless procedural fallback.
@@ -1893,16 +2021,25 @@ namespace Gorkha.Graphics
                     else Object.DestroyImmediate(c);
                 }
 
-                // Preserve native materials on Mixamo and custom historical rigs
-                bool isCustomOrMixamo = charPrefab.name.Contains("Gorkhali_Warrior") || charPrefab.name.ToLowerInvariant().Contains("character");
-                bool isPeasant = charPrefab.name.Contains("Peasent") || charPrefab.name.Contains("Peasant");
-                Material charMat = isCustomOrMixamo ? null : FantasyKingdomAssetRegistry.GetCharacterMaterial(isPeasant, isHostile);
+                // Apply authentic materials: Mixamo diffuse/normal textures for Mixamo models, Gorkha custom/peasant palettes for legacy
+                bool isMixamo = charPrefab.name.ToLowerInvariant().Contains("character");
+                bool isCustomOrMixamo = charPrefab.name.Contains("Gorkhali_Warrior") || isMixamo;
 
-                if (charMat != null)
+                if (isMixamo)
                 {
-                    foreach (var r in charInstance.GetComponentsInChildren<Renderer>(true))
+                    ApplyMixamoMaterials(charInstance, unitType);
+                }
+                else
+                {
+                    bool isPeasant = charPrefab.name.Contains("Peasent") || charPrefab.name.Contains("Peasant");
+                    Material charMat = isCustomOrMixamo ? null : FantasyKingdomAssetRegistry.GetCharacterMaterial(isPeasant, isHostile);
+
+                    if (charMat != null)
                     {
-                        r.sharedMaterial = charMat;
+                        foreach (var r in charInstance.GetComponentsInChildren<Renderer>(true))
+                        {
+                            r.sharedMaterial = charMat;
+                        }
                     }
                 }
 

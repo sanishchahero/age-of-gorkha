@@ -155,6 +155,16 @@ namespace Gorkha.Units
                 currentVisual = Nepali3DMeshBuilder.BuildUnit(transform, _unitType, _isHostile)?.transform;
             }
 
+            // Guarantee authentic Mixamo textured materials are bound to the character renderers
+            if (currentVisual != null)
+            {
+                var charTransform = currentVisual.Find("VisualModel/Synty_Character");
+                if (charTransform != null)
+                {
+                    Nepali3DMeshBuilder.ApplyMixamoMaterials(charTransform.gameObject, _unitType);
+                }
+            }
+
             _animator = GetComponentInChildren<UnitProceduralAnimator>();
             if (_animator != null)
             {
