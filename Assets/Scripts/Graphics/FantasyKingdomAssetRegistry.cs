@@ -67,24 +67,6 @@ namespace Gorkha.Graphics
         // Compositions & Water
         public const string PREFAB_WATER         = "Assets/Art/Prefabs/Compositions/Water.prefab";
 
-        // Synty POLYGON Characters, Weapons & Attachments
-        public const string PREFAB_POLYGON_MALE          = "Assets/Synty/PolygonStarter/Prefabs/Characters/SM_Chr_Male_01.prefab";
-        public const string PREFAB_POLYGON_FEMALE        = "Assets/Synty/PolygonStarter/Prefabs/Characters/SM_Chr_Female_01.prefab";
-        public const string PREFAB_POLYGON_PEASANT_MALE  = "Assets/Synty/PolygonGeneric/Prefabs/Characters/SM_Gen_Chr_Peasent_Male_01.prefab";
-        public const string PREFAB_POLYGON_PEASANT_FEMALE= "Assets/Synty/PolygonGeneric/Prefabs/Characters/SM_Gen_Chr_Peasent_Female_01.prefab";
-        public const string PREFAB_WEAPON_AXE            = "Assets/Synty/PolygonGeneric/Prefabs/Weapons/SM_Gen_Wep_Axe_01.prefab";
-        public const string PREFAB_WEAPON_PICKAXE        = "Assets/Synty/PolygonGeneric/Prefabs/Weapons/SM_Gen_Wep_Pickaxe_01.prefab";
-        public const string PREFAB_ATTACH_MOUSTACHE      = "Assets/Synty/PolygonGeneric/Prefabs/Characters/Attachments/SM_Gen_Chr_Attach_Moustache_01.prefab";
-        public const string PREFAB_ATTACH_BEARD_01       = "Assets/Synty/PolygonGeneric/Prefabs/Characters/Attachments/SM_Gen_Chr_Attach_Beard_01.prefab";
-        public const string PREFAB_ATTACH_PONYTAIL       = "Assets/Synty/PolygonGeneric/Prefabs/Characters/Attachments/SM_Gen_Chr_Attach_Ponytail_01.prefab";
-
-        public const string MAT_POLYGON_01               = "Assets/Synty/PolygonStarter/Materials/PolygonStarter_01.mat";
-        public const string MAT_POLYGON_02               = "Assets/Synty/PolygonStarter/Materials/PolygonStarter_02.mat";
-        public const string MAT_POLYGON_03               = "Assets/Synty/PolygonStarter/Materials/PolygonStarter_03.mat";
-        public const string MAT_POLYGON_04               = "Assets/Synty/PolygonStarter/Materials/PolygonStarter_04.mat";
-        public const string MAT_GENERIC_01_A             = "Assets/Synty/PolygonGeneric/Materials/Alts/Generic_01_A.mat";
-        public const string MAT_GENERIC_03_A             = "Assets/Synty/PolygonGeneric/Materials/Alts/Generic_03_A.mat";
-
         // -------------------------------------------------------------
         // Calibration Dictionary (Exact Mathematical Bounds & Centering)
         // -------------------------------------------------------------
@@ -404,72 +386,87 @@ namespace Gorkha.Graphics
         }
 
         /// <summary>
-        /// Retrieves one of the 4 Synty POLYGON Starter pack materials (palette variants).
-        /// Variant 1: Standard / Heroic
-        /// Variant 2: Desert / Leather
-        /// Variant 3: Dark Iron / Hostile Bandit
-        /// Variant 4: Royal / Elite
+        /// Retrieves one of the Synty POLYGON Starter pack materials (palette variants).
+        /// Returns null now that Mixamo and authentic high-fidelity FBX assets are used.
         /// </summary>
         public static Material GetSyntyStarterMaterial(int index = 1)
         {
-            string path = index switch
-            {
-                1 => MAT_POLYGON_01,
-                2 => MAT_POLYGON_02,
-                3 => MAT_POLYGON_03,
-                4 => MAT_POLYGON_04,
-                _ => MAT_POLYGON_01
-            };
-            return LoadMaterial(path);
+            return null;
         }
 
         /// <summary>
         /// Retrieves one of the Synty POLYGON Generic materials (palette variants).
+        /// Returns null now that Mixamo and authentic high-fidelity FBX assets are used.
         /// </summary>
         public static Material GetSyntyGenericMaterial(int index = 1)
         {
-            string path = (index == 3) ? MAT_GENERIC_03_A : MAT_GENERIC_01_A;
-            return LoadMaterial(path);
+            return null;
         }
 
         /// <summary>
-        /// Retrieves the appropriate character texture palette material based on model family and allegiance.
+        /// Retrieves character texture palette material. Returns null to preserve native embedded FBX textures.
         /// </summary>
         public static Material GetCharacterMaterial(bool isPeasant, bool isHostile)
         {
-            if (isPeasant)
-            {
-                return isHostile ? LoadMaterial(MAT_GENERIC_03_A) : LoadMaterial(MAT_GENERIC_01_A);
-            }
-            return isHostile ? GetSyntyStarterMaterial(3) : GetSyntyStarterMaterial(1);
+            return null;
         }
 
         /// <summary>
-        /// Loads the Synty POLYGON humanoid character prefab (male or female) tailored by unit role.
-        /// Civilians/Villagers use authentic medieval peasant tunic models; military troops use athletic warrior rigs.
+        /// Loads high-fidelity humanoid character FBX models (Mixamo & custom historical rigs) tailored by unit role.
         /// </summary>
         public static GameObject LoadCharacterPrefab(UnitType unitType, bool isFemale = false)
         {
-            // 1. Check for High-Fidelity Custom Blender Historical Gorkhali Rig
-            if (unitType != UnitType.Villager && !isFemale)
+            // 1. Check Resources/GorkhaCharacters/ (Mixamo models organized by unit role)
+            string resName = unitType switch
             {
-                GameObject customWarrior = Resources.Load<GameObject>("GorkhaCharacters/Gorkhali_Warrior_Historical");
-                if (customWarrior != null) return customWarrior;
-            }
+                UnitType.Villager => "Character_Villager",
+                UnitType.Spearman => "Character_Spearman",
+                UnitType.Archer => "Character_Archer",
+                UnitType.KhukuriWarrior => "Character_KhukuriWarrior",
+                _ => "Character_KhukuriWarrior"
+            };
 
-            if (unitType == UnitType.Villager)
+            GameObject resModel = Resources.Load<GameObject>("GorkhaCharacters/" + resName);
+            if (resModel != null) return resModel;
+
+            // 2. Check Assets/Art/Meshes/ downloaded Mixamo models
+            string meshName = unitType switch
             {
-                string peasantPath = isFemale ? PREFAB_POLYGON_PEASANT_FEMALE : PREFAB_POLYGON_PEASANT_MALE;
-                GameObject peasant = LoadPrefab(peasantPath);
-                if (peasant != null) return peasant;
-            }
+                UnitType.Villager => "character_villager.fbx",
+                UnitType.Spearman => "character_soldier.fbx",
+                UnitType.Archer => "character_arrow.fbx",
+                UnitType.KhukuriWarrior => "character.fbx",
+                _ => "character.fbx"
+            };
 
-            string path = isFemale ? PREFAB_POLYGON_FEMALE : PREFAB_POLYGON_MALE;
-            return LoadPrefab(path);
+            GameObject directAsset = LoadPrefab("Assets/Art/Meshes/" + meshName);
+            if (directAsset != null) return directAsset;
+
+            // Space-separated filename fallback
+            string spaceName = unitType switch
+            {
+                UnitType.Villager => "character villager.fbx",
+                UnitType.Spearman => "character soldier.fbx",
+                UnitType.Archer => "character arrow.fbx",
+                UnitType.KhukuriWarrior => "character.fbx",
+                _ => "character.fbx"
+            };
+            directAsset = LoadPrefab("Assets/Art/Meshes/" + spaceName);
+            if (directAsset != null) return directAsset;
+
+            // 3. Check Assets/Art/Characters/ fallback
+            GameObject charAsset = LoadPrefab("Assets/Art/Characters/" + resName + ".fbx");
+            if (charAsset != null) return charAsset;
+
+            // 4. Historical custom Gorkhali warrior fallback
+            GameObject customWarrior = Resources.Load<GameObject>("GorkhaCharacters/Gorkhali_Warrior_Historical");
+            if (customWarrior != null) return customWarrior;
+
+            return null;
         }
 
         /// <summary>
-        /// Loads the Synty POLYGON humanoid character prefab (male or female) - backwards compatibility.
+        /// Loads the humanoid character prefab (male or female) - backwards compatibility.
         /// </summary>
         public static GameObject LoadCharacterPrefab(bool isFemale = false)
         {
@@ -477,32 +474,21 @@ namespace Gorkha.Graphics
         }
 
         /// <summary>
-        /// Loads authentic Synty 3D tool/weapon prefabs (woodcutter axe, miner pickaxe).
+        /// Loads 3D tool/weapon prefabs (woodcutter axe, miner pickaxe).
+        /// Returns null to use authentic Gorkha weapon models and procedural Salwood/Steel fallbacks.
         /// </summary>
         public static GameObject LoadWeaponPrefab(ResourceType resource)
         {
-            string path = resource switch
-            {
-                ResourceType.Wood => PREFAB_WEAPON_AXE,
-                ResourceType.Stone => PREFAB_WEAPON_PICKAXE,
-                _ => PREFAB_WEAPON_AXE
-            };
-            return LoadPrefab(path);
+            return null;
         }
 
         /// <summary>
         /// Loads character cosmetic facial hair or hairstyle attachments.
+        /// Returns null for Mixamo characters who have their own native hair and features.
         /// </summary>
         public static GameObject LoadAttachmentPrefab(string attachmentName)
         {
-            string path = attachmentName.ToLowerInvariant() switch
-            {
-                "moustache" or "mustache" => PREFAB_ATTACH_MOUSTACHE,
-                "beard" => PREFAB_ATTACH_BEARD_01,
-                "ponytail" => PREFAB_ATTACH_PONYTAIL,
-                _ => null
-            };
-            return LoadPrefab(path);
+            return null;
         }
 
         /// <summary>

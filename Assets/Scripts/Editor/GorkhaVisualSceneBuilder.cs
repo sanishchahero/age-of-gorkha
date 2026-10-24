@@ -18,6 +18,16 @@ namespace Gorkha.Editor
     /// </summary>
     public static class GorkhaVisualSceneBuilder
     {
+        [MenuItem("Gorkha/Play Settlement Scene %p", false, 0)]
+        public static void StartPlayMode()
+        {
+            if (EditorSceneManager.GetActiveScene().path != "Assets/Scenes/MainSettlementScene.unity")
+            {
+                EditorSceneManager.OpenScene("Assets/Scenes/MainSettlementScene.unity");
+            }
+            EditorApplication.isPlaying = true;
+        }
+
         [MenuItem("Gorkha/Generate 3D Settlement Scene & Prefabs", false, 1)]
         public static void GenerateComplete3DScene()
         {

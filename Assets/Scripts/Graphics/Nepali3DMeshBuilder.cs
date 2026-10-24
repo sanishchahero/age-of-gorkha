@@ -1817,8 +1817,44 @@ namespace Gorkha.Graphics
         }
 
         /// <summary>
+        /// Robust bone locator supporting Mixamo rigs (mixamorig:), Synty rigs, and Blender armatures.
+        /// </summary>
+        private static Transform FindBone(Transform root, params string[] names)
+        {
+            if (root == null || names == null || names.Length == 0) return null;
+
+            // 1. Direct candidate matches
+            foreach (string name in names)
+            {
+                Transform t = FindChildRecursive(root, name);
+                if (t != null) return t;
+                if (!name.StartsWith("mixamorig:"))
+                {
+                    t = FindChildRecursive(root, "mixamorig:" + name);
+                    if (t != null) return t;
+                }
+            }
+
+            // 2. Case-insensitive and normalized fallback
+            var allTransforms = root.GetComponentsInChildren<Transform>(true);
+            foreach (string target in names)
+            {
+                string normTarget = target.ToLowerInvariant().Replace("_", "").Replace(":", "");
+                foreach (var t in allTransforms)
+                {
+                    string normName = t.name.ToLowerInvariant().Replace("_", "").Replace(":", "");
+                    if (normName == normTarget || normName.EndsWith(normTarget))
+                    {
+                        return t;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Generates a complete stylized military or civilian unit equipped with class weapons, shields, and headwear.
-        /// Integrates Synty POLYGON Starter Pack 3D humanoid character models when installed, with seamless procedural fallback.
+        /// Integrates Mixamo high-fidelity character FBX models and custom rigs, with seamless procedural fallback.
         /// Limb joints (hips, shoulders, head, torso) are fully articulated for realistic procedural combat animations.
         /// </summary>
         public static GameObject BuildUnit(Transform parent, UnitType unitType, bool isHostile = false)
@@ -1833,15 +1869,15 @@ namespace Gorkha.Graphics
             // Soft circular ground shadow disc
             CreateSubMesh("ShadowDisc", CreateCylinderMesh(0.38f, 0.02f), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.01f, 0));
 
-            // 1. Check if high-fidelity Synty POLYGON character prefab is available
+            // 1. Check if high-fidelity character prefab (Mixamo or custom) is available
             bool isFemale = unitType == UnitType.Villager && (UnityEngine.Random.value > 0.5f);
             GameObject charPrefab = FantasyKingdomAssetRegistry.LoadCharacterPrefab(unitType, isFemale);
 
             if (charPrefab != null)
             {
-                // Instantiate Synty Character (Peasant model for Villagers, Warrior model for Soldiers)
+                // Instantiate Character (Peasant model for Villagers, Warrior model for Soldiers)
                 GameObject charInstance = UnityEngine.Object.Instantiate(charPrefab, model.transform);
-                charInstance.name = "Synty_Character";
+                charInstance.name = "Synty_Character"; // Preserved for backwards compatibility with visual checkers
                 charInstance.transform.localPosition = Vector3.zero;
                 charInstance.transform.localRotation = Quaternion.identity;
                 charInstance.transform.localScale = Vector3.one * 0.90f;
@@ -1857,10 +1893,10 @@ namespace Gorkha.Graphics
                     else Object.DestroyImmediate(c);
                 }
 
-                // Apply authentic materials: Peasant texture for villagers, warrior texture for soldiers
-                bool isCustomGorkhali = charPrefab.name.Contains("Gorkhali_Warrior");
+                // Preserve native materials on Mixamo and custom historical rigs
+                bool isCustomOrMixamo = charPrefab.name.Contains("Gorkhali_Warrior") || charPrefab.name.ToLowerInvariant().Contains("character");
                 bool isPeasant = charPrefab.name.Contains("Peasent") || charPrefab.name.Contains("Peasant");
-                Material charMat = isCustomGorkhali ? null : FantasyKingdomAssetRegistry.GetCharacterMaterial(isPeasant, isHostile);
+                Material charMat = isCustomOrMixamo ? null : FantasyKingdomAssetRegistry.GetCharacterMaterial(isPeasant, isHostile);
 
                 if (charMat != null)
                 {
@@ -1870,22 +1906,24 @@ namespace Gorkha.Graphics
                     }
                 }
 
-                // Locate skeleton bone joints
-                Transform headBone        = FindChildRecursive(charInstance.transform, "Head");
-                Transform handR           = FindChildRecursive(charInstance.transform, "Hand_R");
-                Transform handL           = FindChildRecursive(charInstance.transform, "Hand_L");
-                Transform spineBone       = FindChildRecursive(charInstance.transform, "Spine_02") ?? FindChildRecursive(charInstance.transform, "Spine_01");
-                Transform syntyHipL       = FindChildRecursive(charInstance.transform, "UpperLeg_L");
-                Transform syntyHipR       = FindChildRecursive(charInstance.transform, "UpperLeg_R");
-                Transform kneeL           = FindChildRecursive(charInstance.transform, "LowerLeg_L");
-                Transform kneeR           = FindChildRecursive(charInstance.transform, "LowerLeg_R");
-                Transform ankleL          = FindChildRecursive(charInstance.transform, "Ankle_L");
-                Transform ankleR          = FindChildRecursive(charInstance.transform, "Ankle_R");
-                Transform syntyShoulderL  = FindChildRecursive(charInstance.transform, "Shoulder_L");
-                Transform syntyShoulderR  = FindChildRecursive(charInstance.transform, "Shoulder_R");
-                Transform elbowL          = FindChildRecursive(charInstance.transform, "Elbow_L");
-                Transform elbowR          = FindChildRecursive(charInstance.transform, "Elbow_R");
-                Transform hips            = FindChildRecursive(charInstance.transform, "Hips");
+                bool isCustomGorkhali = isCustomOrMixamo;
+
+                // Locate skeleton bone joints (supporting Mixamo mixamorig: joints and standard armatures)
+                Transform headBone        = FindBone(charInstance.transform, "mixamorig:Head", "Head");
+                Transform handR           = FindBone(charInstance.transform, "mixamorig:RightHand", "Hand_R", "RightHand");
+                Transform handL           = FindBone(charInstance.transform, "mixamorig:LeftHand", "Hand_L", "LeftHand");
+                Transform spineBone       = FindBone(charInstance.transform, "mixamorig:Spine2", "mixamorig:Spine1", "mixamorig:Spine", "Spine_02", "Spine_01", "Spine");
+                Transform syntyHipL       = FindBone(charInstance.transform, "mixamorig:LeftUpLeg", "UpperLeg_L", "LeftUpLeg");
+                Transform syntyHipR       = FindBone(charInstance.transform, "mixamorig:RightUpLeg", "UpperLeg_R", "RightUpLeg");
+                Transform kneeL           = FindBone(charInstance.transform, "mixamorig:LeftLeg", "LowerLeg_L", "LeftLeg");
+                Transform kneeR           = FindBone(charInstance.transform, "mixamorig:RightLeg", "LowerLeg_R", "RightLeg");
+                Transform ankleL          = FindBone(charInstance.transform, "mixamorig:LeftFoot", "Ankle_L", "LeftFoot");
+                Transform ankleR          = FindBone(charInstance.transform, "mixamorig:RightFoot", "Ankle_R", "RightFoot");
+                Transform syntyShoulderL  = FindBone(charInstance.transform, "mixamorig:LeftArm", "Shoulder_L", "LeftShoulder", "LeftArm");
+                Transform syntyShoulderR  = FindBone(charInstance.transform, "mixamorig:RightArm", "Shoulder_R", "RightShoulder", "RightArm");
+                Transform elbowL          = FindBone(charInstance.transform, "mixamorig:LeftForeArm", "Elbow_L", "LeftForeArm");
+                Transform elbowR          = FindBone(charInstance.transform, "mixamorig:RightForeArm", "Elbow_R", "RightForeArm");
+                Transform hips            = FindBone(charInstance.transform, "mixamorig:Hips", "Hips");
 
                 // Disable modern/generic hair when equipping enclosed headgear
                 Transform maleHair = FindChildRecursive(charInstance.transform, "Character_Hair_Male_01");

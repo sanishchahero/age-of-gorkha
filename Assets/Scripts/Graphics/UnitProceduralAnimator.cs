@@ -230,24 +230,24 @@ namespace Gorkha.Graphics
 
         private void AutoCacheLimbs()
         {
-            if (_hips == null) _hips = FindDeepChild(transform, "Hips") ?? FindDeepChild(transform, "Torso");
-            if (_spine == null) _spine = FindDeepChild(transform, "Spine_02") ?? FindDeepChild(transform, "Spine_01") ?? FindDeepChild(transform, "TorsoRoot") ?? FindDeepChild(transform, "Torso");
+            if (_hips == null) _hips = FindDeepChild(transform, "mixamorig:Hips", "Hips", "Torso");
+            if (_spine == null) _spine = FindDeepChild(transform, "mixamorig:Spine2", "mixamorig:Spine1", "mixamorig:Spine", "Spine_02", "Spine_01", "TorsoRoot", "Torso");
             if (_torso == null) _torso = _spine ?? _hips;
-            if (_head == null) _head = FindDeepChild(transform, "Head") ?? FindDeepChild(transform, "HeadRoot");
+            if (_head == null) _head = FindDeepChild(transform, "mixamorig:Head", "Head", "HeadRoot");
 
-            if (_hipLeft == null) _hipLeft = FindDeepChild(transform, "UpperLeg_L") ?? FindDeepChild(transform, "HipLeft");
-            if (_hipRight == null) _hipRight = FindDeepChild(transform, "UpperLeg_R") ?? FindDeepChild(transform, "HipRight");
-            if (_kneeLeft == null) _kneeLeft = FindDeepChild(transform, "LowerLeg_L");
-            if (_kneeRight == null) _kneeRight = FindDeepChild(transform, "LowerLeg_R");
-            if (_ankleLeft == null) _ankleLeft = FindDeepChild(transform, "Ankle_L");
-            if (_ankleRight == null) _ankleRight = FindDeepChild(transform, "Ankle_R");
+            if (_hipLeft == null) _hipLeft = FindDeepChild(transform, "mixamorig:LeftUpLeg", "UpperLeg_L", "HipLeft");
+            if (_hipRight == null) _hipRight = FindDeepChild(transform, "mixamorig:RightUpLeg", "UpperLeg_R", "HipRight");
+            if (_kneeLeft == null) _kneeLeft = FindDeepChild(transform, "mixamorig:LeftLeg", "LowerLeg_L");
+            if (_kneeRight == null) _kneeRight = FindDeepChild(transform, "mixamorig:RightLeg", "LowerLeg_R");
+            if (_ankleLeft == null) _ankleLeft = FindDeepChild(transform, "mixamorig:LeftFoot", "Ankle_L");
+            if (_ankleRight == null) _ankleRight = FindDeepChild(transform, "mixamorig:RightFoot", "Ankle_R");
 
-            if (_shoulderLeft == null) _shoulderLeft = FindDeepChild(transform, "Shoulder_L") ?? FindDeepChild(transform, "Clavicle_L") ?? FindDeepChild(transform, "ShoulderLeft");
-            if (_shoulderRight == null) _shoulderRight = FindDeepChild(transform, "Shoulder_R") ?? FindDeepChild(transform, "Clavicle_R") ?? FindDeepChild(transform, "ShoulderRight");
-            if (_elbowLeft == null) _elbowLeft = FindDeepChild(transform, "Elbow_L");
-            if (_elbowRight == null) _elbowRight = FindDeepChild(transform, "Elbow_R");
-            if (_handLeft == null) _handLeft = FindDeepChild(transform, "Hand_L");
-            if (_handRight == null) _handRight = FindDeepChild(transform, "Hand_R");
+            if (_shoulderLeft == null) _shoulderLeft = FindDeepChild(transform, "mixamorig:LeftArm", "mixamorig:LeftShoulder", "Shoulder_L", "Clavicle_L", "ShoulderLeft");
+            if (_shoulderRight == null) _shoulderRight = FindDeepChild(transform, "mixamorig:RightArm", "mixamorig:RightShoulder", "Shoulder_R", "Clavicle_R", "ShoulderRight");
+            if (_elbowLeft == null) _elbowLeft = FindDeepChild(transform, "mixamorig:LeftForeArm", "Elbow_L");
+            if (_elbowRight == null) _elbowRight = FindDeepChild(transform, "mixamorig:RightForeArm", "Elbow_R");
+            if (_handLeft == null) _handLeft = FindDeepChild(transform, "mixamorig:LeftHand", "Hand_L");
+            if (_handRight == null) _handRight = FindDeepChild(transform, "mixamorig:RightHand", "Hand_R");
         }
 
         private void CacheBasePositions()
@@ -304,13 +304,29 @@ namespace Gorkha.Graphics
             }
         }
 
-        private Transform FindDeepChild(Transform parent, string name)
+        private Transform FindDeepChild(Transform parent, params string[] names)
+        {
+            if (parent == null || names == null || names.Length == 0) return null;
+            foreach (var n in names)
+            {
+                var found = FindDeepChildSingle(parent, n);
+                if (found != null) return found;
+                if (!n.StartsWith("mixamorig:"))
+                {
+                    found = FindDeepChildSingle(parent, "mixamorig:" + n);
+                    if (found != null) return found;
+                }
+            }
+            return null;
+        }
+
+        private Transform FindDeepChildSingle(Transform parent, string name)
         {
             if (parent == null) return null;
             foreach (Transform child in parent)
             {
                 if (child.name == name) return child;
-                Transform found = FindDeepChild(child, name);
+                Transform found = FindDeepChildSingle(child, name);
                 if (found != null) return found;
             }
             return null;
