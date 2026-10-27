@@ -15,7 +15,9 @@ namespace Gorkha.Units
         Villager,
         Spearman,
         KhukuriWarrior,
-        Archer
+        Archer,
+        HeroPrithvi,
+        HeroKaluPande
     }
 
     public enum TacticalStance
@@ -126,9 +128,41 @@ namespace Gorkha.Units
             }
         }
 
+        public bool IsHero => _unitType == UnitType.HeroPrithvi || _unitType == UnitType.HeroKaluPande;
+
         public void SetUnitType(UnitType type)
         {
             _unitType = type;
+            if (_unitType == UnitType.HeroPrithvi)
+            {
+                _maxHealth = 500;
+                _currentHealth = 500;
+                _moveSpeed = 3.6f;
+            }
+            else if (_unitType == UnitType.HeroKaluPande)
+            {
+                _maxHealth = 650;
+                _currentHealth = 650;
+                _moveSpeed = 3.3f;
+            }
+            else if (_unitType == UnitType.Archer)
+            {
+                _maxHealth = 80;
+                _currentHealth = 80;
+                _moveSpeed = 3.4f;
+            }
+            else if (_unitType == UnitType.Spearman)
+            {
+                _maxHealth = 120;
+                _currentHealth = 120;
+                _moveSpeed = 3.0f;
+            }
+            else if (_unitType == UnitType.KhukuriWarrior)
+            {
+                _maxHealth = 100;
+                _currentHealth = 100;
+                _moveSpeed = 3.5f;
+            }
             EnsureVisuals(forceRebuild: true);
         }
 
@@ -305,7 +339,13 @@ namespace Gorkha.Units
             feedback = null;
             feedbackColor = Color.white;
 
-            if (attacker == UnitType.Spearman && defender == UnitType.KhukuriWarrior)
+            if (attacker == UnitType.HeroPrithvi || attacker == UnitType.HeroKaluPande)
+            {
+                mult = 1.30f;
+                feedback = "👑 HEROIC STRIKE!";
+                feedbackColor = new Color(1f, 0.85f, 0.2f);
+            }
+            else if (attacker == UnitType.Spearman && defender == UnitType.KhukuriWarrior)
             {
                 mult = 1.35f;
                 feedback = "CRIT! (Spear Wall)";
@@ -352,7 +392,10 @@ namespace Gorkha.Units
 
             if (attacker != null)
             {
-                int finalDamage = CalculateCounterDamage(attacker.Type, this.Type, baseDamage, out string feedback, out Color feedbackColor);
+                float heroBuff = HeroController.GetGlobalHeroDamageBuff(attacker.transform.position);
+                float techBuff = Progression.TechTreeManager.Instance != null ? Progression.TechTreeManager.Instance.MeleeDamageMultiplier : 1.0f;
+                int boostedBaseDamage = Mathf.RoundToInt(baseDamage * heroBuff * techBuff);
+                int finalDamage = CalculateCounterDamage(attacker.Type, this.Type, boostedBaseDamage, out string feedback, out Color feedbackColor);
                 TakeDamage(finalDamage, feedback, feedbackColor);
             }
             else
@@ -369,6 +412,9 @@ namespace Gorkha.Units
         public void TakeDamage(int damage, string feedback, Color? feedbackColor)
         {
             if (!IsAlive) return;
+
+            float heroArmorReduction = HeroController.GetGlobalHeroArmorBuff(transform.position);
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * heroArmorReduction));
 
             _currentHealth = Mathf.Max(0, _currentHealth - damage);
             _healthBar?.UpdateHealth(_currentHealth, _maxHealth);
@@ -414,6 +460,10 @@ namespace Gorkha.Units
 
             if (_selectionRing != null) Destroy(_selectionRing);
             if (_healthBar != null) Destroy(_healthBar.gameObject);
+            if (TryGetComponent<HeroController>(out var hero))
+            {
+                Progression.HeroManager.Instance?.NotifyHeroFallen(hero);
+            }
             foreach (var col in GetComponentsInChildren<Collider>()) col.enabled = false;
 
             if (_behaviorRoutine != null)
@@ -718,7 +768,8 @@ namespace Gorkha.Units
         private IEnumerator AttackHostileTarget(UnitController target)
         {
             if (target == null || !target.IsAlive) yield break;
-            float attackRange = _unitType == UnitType.Archer ? 7.5f : (_unitType == UnitType.Spearman ? 1.9f : 1.35f);
+            float archerBonus = Progression.TechTreeManager.Instance != null ? Progression.TechTreeManager.Instance.ArcherRangeMultiplier : 1.0f;
+            float attackRange = _unitType == UnitType.Archer ? (7.5f * archerBonus) : (_unitType == UnitType.Spearman || _unitType == UnitType.HeroKaluPande ? 2.1f : 1.35f);
             float dist = Vector3.Distance(transform.position, target.transform.position);
 
             if (dist > attackRange)
@@ -769,7 +820,10 @@ namespace Gorkha.Units
                 }
                 else
                 {
-                    int dmg = _unitType == UnitType.KhukuriWarrior ? 20 : 10;
+                    int dmg = 10;
+                    if (_unitType == UnitType.HeroPrithvi) dmg = 45;
+                    else if (_unitType == UnitType.HeroKaluPande) dmg = 35;
+                    else if (_unitType == UnitType.KhukuriWarrior) dmg = 20;
                     if (_animator != null)
                     {
                         _animator.PlayKhukuriSlash(() => {
@@ -1450,9 +1504,11 @@ namespace Gorkha.Units
 
             if (dir.sqrMagnitude > stopDist * stopDist)
             {
+                float techSpeed = Progression.TechTreeManager.Instance != null ? Progression.TechTreeManager.Instance.MoveSpeedMultiplier : 1.0f;
+                float finalSpeed = _moveSpeed * techSpeed;
                 Quaternion rot = Quaternion.LookRotation(dir.normalized);
                 transform.rotation = Quaternion.Slerp(transform.rotation, rot, _rotationSpeed * Time.deltaTime);
-                transform.position = Vector3.MoveTowards(transform.position, dest, _moveSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, dest, finalSpeed * Time.deltaTime);
             }
         }
     }

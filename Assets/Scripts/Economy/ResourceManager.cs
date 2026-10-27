@@ -308,6 +308,21 @@ namespace Gorkha.Economy
             return true;
         }
 
+        public bool Spend(ResourceType type, double amount)
+        {
+            if (amount <= 0) return true;
+            if (_balances.TryGetValue(type, out var bal))
+            {
+                if (bal.amount >= amount)
+                {
+                    bal.amount -= amount;
+                    OnResourcesChanged?.Invoke();
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void AddResource(ResourceType type, double amount)
         {
             if (_balances.TryGetValue(type, out var bal))

@@ -268,6 +268,10 @@ namespace Gorkha.Audio
             }
         }
 
+        public static void PlayPlacementThud() => PlayBuild();
+        public static void PlayBuildingPlaced() => PlayBuild();
+        public static void PlayEraFanfare() { PlayUpgrade(); PlayHorn(); }
+
         public static void PlayClick()
         {
             if (Instance != null && !Instance._isMuted && Instance._clickClip != null)

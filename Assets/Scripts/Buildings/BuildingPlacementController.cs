@@ -159,6 +159,12 @@ namespace Gorkha.Buildings
                     case BuildingType.Trap:
                         Nepali3DMeshBuilder.BuildSpikeTrap(_previewInstance.transform);
                         break;
+                    case BuildingType.Academy:
+                        Nepali3DMeshBuilder.BuildAcademy(_previewInstance.transform);
+                        break;
+                    case BuildingType.Wonder:
+                        Nepali3DMeshBuilder.BuildWonder(_previewInstance.transform, 1);
+                        break;
                     default:
                         Nepali3DMeshBuilder.BuildTownCenter(_previewInstance.transform);
                         break;

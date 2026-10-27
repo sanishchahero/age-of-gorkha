@@ -932,6 +932,115 @@ namespace Gorkha.Graphics
         }
 
         /// <summary>
+        /// Generates the Academy of Arts & Warfare (Vidya Kendra) - AGE-03.
+        /// A two-tiered Newari scholar pagoda featuring palm-leaf scroll archives,
+        /// carved Salwood colonnades, brass bells, and a golden Gajur pinnacle.
+        /// </summary>
+        public static GameObject BuildAcademy(Transform parent = null)
+        {
+            GameObject root = new GameObject("Academy_3D");
+            if (parent != null) root.transform.SetParent(parent, false);
+
+            // Tiered Stone Foundation Plinth
+            CreateSubMesh("AcademyPlinthLower", CreateCubeMesh(new Vector3(3.4f, 0.25f, 3.4f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.125f, 0));
+            CreateSubMesh("AcademyPlinthUpper", CreateCubeMesh(new Vector3(2.9f, 0.20f, 2.9f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.35f, 0));
+
+            // Brick Lower Sanctuary
+            CreateSubMesh("AcademyBrickCore", CreateCubeMesh(new Vector3(2.4f, 1.6f, 2.4f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 1.25f, 0));
+
+            // Carved Timber Columns / Porch
+            CreateSubMesh("AcademyColonnadeN", CreateCubeMesh(new Vector3(0.18f, 1.4f, 0.18f)), GorkhaMaterials.SalWoodTimber, root.transform, new Vector3(-0.95f, 1.15f, -1.25f));
+            CreateSubMesh("AcademyColonnadeS", CreateCubeMesh(new Vector3(0.18f, 1.4f, 0.18f)), GorkhaMaterials.SalWoodTimber, root.transform, new Vector3(0.95f, 1.15f, -1.25f));
+
+            // First Tier Flared Pagoda Roof
+            CreateSubMesh("AcademyRoofTier1", CreatePyramidMesh(3.3f, 0.70f, flare: 0.35f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 2.25f, 0));
+
+            // Second Level Scholar Pavilion
+            CreateSubMesh("AcademyUpperPavilion", CreateCubeMesh(new Vector3(1.6f, 1.1f, 1.6f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 2.90f, 0));
+
+            // Second Tier Pagoda Roof
+            CreateSubMesh("AcademyRoofTier2", CreatePyramidMesh(2.2f, 0.60f, flare: 0.30f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 3.65f, 0));
+
+            // Golden Gajur Pinnacle & Brass Temple Bell
+            CreateSubMesh("AcademyGajur", CreatePyramidMesh(0.35f, 0.85f), GorkhaMaterials.MetallicGoldGajur, root.transform, new Vector3(0, 4.40f, 0));
+            CreateSubMesh("AcademyTempleBell", CreateCylinderMesh(0.14f, 0.25f, 12), GorkhaMaterials.PolishedBrass, root.transform, new Vector3(0, 1.95f, -1.25f));
+
+            // Scholar Scrolls Desk on Porch
+            CreateSubMesh("ScholarDesk", CreateCubeMesh(new Vector3(0.75f, 0.40f, 0.35f)), GorkhaMaterials.SalWoodTimber, root.transform, new Vector3(0, 0.65f, -1.15f));
+            CreateSubMesh("PalmLeafScrolls", CreateCubeMesh(new Vector3(0.50f, 0.10f, 0.22f)), GorkhaMaterials.RawhideLeather, root.transform, new Vector3(0, 0.90f, -1.15f));
+
+            // Chimney / Incense Smoke VFX
+            GorkhaVFX.AttachChimneySmoke(root.transform, new Vector3(0, 4.2f, 0));
+
+            BoxCollider col = root.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, 1.8f, 0);
+            col.size = new Vector3(3.2f, 3.6f, 3.2f);
+
+            return root;
+        }
+
+        /// <summary>
+        /// Generates the Himalayan Monumental Wonder of the World (Kasthamandap / Swayambhunath) - AGE-04.
+        /// Constructed across progressive stages requiring stone, timber, copper, and gold.
+        /// </summary>
+        public static GameObject BuildWonder(Transform parent = null, int stage = 4)
+        {
+            GameObject root = new GameObject("HimalayanWonder_3D");
+            if (parent != null) root.transform.SetParent(parent, false);
+
+            // Stage 1: Massive 3-Stepped Slate Foundation Plinth & Guardian Lions
+            CreateSubMesh("WonderPlinth1", CreateCubeMesh(new Vector3(5.6f, 0.35f, 5.6f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.175f, 0));
+            CreateSubMesh("WonderPlinth2", CreateCubeMesh(new Vector3(4.8f, 0.30f, 4.8f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.50f, 0));
+            CreateSubMesh("WonderPlinth3", CreateCubeMesh(new Vector3(4.0f, 0.25f, 4.0f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.775f, 0));
+
+            // 4 Corner Stone Guardian Lion Pedestals
+            CreateSubMesh("LionPedestalNW", CreateCubeMesh(new Vector3(0.45f, 0.65f, 0.45f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(-2.1f, 0.65f, 2.1f));
+            CreateSubMesh("LionPedestalNE", CreateCubeMesh(new Vector3(0.45f, 0.65f, 0.45f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(2.1f, 0.65f, 2.1f));
+            CreateSubMesh("LionPedestalSW", CreateCubeMesh(new Vector3(0.45f, 0.65f, 0.45f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(-2.1f, 0.65f, -2.1f));
+            CreateSubMesh("LionPedestalSE", CreateCubeMesh(new Vector3(0.45f, 0.65f, 0.45f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(2.1f, 0.65f, -2.1f));
+
+            if (stage >= 2)
+            {
+                // Stage 2: Heavy Carved Timber Colonnade & Shrine Core
+                CreateSubMesh("WonderCore", CreateCubeMesh(new Vector3(3.2f, 2.0f, 3.2f)), GorkhaMaterials.TerracottaBrick, root.transform, new Vector3(0, 1.90f, 0));
+                CreateSubMesh("WonderColonnadeTier1", CreateCubeMesh(new Vector3(3.6f, 0.25f, 3.6f)), GorkhaMaterials.SalWoodTimber, root.transform, new Vector3(0, 2.95f, 0));
+            }
+
+            if (stage >= 3)
+            {
+                // Stage 3: Tri-Tiered Monumental Pagoda Roofs with Flared Eaves
+                CreateSubMesh("WonderRoofTier1", CreatePyramidMesh(4.6f, 0.85f, flare: 0.45f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 3.45f, 0));
+                CreateSubMesh("WonderUpperCore", CreateCubeMesh(new Vector3(2.2f, 1.4f, 2.2f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 4.30f, 0));
+                CreateSubMesh("WonderRoofTier2", CreatePyramidMesh(3.4f, 0.75f, flare: 0.40f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 5.15f, 0));
+            }
+
+            if (stage >= 4)
+            {
+                // Stage 4: Third Roof & Soaring Golden Gajur Spire with Prayer Flags
+                CreateSubMesh("WonderSanctumSpire", CreateCubeMesh(new Vector3(1.4f, 1.0f, 1.4f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 5.85f, 0));
+                CreateSubMesh("WonderRoofTier3", CreatePyramidMesh(2.4f, 0.65f, flare: 0.35f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 6.50f, 0));
+                CreateSubMesh("WonderGoldenSpire", CreatePyramidMesh(0.40f, 1.6f, flare: 0.10f), GorkhaMaterials.MetallicGoldGajur, root.transform, new Vector3(0, 7.80f, 0));
+
+                // 4 Fluttering Prayer Flag Lines radiating to corners
+                for (int i = 0; i < 4; i++)
+                {
+                    float angle = i * 90f + 45f;
+                    Vector3 flagEnd = Quaternion.Euler(0, angle, 0) * new Vector3(2.2f, 0, 2.2f);
+                    CreateSubMesh($"PrayerFlagLine_{i}", CreateCubeMesh(new Vector3(0.04f, 0.04f, 3.1f)), GorkhaMaterials.RoyalRedFlag, root.transform,
+                        new Vector3(flagEnd.x * 0.5f, 5.5f, flagEnd.z * 0.5f), Quaternion.LookRotation(new Vector3(flagEnd.x, -2.5f, flagEnd.z)));
+                }
+
+                GorkhaVFX.AttachChimneySmoke(root.transform, new Vector3(0, 8.4f, 0));
+            }
+
+            BoxCollider col = root.AddComponent<BoxCollider>();
+            col.center = new Vector3(0, 2.8f, 0);
+            col.size = new Vector3(5.2f, 5.6f, 5.2f);
+
+            return root;
+        }
+
+        /// <summary>
         /// Generates dynamic connected fortification wall segments (CoC & AoE style).
         /// </summary>
         public static GameObject BuildWallSegment(Transform parent, int level, bool north, bool south, bool east, bool west)
@@ -2418,6 +2527,16 @@ namespace Gorkha.Graphics
                                 // Woven Bamboo Straw Sun Hat (Ghum)
                                 BuildStrawGhum(headBone, new Vector3(0, 0.16f, 0.01f), Quaternion.identity);
                                 break;
+                            case UnitType.HeroPrithvi:
+                                // Royal Sirpech Jeweled Crown & Bird-of-Paradise Feather Crest
+                                CreateSubMesh("SirpechBase", CreateCylinderMesh(0.17f, 0.16f), GorkhaMaterials.MetallicGoldGajur, headBone, new Vector3(0, 0.16f, 0.02f));
+                                CreateSubMesh("SirpechPlume", CreateDoubleTriangleFlagMesh(0.16f, 0.36f), GorkhaMaterials.RoyalRedFlag, headBone, new Vector3(0.06f, 0.32f, -0.06f), Quaternion.Euler(-15, 0, 15));
+                                break;
+                            case UnitType.HeroKaluPande:
+                                // Commander Conical Helmet with Horsehair War Plume
+                                BuildGorkhaHelmet(headBone, new Vector3(0, 0.14f, 0.01f), Quaternion.identity);
+                                CreateSubMesh("WarPlume", CreatePyramidMesh(0.14f, 0.36f), GorkhaMaterials.RoyalRedFlag, headBone, new Vector3(0, 0.32f, 0));
+                                break;
                             case UnitType.KhukuriWarrior:
                             default:
                                 // Authentic Geometric Woven Dhaka Topi with Golden Sun Insignia
@@ -2461,6 +2580,20 @@ namespace Gorkha.Graphics
                         BuildSpear(rWeaponSocket, new Vector3(0.04f, -0.25f, 0.15f), Quaternion.Euler(20f, 0, 0));
                         // Royal Heraldic Pavise Shield with Golden Sun/Moon Crest on Left Arm
                         BuildPaviseShield(lWeaponSocket, new Vector3(-0.06f, 0f, 0.12f), Quaternion.Euler(0, 15f, 0));
+                        break;
+
+                    case UnitType.HeroKaluPande:
+                        // Grand Commander Lance & Pavise Tower Shield
+                        BuildSpear(rWeaponSocket, new Vector3(0.05f, -0.25f, 0.15f), Quaternion.Euler(20f, 0, 0));
+                        BuildPaviseShield(lWeaponSocket, new Vector3(-0.06f, 0f, 0.12f), Quaternion.Euler(0, 15f, 0));
+                        BuildLamellarPauldrons(syntyShoulderL, syntyShoulderR, false);
+                        break;
+
+                    case UnitType.HeroPrithvi:
+                        // Curved Heirloom Golden Khukuri & Royal Velvet Cape
+                        BuildKhukuriBlade(rWeaponSocket, new Vector3(0.04f, -0.12f, 0.18f), Quaternion.Euler(45f, 0, 0), isBandit: false);
+                        BuildBucklerShield(lWeaponSocket, new Vector3(-0.06f, 0f, 0.10f), Quaternion.Euler(0, 20f, 0));
+                        CreateSubMesh("RoyalCape", CreateDoubleTriangleFlagMesh(0.65f, 1.25f), GorkhaMaterials.RoyalRedFlag, backSocket, new Vector3(0, 0.15f, -0.15f), Quaternion.Euler(15f, 180f, 0));
                         break;
 
                     case UnitType.Archer:
@@ -2576,6 +2709,14 @@ namespace Gorkha.Graphics
                     case UnitType.Villager:
                         BuildStrawGhum(head.transform, new Vector3(0, 0.26f, 0), Quaternion.identity);
                         break;
+                    case UnitType.HeroPrithvi:
+                        CreateSubMesh("SirpechBase", CreateCylinderMesh(0.18f, 0.18f), GorkhaMaterials.MetallicGoldGajur, head.transform, new Vector3(0, 0.24f, 0));
+                        CreateSubMesh("SirpechPlume", CreateDoubleTriangleFlagMesh(0.16f, 0.36f), GorkhaMaterials.RoyalRedFlag, head.transform, new Vector3(0.06f, 0.38f, -0.06f), Quaternion.Euler(-15, 0, 15));
+                        break;
+                    case UnitType.HeroKaluPande:
+                        BuildGorkhaHelmet(head.transform, new Vector3(0, 0.22f, 0), Quaternion.identity);
+                        CreateSubMesh("WarPlume", CreatePyramidMesh(0.14f, 0.36f), GorkhaMaterials.RoyalRedFlag, head.transform, new Vector3(0, 0.40f, 0));
+                        break;
                     case UnitType.KhukuriWarrior:
                     default:
                         BuildDhakaTopi(head.transform, new Vector3(0, 0.24f, 0), Quaternion.Euler(0, 25f, 0));
@@ -2600,6 +2741,16 @@ namespace Gorkha.Graphics
                 case UnitType.Spearman:
                     BuildSpear(shoulderR.transform, new Vector3(0.06f, -0.95f, 0.20f), Quaternion.Euler(15f, 0, 0));
                     BuildPaviseShield(shoulderL.transform, new Vector3(-0.06f, -0.30f, 0.18f), Quaternion.Euler(0, 15f, 0));
+                    break;
+
+                case UnitType.HeroKaluPande:
+                    BuildSpear(shoulderR.transform, new Vector3(0.06f, -0.95f, 0.20f), Quaternion.Euler(15f, 0, 0));
+                    BuildPaviseShield(shoulderL.transform, new Vector3(-0.06f, -0.30f, 0.18f), Quaternion.Euler(0, 15f, 0));
+                    break;
+
+                case UnitType.HeroPrithvi:
+                    BuildKhukuriBlade(shoulderR.transform, new Vector3(0.04f, -0.40f, 0.25f), Quaternion.Euler(35f, 0, 0), false);
+                    BuildBucklerShield(shoulderL.transform, new Vector3(-0.06f, -0.30f, 0.12f), Quaternion.Euler(0, 20f, 0));
                     break;
 
                 case UnitType.Archer:

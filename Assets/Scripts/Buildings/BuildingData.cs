@@ -21,7 +21,9 @@ namespace Gorkha.Buildings
         Granary,
         TimberYard,
         SlateDepot,
-        Vault
+        Vault,
+        Academy,
+        Wonder
     }
 
     [Serializable]

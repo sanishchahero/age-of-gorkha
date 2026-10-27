@@ -244,8 +244,9 @@ namespace Gorkha.Buildings
             GorkhaAudio.PlayBuildingBounce();
             GorkhaVFX.SpawnPlacementDust(target, Vector2.one * 2.8f);
 
-            // Deal splash damage to all hostiles within 3.5m radius
-            float splashRadius = 3.5f;
+            // Deal splash damage to all hostiles within splash radius
+            float blastMult = Progression.TechTreeManager.Instance != null ? Progression.TechTreeManager.Instance.CannonBlastMultiplier : 1.0f;
+            float splashRadius = 3.5f * blastMult;
             foreach (var u in UnitController.AllUnits)
             {
                 if (u != null && u.IsHostile && u.IsAlive)

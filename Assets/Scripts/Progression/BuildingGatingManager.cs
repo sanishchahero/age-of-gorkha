@@ -26,12 +26,16 @@ namespace Gorkha.Progression
                 case BuildingType.Granary:
                 case BuildingType.TimberYard:
                 case BuildingType.Trap:
+                case BuildingType.Academy:
                     return 2;
 
                 case BuildingType.Kaman:
                 case BuildingType.SlateDepot:
                 case BuildingType.Vault:
                     return 3;
+
+                case BuildingType.Wonder:
+                    return 4;
 
                 case BuildingType.Gate:
                     return 2;
@@ -86,6 +90,12 @@ namespace Gorkha.Progression
 
                 case BuildingType.Vault:
                     return age >= 3 ? 1 : 0;
+
+                case BuildingType.Academy:
+                    return age >= 2 ? 1 : 0;
+
+                case BuildingType.Wonder:
+                    return age >= 4 ? 1 : 0;
 
                 default:
                     return 99;
@@ -171,6 +181,26 @@ namespace Gorkha.Progression
                     if (currentAge < 3)
                     {
                         reason = "🔒 Mountain Archers require Era III: Unification Era!";
+                        return false;
+                    }
+                    reason = null;
+                    return true;
+
+                case UnitType.HeroKaluPande:
+                    requiredAge = 2;
+                    if (currentAge < 2)
+                    {
+                        reason = "🔒 General Kalu Pande requires Era II: Fortified Kot!";
+                        return false;
+                    }
+                    reason = null;
+                    return true;
+
+                case UnitType.HeroPrithvi:
+                    requiredAge = 3;
+                    if (currentAge < 3)
+                    {
+                        reason = "🔒 King Prithvi Narayan Shah requires Era III: Unification Era!";
                         return false;
                     }
                     reason = null;

@@ -187,6 +187,7 @@ namespace Gorkha.Graphics
 
             switch (_unitType)
             {
+                case UnitType.HeroKaluPande:
                 case UnitType.Spearman:
                     // Phalanx guard: spear held low-forward, pavise shield locked across chest
                     _spineBaseRot = _rawSpineRot * Quaternion.Euler(6f, -10f, 0);
@@ -214,6 +215,7 @@ namespace Gorkha.Graphics
                     _elbowLBaseRot = _rawElbowLRot * Quaternion.Euler(-36f, 0, 0);
                     break;
 
+                case UnitType.HeroPrithvi:
                 case UnitType.KhukuriWarrior:
                 default:
                     // Authentic Gorkhali martial guard: right hand holding curved Khukuri forward at waist height, buckler raised

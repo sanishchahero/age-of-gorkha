@@ -101,6 +101,11 @@ namespace Gorkha.UI
         private Rect _topBannerRect;
         private Rect _bottomDockRect;
         private Rect _unitInspectorRect;
+        private bool _showTechModal = false;
+        private Rect _techModalRect;
+        private bool _showGuthiModal = false;
+        private int _guthiTab = 0;
+        private Rect _guthiModalRect;
 
         private void Awake()
         {
@@ -148,6 +153,8 @@ namespace Gorkha.UI
                 _bottomDockRect.Contains(guiMousePos) ||
                 (_selectedBuilding != null && _inspectorRect.Contains(guiMousePos)) ||
                 (RTSSelectionManager.Instance != null && RTSSelectionManager.Instance.SelectedUnits.Count > 0 && _unitInspectorRect.Contains(guiMousePos)) ||
+                (_showTechModal && _techModalRect.Contains(guiMousePos)) ||
+                (_showGuthiModal && _guthiModalRect.Contains(guiMousePos)) ||
                 (GorkhaMiniMap.Instance != null && GorkhaMiniMap.Instance.MapRect.Contains(guiMousePos)))
             {
                 return true;
@@ -174,6 +181,24 @@ namespace Gorkha.UI
         {
             Handle3DMouseInteractions();
             UpdateFloatingTexts();
+            HandleHeroAbilityHotkeys();
+        }
+
+        private void HandleHeroAbilityHotkeys()
+        {
+            if (RTSSelectionManager.Instance == null) return;
+            var selected = RTSSelectionManager.Instance.SelectedUnits;
+            if (selected.Count == 1 && selected[0] != null && selected[0].TryGetComponent<Units.HeroController>(out var hero))
+            {
+                if (GorkhaInput.GetKeyDown(KeyCode.Q))
+                {
+                    hero.TriggerAbility1();
+                }
+                else if (GorkhaInput.GetKeyDown(KeyCode.E) || GorkhaInput.GetKeyDown(KeyCode.W) || GorkhaInput.GetKeyDown(KeyCode.R))
+                {
+                    hero.TriggerAbility2();
+                }
+            }
         }
 
         private void Handle3DMouseInteractions()
@@ -507,6 +532,21 @@ namespace Gorkha.UI
             // Historical Era Advancement Fanfare Celebration (AGE-01 / AGE-02)
             AgeManager.Instance?.DrawCelebrationOverlay(vWidth, vHeight);
 
+            // Vidya Kendra Tech Tree Research Modal (AGE-03)
+            if (_showTechModal)
+            {
+                DrawTechResearchModal(vWidth, vHeight);
+            }
+
+            // Wonder Victory Countdown & Banner (AGE-04)
+            DrawWonderVictoryBanner(vWidth, vHeight);
+
+            // Guthi Clan & Campaign Modal (SOC-01 / SOC-03)
+            if (_showGuthiModal)
+            {
+                DrawGuthiModal(vWidth, vHeight);
+            }
+
             GUI.matrix = origMatrix;
         }
 
@@ -514,7 +554,7 @@ namespace Gorkha.UI
 
         private void DrawTopResourceBanner(float vWidth, float vHeight)
         {
-            float bannerWidth = Mathf.Min(vWidth - 24f, 1140f);
+            float bannerWidth = Mathf.Min(vWidth - 24f, 1320f);
             float xPos = (vWidth - bannerWidth) * 0.5f;
             _topBannerRect = new Rect(xPos, 8, bannerWidth, 60);
 
@@ -605,6 +645,32 @@ namespace Gorkha.UI
                     GUI.color = new Color(1.0f, 0.4f, 0.4f);
                     GUILayout.Label("⚔️ <b>Unshielded</b>", _subHeaderStyle, GUILayout.Width(95));
                     GUI.color = Color.white;
+                }
+            }
+
+            // Guthi Clan & Campaign (SOC-01 / SOC-03)
+            if (GUILayout.Button("🛡️ Guthi", _goldButtonStyle, GUILayout.Width(72), GUILayout.Height(32)))
+            {
+                _showGuthiModal = !_showGuthiModal;
+                GorkhaAudio.PlayClick();
+            }
+
+            // Time of Day Toggle (Phase 6)
+            if (Graphics.HimalayanDayNightCycle.Instance != null)
+            {
+                var tod = Graphics.HimalayanDayNightCycle.Instance.CurrentTime;
+                string todIcon = tod switch
+                {
+                    Graphics.TimeOfDay.Dawn => "🌅",
+                    Graphics.TimeOfDay.Noon => "☀️",
+                    Graphics.TimeOfDay.Sunset => "🌄",
+                    _ => "🌙"
+                };
+                if (GUILayout.Button(todIcon, _buttonStyle, GUILayout.Width(34), GUILayout.Height(32)))
+                {
+                    var nextTod = (Graphics.TimeOfDay)(((int)tod + 1) % 4);
+                    Graphics.HimalayanDayNightCycle.Instance.SetTimeOfDay(nextTod);
+                    GorkhaAudio.PlayClick();
                 }
             }
 
@@ -741,6 +807,9 @@ namespace Gorkha.UI
 
                     DrawGatedDockCard(BuildingType.Vault, "🪙", "Vault", "100W, 60S • +1k G", () =>
                         StartBlueprintPlacement(BuildingType.Vault, "Treasury Vault (Dhukuti)", 2, 2, ResourceType.Gold, 0.0, woodCost: 100, stoneCost: 60, isStorage: true, storageType: ResourceType.Gold, storageCapacity: 1000));
+
+                    DrawGatedDockCard(BuildingType.Academy, "🏛️", "Academy", "120W, 60S", () =>
+                        StartBlueprintPlacement(BuildingType.Academy, "Vidya Kendra (Academy)", 2, 2, ResourceType.Food, 0.0, woodCost: 120, stoneCost: 60));
                 }
                 else
                 {
@@ -759,6 +828,9 @@ namespace Gorkha.UI
 
                     DrawGatedDockCard(BuildingType.Trap, "🕳️", "Trap", "20W, 10S", () =>
                         StartBlueprintPlacement(BuildingType.Trap, "Spike Trap", 1, 1, ResourceType.Food, 0.0, woodCost: 20, stoneCost: 10));
+
+                    DrawGatedDockCard(BuildingType.Wonder, "🏆", "Wonder", "500W, 500S, 300G", () =>
+                        StartBlueprintPlacement(BuildingType.Wonder, "Himalayan Wonder", 3, 3, ResourceType.Food, 0.0, woodCost: 500, stoneCost: 500));
 
                     if (GUILayout.Button("⚔️ <b>Raid!</b>\n<size=10><color=#FF8888>Outposts</color></size>", _dangerButtonStyle, GUILayout.Width(76)))
                     {
@@ -874,8 +946,10 @@ namespace Gorkha.UI
             float modalHeight = 320f;
             if (b.Data != null)
             {
-                if (b.Data.buildingType == BuildingType.Barracks) modalHeight = 440f;
-                else if (b.Data.buildingType == BuildingType.TownCenter) modalHeight = 470f;
+                if (b.Data.buildingType == BuildingType.Barracks) modalHeight = 460f;
+                else if (b.Data.buildingType == BuildingType.TownCenter) modalHeight = 550f;
+                else if (b.Data.buildingType == BuildingType.Academy) modalHeight = 360f;
+                else if (b.Data.buildingType == BuildingType.Wonder) modalHeight = 380f;
                 else if (b.Data.isStorage) modalHeight = 360f;
             }
             float xPos = (vWidth - modalWidth) * 0.5f;
@@ -1101,6 +1175,114 @@ namespace Gorkha.UI
                 {
                     GUILayout.Label("<color=#FF6666>⚠️ Population limit reached! Build more Houses.</color>", _subHeaderStyle);
                 }
+
+                // Hero Generals (CBT-06)
+                GUILayout.Space(6);
+                GUILayout.Label("👑 <b>Commanders & Hero Generals (CBT-06):</b>", _headerStyle);
+                GUILayout.BeginHorizontal();
+
+                // General Kalu Pande
+                bool kaluUnlocked = Progression.BuildingGatingManager.IsUnitUnlocked(UnitType.HeroKaluPande, out string kaluReason);
+                bool kaluAlive = Progression.HeroManager.Instance != null && Progression.HeroManager.Instance.IsHeroAlive(Units.HeroGeneralType.KaluPande);
+                if (kaluAlive)
+                {
+                    GUI.color = new Color(0.4f, 0.8f, 1f, 0.8f);
+                    GUILayout.Button("🛡️ Kalu Pande\n<size=10>In Battle</size>", _buttonStyle, GUILayout.Height(44));
+                    GUI.color = Color.white;
+                }
+                else if (kaluUnlocked)
+                {
+                    if (GUILayout.Button("🛡️ General Kalu Pande\n<size=10>150F, 100G</size>", _buttonStyle, GUILayout.Height(44)))
+                    {
+                        if (Progression.HeroManager.Instance != null && Progression.HeroManager.Instance.CanSummonHero(Units.HeroGeneralType.KaluPande, out string r))
+                        {
+                            Progression.HeroManager.Instance.SummonHero(Units.HeroGeneralType.KaluPande, b.transform.position + new Vector3(2.5f, 0, 0));
+                        }
+                        else
+                        {
+                            GorkhaAudio.PlayError();
+                            SpawnFloatingText(b.transform.position + Vector3.up * 3f, "Insufficient Resources!", Color.red);
+                        }
+                    }
+                }
+                else
+                {
+                    GUI.color = new Color(0.6f, 0.6f, 0.6f, 0.7f);
+                    if (GUILayout.Button($"🔒 Kalu Pande\n<size=10>{kaluReason}</size>", _buttonStyle, GUILayout.Height(44)))
+                    {
+                        GorkhaAudio.PlayError();
+                        SpawnFloatingText(b.transform.position + Vector3.up * 3f, kaluReason, Color.red);
+                    }
+                    GUI.color = Color.white;
+                }
+
+                // King Prithvi Narayan Shah
+                bool prithviUnlocked = Progression.BuildingGatingManager.IsUnitUnlocked(UnitType.HeroPrithvi, out string pReason);
+                bool prithviAlive = Progression.HeroManager.Instance != null && Progression.HeroManager.Instance.IsHeroAlive(Units.HeroGeneralType.PrithviNarayanShah);
+                if (prithviAlive)
+                {
+                    GUI.color = new Color(1f, 0.85f, 0.2f, 0.8f);
+                    GUILayout.Button("👑 King Prithvi\n<size=10>In Battle</size>", _buttonStyle, GUILayout.Height(44));
+                    GUI.color = Color.white;
+                }
+                else if (prithviUnlocked)
+                {
+                    if (GUILayout.Button("👑 King Prithvi N. Shah\n<size=10>250F, 200G</size>", _buttonStyle, GUILayout.Height(44)))
+                    {
+                        if (Progression.HeroManager.Instance != null && Progression.HeroManager.Instance.CanSummonHero(Units.HeroGeneralType.PrithviNarayanShah, out string r))
+                        {
+                            Progression.HeroManager.Instance.SummonHero(Units.HeroGeneralType.PrithviNarayanShah, b.transform.position + new Vector3(-2.5f, 0, 0));
+                        }
+                        else
+                        {
+                            GorkhaAudio.PlayError();
+                            SpawnFloatingText(b.transform.position + Vector3.up * 3f, "Insufficient Resources!", Color.red);
+                        }
+                    }
+                }
+                else
+                {
+                    GUI.color = new Color(0.6f, 0.6f, 0.6f, 0.7f);
+                    if (GUILayout.Button($"🔒 King Prithvi\n<size=10>{pReason}</size>", _buttonStyle, GUILayout.Height(44)))
+                    {
+                        GorkhaAudio.PlayError();
+                        SpawnFloatingText(b.transform.position + Vector3.up * 3f, pReason, Color.red);
+                    }
+                    GUI.color = Color.white;
+                }
+                GUILayout.EndHorizontal();
+            }
+
+            // If Academy: Vidya Kendra Tech Tree (AGE-03)
+            if (b.Data != null && b.Data.buildingType == BuildingType.Academy && b.State == BuildingState.Active)
+            {
+                GUILayout.Space(8);
+                GUILayout.Label("📚 <b>Academy of Warfare (Vidya Kendra):</b>", _headerStyle);
+                GUILayout.Label("<size=11><color=#CCCCCC>Research ancient metallurgy, architecture, agriculture & logistics.</color></size>", _bodyStyle);
+                GUILayout.Space(4);
+                if (GUILayout.Button("🔬 <b>Open Tech Tree Research Window</b>", _goldButtonStyle, GUILayout.Height(44)))
+                {
+                    _showTechModal = true;
+                    GorkhaAudio.PlayClick();
+                }
+            }
+
+            // If Wonder: Himalayan Wonder Defense Status (AGE-04)
+            if (b.Data != null && b.Data.buildingType == BuildingType.Wonder && b.State == BuildingState.Active)
+            {
+                GUILayout.Space(8);
+                GUILayout.Label("🏆 <b>Himalayan Monumental Wonder:</b>", _headerStyle);
+                if (Progression.WonderVictoryController.Instance != null && Progression.WonderVictoryController.Instance.IsCountdownActive)
+                {
+                    float rem = Progression.WonderVictoryController.Instance.CountdownRemaining;
+                    int mins = Mathf.FloorToInt(rem / 60f);
+                    int secs = Mathf.FloorToInt(rem % 60f);
+                    GUILayout.Label($"<color=#FFD700><b>🛡️ DEFENDING WONDER: {mins:D2}:{secs:D2}</b></color>", _headerStyle);
+                }
+                else
+                {
+                    GUILayout.Label("<color=#69f0ae>Monument of the Ages standing undefeated!</color>", _bodyStyle);
+                }
             }
 
             GUILayout.EndVertical();
@@ -1226,8 +1408,9 @@ namespace Gorkha.UI
             if (rts == null || rts.SelectedUnits.Count == 0) return;
 
             var selected = rts.SelectedUnits;
-            float panelWidth = selected.Count == 1 ? 420f : 490f;
-            float panelHeight = selected.Count == 1 ? 175f : 215f;
+            bool isSingleHero = selected.Count == 1 && selected[0] != null && selected[0].IsHero;
+            float panelWidth = selected.Count == 1 ? 440f : 490f;
+            float panelHeight = selected.Count == 1 ? (isSingleHero ? 235f : 175f) : 215f;
             float xPos = (vWidth - panelWidth) * 0.5f;
             float yPos = vHeight - panelHeight - 96f;
 
@@ -1243,6 +1426,8 @@ namespace Gorkha.UI
                     GUILayout.BeginHorizontal();
                     string unitName = u.Type switch
                     {
+                        UnitType.HeroPrithvi => "👑 King Prithvi Narayan Shah (The Unifier)",
+                        UnitType.HeroKaluPande => "🛡️ General Kalu Pande (Grand Commander)",
                         UnitType.Spearman => "🛡️ Gorkha Spearman",
                         UnitType.KhukuriWarrior => "🗡️ Gurkha Khukuri Warrior",
                         UnitType.Archer => "🏹 Himalayan Archer",
@@ -1276,12 +1461,40 @@ namespace Gorkha.UI
                     GUILayout.Space(4);
                     string roleTip = u.Type switch
                     {
+                        UnitType.HeroPrithvi => "<color=#ffd700><b>Divine Sun Aura:</b> +20% Attack Damage to nearby allies</color>",
+                        UnitType.HeroKaluPande => "<color=#38b6ff><b>Infantry Bastion:</b> +25% Armor / Damage Reduction to nearby allies</color>",
                         UnitType.Spearman => "<color=#4deeea><b>Counter Wall:</b> +35% vs Khukuri Warriors</color>",
                         UnitType.KhukuriWarrior => "<color=#ff7043><b>Counter Flank:</b> +50% vs Archers</color>",
                         UnitType.Archer => "<color=#69f0ae><b>Counter Pierce:</b> +40% vs Spearmen</color>",
                         _ => "<color=#ffd54f><b>Civilian:</b> Harvests timber/slate & delivers resources</color>"
                     };
                     GUILayout.Label(roleTip, _subHeaderStyle);
+
+                    if (u.TryGetComponent<Units.HeroController>(out var hero))
+                    {
+                        GUILayout.Space(4);
+                        GUILayout.BeginHorizontal();
+                        // Ability 1
+                        string a1Name = hero.GeneralType == Units.HeroGeneralType.PrithviNarayanShah ? "👑 [Q] Call to Arms" : "🛡️ [W] Shield Wall";
+                        bool a1Ready = hero.IsAbility1Ready;
+                        if (!a1Ready) GUI.color = new Color(0.6f, 0.6f, 0.6f, 0.8f);
+                        if (GUILayout.Button(a1Ready ? $"{a1Name}\n<size=10><color=#FFD700>READY</color></size>" : $"{a1Name}\n<size=10>{hero.Ability1CooldownRemaining:F1}s</size>", _goldButtonStyle, GUILayout.Height(38)))
+                        {
+                            hero.TriggerAbility1();
+                        }
+                        GUI.color = Color.white;
+
+                        // Ability 2
+                        string a2Name = hero.GeneralType == Units.HeroGeneralType.PrithviNarayanShah ? "⚡ [E] Royal Decree" : "🗡️ [R] Ambush";
+                        bool a2Ready = hero.IsAbility2Ready;
+                        if (!a2Ready) GUI.color = new Color(0.6f, 0.6f, 0.6f, 0.8f);
+                        if (GUILayout.Button(a2Ready ? $"{a2Name}\n<size=10><color=#69F0AE>READY</color></size>" : $"{a2Name}\n<size=10>{hero.Ability2CooldownRemaining:F1}s</size>", _greenButtonStyle, GUILayout.Height(38)))
+                        {
+                            hero.TriggerAbility2();
+                        }
+                        GUI.color = Color.white;
+                        GUILayout.EndHorizontal();
+                    }
                 }
             }
             else
@@ -1359,6 +1572,325 @@ namespace Gorkha.UI
                 rts.ExecuteStopOrder();
             }
             GUILayout.EndHorizontal();
+
+            GUILayout.EndVertical();
+            GUILayout.EndArea();
+        }
+
+        #endregion
+
+        #region Vidya Kendra Tech Tree Modal (AGE-03)
+
+        private void DrawTechResearchModal(float vWidth, float vHeight)
+        {
+            float modalWidth = 680f;
+            float modalHeight = 440f;
+            float xPos = (vWidth - modalWidth) * 0.5f;
+            float yPos = (vHeight - modalHeight) * 0.5f;
+            _techModalRect = new Rect(xPos, yPos, modalWidth, modalHeight);
+
+            GUILayout.BeginArea(_techModalRect);
+            GUILayout.BeginVertical(_cardStyle);
+
+            // Header
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("🏛️ <b>विद्या केन्द्र (Academy of Warfare & Arts) — Tech Tree</b>", _headerStyle);
+            if (GUILayout.Button("✖", _buttonStyle, GUILayout.Width(30), GUILayout.Height(28)))
+            {
+                _showTechModal = false;
+                GorkhaAudio.PlayClick();
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label("<size=11><color=#CCCCCC>Research ancient metallurgy, architecture, agrarian engineering & logistics to empower your kingdom.</color></size>", _bodyStyle);
+            GUILayout.Space(6);
+
+            var tm = Progression.TechTreeManager.Instance;
+            if (tm == null)
+            {
+                GUILayout.Label("Tech Tree Manager not found in scene.", _subHeaderStyle);
+                GUILayout.EndVertical();
+                GUILayout.EndArea();
+                return;
+            }
+
+            // Current Active Research Bar
+            if (tm.CurrentResearch != null)
+            {
+                GUILayout.BeginVertical(_cardStyle);
+                GUILayout.Label($"🔬 <b>Researching:</b> <color=#FFD700>{tm.CurrentResearch.title}</color> ({tm.CurrentResearchRemaining:F1}s remaining)", _subHeaderStyle);
+                Rect barRect = GUILayoutUtility.GetRect(modalWidth - 48, 16);
+                GUI.DrawTexture(barRect, _progressBarBgTex);
+                float fill = (barRect.width - 4) * tm.CurrentResearchProgress;
+                if (fill > 0.01f)
+                {
+                    GUI.DrawTexture(new Rect(barRect.x + 2, barRect.y + 2, fill, barRect.height - 4), _progressBarFillTex);
+                }
+                GUILayout.EndVertical();
+                GUILayout.Space(6);
+            }
+
+            // Tech Grid (2 Columns)
+            var allTechs = new List<Progression.TechItem>(tm.GetAllTechs());
+            for (int i = 0; i < allTechs.Count; i += 2)
+            {
+                GUILayout.BeginHorizontal();
+                for (int j = 0; j < 2; j++)
+                {
+                    int idx = i + j;
+                    if (idx < allTechs.Count)
+                    {
+                        DrawTechItemCard(allTechs[idx], tm, (modalWidth - 48) * 0.5f);
+                    }
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.Space(4);
+            }
+
+            GUILayout.EndVertical();
+            GUILayout.EndArea();
+        }
+
+        private void DrawTechItemCard(Progression.TechItem item, Progression.TechTreeManager tm, float cardWidth)
+        {
+            GUILayout.BeginVertical(_cardStyle, GUILayout.Width(cardWidth), GUILayout.Height(98));
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"{item.iconEmoji} <b>{item.title}</b>", _subHeaderStyle);
+            GUILayout.Label($"<size=10><color=#AAAAAA>{item.branch}</color></size>", _bodyStyle, GUILayout.Width(130));
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label($"<size=10><color=#E0E0E0>{item.description}</color></size>", _bodyStyle);
+
+            string costStr = "";
+            if (item.foodCost > 0) costStr += $"{item.foodCost}F ";
+            if (item.woodCost > 0) costStr += $"{item.woodCost}W ";
+            if (item.stoneCost > 0) costStr += $"{item.stoneCost}S ";
+            if (item.goldCost > 0) costStr += $"{item.goldCost}G ";
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"<size=10><color=#FFD700>Cost: {costStr.Trim()}</color></size>", _bodyStyle);
+
+            if (item.isResearched)
+            {
+                GUI.color = new Color(0.4f, 1f, 0.4f);
+                GUILayout.Label("✅ Researched", _subHeaderStyle, GUILayout.Width(100));
+                GUI.color = Color.white;
+            }
+            else if (item.isResearching)
+            {
+                GUI.color = new Color(1f, 0.85f, 0.2f);
+                GUILayout.Label($"⏳ {item.researchProgress * 100f:F0}%", _subHeaderStyle, GUILayout.Width(100));
+                GUI.color = Color.white;
+            }
+            else
+            {
+                bool canResearch = tm.CanResearch(item.type, out string reason);
+                GUI.enabled = canResearch;
+                if (GUILayout.Button($"Research ({item.researchDuration:F0}s)", _buttonStyle, GUILayout.Width(110), GUILayout.Height(24)))
+                {
+                    tm.StartResearch(item.type);
+                }
+                GUI.enabled = true;
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.EndVertical();
+        }
+
+        #endregion
+
+        #region Wonder Victory Banner (AGE-04)
+
+        private void DrawWonderVictoryBanner(float vWidth, float vHeight)
+        {
+            var wc = Progression.WonderVictoryController.Instance;
+            if (wc == null) return;
+
+            if (wc.IsCountdownActive)
+            {
+                float rem = wc.CountdownRemaining;
+                int mins = Mathf.FloorToInt(rem / 60f);
+                int secs = Mathf.FloorToInt(rem % 60f);
+
+                float bannerWidth = 440f;
+                float xPos = (vWidth - bannerWidth) * 0.5f;
+                Rect bannerRect = new Rect(xPos, 74, bannerWidth, 42);
+
+                GUILayout.BeginArea(bannerRect);
+                GUILayout.BeginHorizontal(_cardStyle);
+                GUILayout.Label($"🏆 <b>WONDER DEFENSE: <color=#FFD700>{mins:D2}:{secs:D2}</color></b> (Survive to Win!)", _headerStyle);
+                GUILayout.EndHorizontal();
+                GUILayout.EndArea();
+            }
+            else if (wc.IsVictoryAchieved)
+            {
+                float modalWidth = 540f;
+                float modalHeight = 220f;
+                float xPos = (vWidth - modalWidth) * 0.5f;
+                float yPos = (vHeight - modalHeight) * 0.5f;
+
+                GUILayout.BeginArea(new Rect(xPos, yPos, modalWidth, modalHeight));
+                GUILayout.BeginVertical(_cardStyle);
+
+                GUILayout.Space(8);
+                GUILayout.Label("👑 <b>HIMALAYAN GOLDEN AGE VICTORY!</b> 🏆", _headerStyle);
+                GUILayout.Space(6);
+                GUILayout.Label("<color=#FFD700><b>The Monument of the Ages stands undefeated upon the Himalayan peaks!</b></color>", _subHeaderStyle);
+                GUILayout.Label("Your kingdom has unified the lands under peace, prosperity, and martial glory.", _bodyStyle);
+                GUILayout.Space(12);
+
+                if (GUILayout.Button("🎉 <b>Continue Governing Gorkha</b>", _goldButtonStyle, GUILayout.Height(44)))
+                {
+                    GorkhaAudio.PlayClick();
+                }
+
+                GUILayout.EndVertical();
+                GUILayout.EndArea();
+            }
+        }
+
+        #endregion
+
+        #region Guthi Brotherhood & Historical Campaign Modal (SOC-01 / SOC-03)
+
+        private void DrawGuthiModal(float vWidth, float vHeight)
+        {
+            float modalWidth = 680f;
+            float modalHeight = 460f;
+            float xPos = (vWidth - modalWidth) * 0.5f;
+            float yPos = (vHeight - modalHeight) * 0.5f;
+            _guthiModalRect = new Rect(xPos, yPos, modalWidth, modalHeight);
+
+            GUILayout.BeginArea(_guthiModalRect);
+            GUILayout.BeginVertical(_cardStyle);
+
+            // Header
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("🛡️ <b>गुठी समाज (Guthi Brotherhood & Campaign)</b>", _headerStyle);
+            if (GUILayout.Button("✖", _buttonStyle, GUILayout.Width(30), GUILayout.Height(28)))
+            {
+                _showGuthiModal = false;
+                GorkhaAudio.PlayClick();
+            }
+            GUILayout.EndHorizontal();
+
+            var gm = Social.GuthiManager.Instance;
+            if (gm == null)
+            {
+                GUILayout.Label("Guthi Manager not initialized.", _subHeaderStyle);
+                GUILayout.EndVertical();
+                GUILayout.EndArea();
+                return;
+            }
+
+            // Tab Selector
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(_guthiTab == 0 ? "🛡️ <b>[ Guthi Clan Roster ]</b>" : "🛡️ Guthi Clan Roster", _guthiTab == 0 ? _goldButtonStyle : _buttonStyle, GUILayout.Height(34)))
+            {
+                _guthiTab = 0;
+                GorkhaAudio.PlayClick();
+            }
+            if (GUILayout.Button(_guthiTab == 1 ? "🗺️ <b>[ Himalayan Campaign ]</b>" : "🗺️ Himalayan Campaign", _guthiTab == 1 ? _goldButtonStyle : _buttonStyle, GUILayout.Height(34)))
+            {
+                _guthiTab = 1;
+                GorkhaAudio.PlayClick();
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(6);
+
+            if (_guthiTab == 0)
+            {
+                // Tab 0: Guthi Brotherhood & Clan Castle
+                GUILayout.BeginVertical(_cardStyle);
+                GUILayout.Label($"👑 <b>{gm.GuthiName}</b>", _headerStyle);
+                GUILayout.Label($"<color=#FFD700>Rank:</color> <b>{gm.PlayerRank}</b> • <color=#38b6ff>Trophies:</color> <b>{gm.ClanTrophies} 🏆</b> • <color=#69f0ae>Clan Level:</color> <b>Lv. {gm.ClanLevel}</b>", _subHeaderStyle);
+                GUILayout.EndVertical();
+
+                GUILayout.Space(6);
+                GUILayout.Label($"🏰 <b>Guthi Castle Garrison ({gm.CurrentTroopCount}/{gm.MaxTroopCapacity} Troops):</b>", _subHeaderStyle);
+
+                // Troop List
+                GUILayout.BeginVertical(_cardStyle);
+                if (gm.CurrentTroopCount == 0)
+                {
+                    GUILayout.Label("<color=#AAAAAA>No donated troops currently stationed in the Guthi Castle.</color>", _bodyStyle);
+                }
+                else
+                {
+                    string troopRoster = "";
+                    foreach (var t in gm.DonatedTroops)
+                    {
+                        troopRoster += t switch
+                        {
+                            UnitType.KhukuriWarrior => "🗡️ Khukuri  ",
+                            UnitType.Spearman => "🛡️ Spearman  ",
+                            UnitType.Archer => "🏹 Archer  ",
+                            _ => "🌾 Villager  "
+                        };
+                    }
+                    GUILayout.Label(troopRoster, _subHeaderStyle);
+                }
+                GUILayout.EndVertical();
+
+                GUILayout.Space(6);
+                GUILayout.BeginHorizontal();
+
+                // Request Troops Button
+                bool canReq = gm.CanRequestTroops;
+                GUI.enabled = canReq;
+                string reqLabel = canReq ? "📥 <b>Request Reinforcements</b>" : $"⏳ Cooldown ({gm.RequestCooldownRemaining:F0}s)";
+                if (GUILayout.Button(reqLabel, _goldButtonStyle, GUILayout.Height(40)))
+                {
+                    gm.RequestClanTroops(out _);
+                }
+                GUI.enabled = true;
+
+                // Deploy Garrison Button
+                GUI.enabled = gm.CurrentTroopCount > 0;
+                if (GUILayout.Button("⚔️ <b>Deploy Garrison Defenders</b>", _greenButtonStyle, GUILayout.Height(40)))
+                {
+                    gm.DeployGarrisonDefenders(new Vector3(24f, 0, 24f));
+                    _showGuthiModal = false;
+                }
+                GUI.enabled = true;
+                GUILayout.EndHorizontal();
+            }
+            else
+            {
+                // Tab 1: Historical Campaign Acts
+                GUILayout.Label("🗺️ <b>5 Historical Campaign Chapters (Unification of Gorkha):</b>", _subHeaderStyle);
+                GUILayout.Space(4);
+
+                foreach (var mission in gm.CampaignMissions)
+                {
+                    GUILayout.BeginVertical(_cardStyle);
+                    GUILayout.BeginHorizontal();
+                    string starStr = mission.starsEarned > 0 ? new string('⭐', mission.starsEarned) : "⚪⚪⚪";
+                    GUILayout.Label($"<b>{mission.title}</b> ({mission.year})  {starStr}", _subHeaderStyle);
+                    GUILayout.Label($"<size=10><color=#FFD700>+{mission.rewardGold}🪙 +{mission.rewardGems}💎</color></size>", _bodyStyle, GUILayout.Width(110));
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.Label($"<size=10><color=#CCCCCC>{mission.historicalContext}</color></size>", _bodyStyle);
+                    GUILayout.Label($"<size=10><color=#88FF88>🎯 Objective: {mission.objective}</color></size>", _bodyStyle);
+
+                    GUILayout.BeginHorizontal();
+                    if (mission.isCompleted)
+                    {
+                        GUI.color = new Color(0.4f, 1f, 0.4f);
+                        GUILayout.Label("✅ Conquered", _subHeaderStyle, GUILayout.Width(110));
+                        GUI.color = Color.white;
+                    }
+                    if (GUILayout.Button(mission.isCompleted ? "Replay Act" : "⚔️ Launch Battle", _buttonStyle, GUILayout.Width(130), GUILayout.Height(24)))
+                    {
+                        gm.CompleteMission(mission.actNumber, 3);
+                    }
+                    GUILayout.EndHorizontal();
+                    GUILayout.EndVertical();
+                    GUILayout.Space(4);
+                }
+            }
 
             GUILayout.EndVertical();
             GUILayout.EndArea();

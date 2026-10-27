@@ -256,6 +256,16 @@ namespace Gorkha.Audio
             GorkhaPlayableHUD.SpawnFloatingText(spawnPos, text, new Color(1.0f, 0.15f, 0.15f));
         }
 
+        public static void TriggerHeroAbilityCallout(string text, Vector3 position)
+        {
+            if (Instance != null)
+            {
+                Instance.PlayClip(Instance._clipSuraksha);
+            }
+            GorkhaAudio.PlayHorn();
+            GorkhaPlayableHUD.SpawnFloatingText(position + Vector3.up * 2.8f, $"👑 🇳🇵 \"{text}\"", new Color(1f, 0.85f, 0.2f));
+        }
+
         private void PlayClip(AudioClip clip)
         {
             if (_voiceSource != null && clip != null && (GorkhaAudio.Instance == null || !GorkhaAudio.Instance.IsMuted))

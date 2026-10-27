@@ -13,9 +13,9 @@
 flowchart LR
     M0["Phase 0: Graphics & Polish<br/>✅ Complete"] --> M1["Phase 1: Economy & Village<br/>✅ Complete"]
     M1 --> M2["Phase 2: Fortifications<br/>✅ Complete"]
-    M2 --> M3["Phase 3: Ages & Tech<br/>⚡ In Progress"]
-    M3 --> M4["Phase 4: RTS Tactical Combat<br/>⚡ In Progress"]
-    M4 --> M5["Phase 5: Guthi Clan & Campaign<br/>⏳ Planned"]
+    M2 --> M3["Phase 3: Ages & Tech<br/>✅ Complete"]
+    M3 --> M4["Phase 4: RTS Tactical Combat<br/>✅ Complete"]
+    M4 --> M5["Phase 5: Guthi Clan & Campaign<br/>⚡ In Progress"]
     M5 --> M6["Phase 6: Audio & Environment<br/>⚡ In Progress"]
     M6 --> M7["Horizon: Future Enhancements<br/>🚀 Innovation Catalog"]
 ```
@@ -270,8 +270,8 @@ flowchart LR
 | :--- | :--- | :--- | :--- | :--- |
 | **AGE-01** | **Four Historical Ages of Gorkha** | AoE | **P0** | ✅ Completed |
 | **AGE-02** | **Town Center Upgrade Gating & Unlocks** | CoC / AoE | **P0** | ✅ Completed |
-| **AGE-03** | **Academy of Arts & Warfare (Research Tech Tree)** | AoE | **P1** | ⏳ Planned |
-| **AGE-04** | **Wonder of the World Construction Victory** | AoE | **P2** | ⏳ Planned |
+| **AGE-03** | **Academy of Arts & Warfare (Research Tech Tree)** | AoE | **P1** | ✅ Completed |
+| **AGE-04** | **Wonder of the World Construction Victory** | AoE | **P2** | ✅ Completed |
 
 ### Detailed Specifications
 
@@ -320,7 +320,7 @@ flowchart LR
 | **CBT-03** | **Rock-Paper-Scissors Combat Triangle** | AoE | **P0** | ✅ Completed |
 | **CBT-04** | **Attack-Move, Hold Position & Patrol Commands** | AoE | **P1** | ✅ Completed |
 | **CBT-05** | **CoC-Style Asynchronous Village Raid Mode** | CoC | **P1** | ✅ Completed |
-| **CBT-06** | **Hero Generals (Prithvi Narayan Shah, Kalu Pande)** | CoC / AoE | **P2** | ⏳ Planned |
+| **CBT-06** | **Hero Generals (Prithvi Narayan Shah, Kalu Pande)** | CoC / AoE | **P2** | ✅ Completed |
 
 ### Detailed Specifications
 
@@ -397,9 +397,9 @@ flowchart LR
 
 | Task ID | Feature Title | Inspiration | Priority | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **SOC-01** | **Guthi Brotherhood (Clan System)** | CoC | **P1** | ⏳ Planned |
-| **SOC-02** | **Troop Reinforcement Donations (Guthi Durbar)** | CoC | **P1** | ⏳ Planned |
-| **SOC-03** | **Historical Himalayan Campaign Map (Nuwakot, Makwanpur)** | AoE | **P1** | ⏳ Planned |
+| **SOC-01** | **Guthi Brotherhood (Clan System)** | CoC | **P1** | ✅ Completed |
+| **SOC-02** | **Troop Reinforcement Donations (Guthi Durbar)** | CoC | **P1** | ✅ Completed |
+| **SOC-03** | **Historical Himalayan Campaign Map (Nuwakot, Makwanpur)** | AoE | **P1** | ✅ Completed |
 | **SOC-04** | **Clan Wars (Guthi vs Guthi Territory Battles)** | CoC | **P2** | ⏳ Planned |
 
 ### Detailed Specifications
@@ -429,7 +429,7 @@ flowchart LR
 
 ## 🎨 Phase 6: Visual & Audio Polish Checklist
 
-- [ ] **Dynamic Day-Night Cycle:** Himalayan sunrise, golden afternoon, and lantern-lit mountain night with glowing paper windows.
+- [x] **Dynamic Day-Night Cycle:** Himalayan sunrise, golden afternoon, and lantern-lit mountain night with planetary sun rotation, color temperature shifts, and trilight adjustments. ✅ Completed!
 - [ ] **Ambient Himalayan Wildlife:** Mountain yaks grazing in pastures, Himalayan eagles soaring overhead, and musk deer in forests.
 - [ ] **Weather & Seasons:** Mountain mist rising from valleys, monsoon rain effects on terracotta roofs, and winter snow caps on pagoda eaves.
 - [x] **Authentic Traditional Audio (AUD-01, AUD-02, AUD-03):** ✅ Completed!

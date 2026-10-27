@@ -164,6 +164,41 @@ namespace Gorkha.Core
                 raidObj.AddComponent<GorkhaRaidBattleController>();
             }
 
+            // 12. Academy of Warfare Tech Tree Manager (AGE-03)
+            if (TechTreeManager.Instance == null && FindAnyObjectByType<TechTreeManager>() == null)
+            {
+                GameObject techObj = new GameObject("TechTreeManager_Manager");
+                techObj.AddComponent<TechTreeManager>();
+            }
+
+            // 13. Historic Hero Generals Manager (CBT-06)
+            if (HeroManager.Instance == null && FindAnyObjectByType<HeroManager>() == null)
+            {
+                GameObject heroObj = new GameObject("HeroManager_Manager");
+                heroObj.AddComponent<HeroManager>();
+            }
+
+            // 14. Himalayan Wonder Victory Controller (AGE-04)
+            if (WonderVictoryController.Instance == null && FindAnyObjectByType<WonderVictoryController>() == null)
+            {
+                GameObject wonderObj = new GameObject("WonderVictoryController_Manager");
+                wonderObj.AddComponent<WonderVictoryController>();
+            }
+
+            // 15. Guthi Brotherhood & Campaign Manager (SOC-01, SOC-02, SOC-03)
+            if (Social.GuthiManager.Instance == null && FindAnyObjectByType<Social.GuthiManager>() == null)
+            {
+                GameObject guthiObj = new GameObject("GuthiManager_Manager");
+                guthiObj.AddComponent<Social.GuthiManager>();
+            }
+
+            // 16. Dynamic Himalayan Day-Night Cycle (Phase 6)
+            if (HimalayanDayNightCycle.Instance == null && FindAnyObjectByType<HimalayanDayNightCycle>() == null)
+            {
+                GameObject dncObj = new GameObject("DayNightCycle_Manager");
+                dncObj.AddComponent<HimalayanDayNightCycle>();
+            }
+
             // 9. Isometric Camera Setup & Framing
             Camera cam = Camera.main;
             if (cam == null)

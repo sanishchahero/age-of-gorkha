@@ -178,7 +178,10 @@ namespace Gorkha.Buildings
             // 3. Animate floating resource bubble & accumulate buffer
             if (_state == BuildingState.Active && _data != null && _data.hasProduction)
             {
-                _uncollectedYield = Math.Min(MaxUncollectedBuffer, _uncollectedYield + (_data.baseProductionRate * _level * Time.deltaTime));
+                float techYield = (_data.buildingType == BuildingType.Farm && Progression.TechTreeManager.Instance != null)
+                    ? Progression.TechTreeManager.Instance.FarmYieldMultiplier
+                    : 1.0f;
+                _uncollectedYield = Math.Min(MaxUncollectedBuffer, _uncollectedYield + (_data.baseProductionRate * _level * techYield * Time.deltaTime));
                 bool hasYield = _uncollectedYield >= 4.0;
 
                 if (_resourceBubble != null)
@@ -472,6 +475,12 @@ namespace Gorkha.Buildings
                         case BuildingType.Vault:
                             _completedVisual = Nepali3DMeshBuilder.BuildVault(transform);
                             break;
+                        case BuildingType.Academy:
+                            _completedVisual = Nepali3DMeshBuilder.BuildAcademy(transform);
+                            break;
+                        case BuildingType.Wonder:
+                            _completedVisual = Nepali3DMeshBuilder.BuildWonder(transform, _level);
+                            break;
                         default:
                             _completedVisual = Nepali3DMeshBuilder.BuildTownCenter(transform, _level);
                             break;
@@ -501,9 +510,14 @@ namespace Gorkha.Buildings
                         BuildingType.StoneQuarry => 450,
                         BuildingType.House => 300,
                         BuildingType.Trap => 200,
+                        BuildingType.Academy => 700,
+                        BuildingType.Wonder => 3000,
                         _ => 500
                     };
                 }
+
+                float hpMultiplier = Progression.TechTreeManager.Instance != null ? Progression.TechTreeManager.Instance.BuildingHpMultiplier : 1.0f;
+                _maxHealth = Mathf.RoundToInt(_maxHealth * hpMultiplier);
 
                 if (_data.buildingType == BuildingType.Watchtower || _data.buildingType == BuildingType.Kaman)
                 {
