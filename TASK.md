@@ -11,11 +11,13 @@
 
 ```mermaid
 flowchart LR
-    M0["Phase 0: Graphics & Professional UX<br/>(Studio Visuals & Tactile Polish)"] --> M1["Phase 1: Economy & Village Life<br/>(CoC + AoE)"]
-    M1 --> M2["Phase 2: Fortifications & Defense<br/>(CoC Style)"]
-    M2 --> M3["Phase 3: Age Progression & Tech Tree<br/>(AoE Style)"]
-    M3 --> M4["Phase 4: RTS Tactical Combat<br/>(AoE Formations + CoC Raids)"]
-    M4 --> M5["Phase 5: Guthi / Clan System & Map<br/>(Campaign & CoC Alliances)"]
+    M0["Phase 0: Graphics & Polish<br/>✅ Complete"] --> M1["Phase 1: Economy & Village<br/>✅ Complete"]
+    M1 --> M2["Phase 2: Fortifications<br/>✅ Complete"]
+    M2 --> M3["Phase 3: Ages & Tech<br/>⚡ In Progress"]
+    M3 --> M4["Phase 4: RTS Tactical Combat<br/>⚡ In Progress"]
+    M4 --> M5["Phase 5: Guthi Clan & Campaign<br/>⏳ Planned"]
+    M5 --> M6["Phase 6: Audio & Environment<br/>⚡ In Progress"]
+    M6 --> M7["Horizon: Future Enhancements<br/>🚀 Innovation Catalog"]
 ```
 
 ---
@@ -437,11 +439,387 @@ flowchart LR
 
 ---
 
-## 🛠️ Sprint 1 Recommended Tasks (Starting Now)
+## 🛠️ Sprint Progress & Active Development Focus
 
-To immediately make the game feel like Clash of Clans & Age of Empires, here are the **Top 4 Sprint Tasks**:
+### ✅ Completed Sprints
+- **Sprint 1 (Foundations & Defenses):**
+  - `DEF-01` Placeable & Connectable Fortification Walls (Stone & Timber with Gateways) ✅
+  - `ECO-01` Resource Storage Caps & Granary/Treasury Visual Fill Gauges ✅
+  - `CBT-01` Multi-Unit Box Selection & Group Hotkeys (Ctrl+1-9, Double-Click Type Select) ✅
+  - `DEF-02` Archer Watchtower Auto-Targeting Radius & Parabolic Arrow Ballistics ✅
+- **Sprint 2 (Era Progression & Tactical Warfare):**
+  - `AGE-01` Four Historical Ages of Gorkha (Baise-Chaubisi $\to$ Kot $\to$ Unification $\to$ Himalayan Empire) ✅
+  - `AGE-02` Town Center Gating & Real-Time Procedural Architecture Morphing ✅
+  - `CBT-04` RTS Tactical Stances (Attack-Move `[A]`, Hold Position `[H]`, Patrol `[P]`, Stop `[S]`) ✅
+  - `CBT-05` CoC-Style Asynchronous Village Raid Mode (3 Outpost Tiers, 3-Star Rating, Real-Time Plunder) ✅
+  - `AUD-01`..`AUD-03` Authentic Procedural Himalayan Audio (Bansuri, Madal, Nepali Voice Barks) ✅
 
-1. **`DEF-01` Placeable Walls & Gates:** Add a 1x1 wall blueprint to the bottom dock so players can wall in their Town Center and create fortresses.
-2. **`ECO-01` Resource Storage Caps & Granary:** Add Granary and Treasury buildings so storage capacity matters and players upgrade them.
-3. **`CBT-01` Multi-Unit Box Selection & March Command:** Implement click-and-drag box selection to command groups of warriors to march and guard together.
-4. **`DEF-02` Archer Watchtower Auto-Attack:** Make the watchtower actively detect and fire arrows at wandering enemy patrols within radius.
+### ⚡ Active Sprint (Sprint 3: Tech Tree, Hero Generals & Foundations)
+1. **`AGE-03` Academy of Warfare (Vidya Kendra Tech Tree):** Build dedicated tech research building with 4 tech trees (Metallurgy, Architecture, Agrarian, Morale).
+2. **`CBT-06` Historic Hero Generals:** Prithvi Narayan Shah (Divine Sun Aura & Royal Bodyguards) and Kalu Pande (Shield Wall Phalanx & Tactical Ambush).
+3. **`SOC-01` Guthi Brotherhood Foundation:** In-game clan registry, custom Himalayan heraldic emblems, and Guthi Durbar structure.
+
+---
+
+## 🚀 Section 7: Future Horizons & Possible Enhancements Catalog (Long-Term Innovation Roadmap)
+
+This catalog details future expansion vectors evaluated against three design pillars: **Clash of Clans Base Defense Strategy**, **Age of Empires RTS Tactical Depth**, and **Authentic Himalayan Cultural Immersion**.
+
+### 📊 Innovation Feature Matrix
+
+| Category | Enhancement ID | Title | Key Inspiration | Priority | Complexity |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Heroes** | `ENH-HERO-01` | Prithvi Narayan Shah (The Great Unifier) | CoC King / AoE Hero | **P0** | High |
+| **Heroes** | `ENH-HERO-02` | Kalu Pande (Grand Commander / Kaji) | CoC Hero / AoE Tactician | **P0** | High |
+| **Heroes** | `ENH-HERO-03` | Bhakti Thapa (The Lion of Nalapani) | Berserker / Last Stand | **P1** | Med |
+| **Heroes** | `ENH-HERO-04` | Queen Regent Rajendra Lakshmi | AoE Monarch / Diplomat | **P2** | Med |
+| **Tech Tree** | `ENH-TECH-01` | Vidya Kendra (Military Metallurgy Branch) | AoE Blacksmith | **P0** | Med |
+| **Tech Tree** | `ENH-TECH-02` | Durbar Vidya (Earthquake & Fortification Branch) | AoE University | **P1** | Med |
+| **Tech Tree** | `ENH-TECH-03` | Krishi Vidya (Himalayan Terracing & Agrarian) | AoE Mill Upgrades | **P1** | Low |
+| **Tech Tree** | `ENH-TECH-04` | Dharma Vidya (Spiritual Morale & Guthi Rites) | AoE Monastery | **P2** | Low |
+| **Religion** | `ENH-REL-01` | Bajrayana Gumba & Hindu Kot Mandir | AoE Monastery / CoC Spell | **P1** | Med |
+| **Religion** | `ENH-REL-02` | Lama & Pujari (Support, Healing & Conversion) | AoE Monk / Priest | **P1** | Med |
+| **Religion** | `ENH-REL-03` | Sacred Relics & Himalayan Pilgrimage Caravans | AoE Holy Relics | **P2** | Med |
+| **Siege** | `ENH-SGE-01` | Battering Ram (*Gajraj Dhoka Todak*) | AoE Battering Ram | **P0** | Med |
+| **Siege** | `ENH-SGE-02` | Rolling Mountain Log Catapult (*Dhunga Yantra*) | AoE Mangonel / Traps | **P1** | Med |
+| **Siege** | `ENH-SGE-03` | Swivel Yak-Gun (*Zumburuk / Chhota Kaman*) | AoE Culverin / Mobile Art | **P1** | Med |
+| **Siege** | `ENH-SGE-04` | Sapper & Wall Breachers (*Khukuri Surang Karmi*) | AoE Petard / CoC Wallbreaker | **P2** | Low |
+| **Environment**| `ENH-ENV-01` | Four Himalayan Dynamic Seasons (Basanta $\to$ Shishir) | Environmental Sim | **P1** | High |
+| **Environment**| `ENH-ENV-02` | Dynamic Day-Night Cycle & Nighttime Lanterns | Immersive Polish | **P1** | Med |
+| **Environment**| `ENH-ENV-03` | Himalayan Fauna Ecosystem (Yaks, Musk Deer, Leopards) | Living World | **P2** | Med |
+| **Environment**| `ENH-ENV-04` | Mountain Natural Hazards (Avalanches & Mudslides) | RTS Dynamic Terrain | **P3** | High |
+| **PvP & Meta** | `ENH-PVP-01` | Asynchronous Trophy Ladder & Shield Defense | CoC Matchmaking | **P0** | High |
+| **PvP & Meta** | `ENH-PVP-02` | Deterministic Battle Replay Theater (1x/2x/4x) | CoC Replays / RTS Engine | **P1** | High |
+| **PvP & Meta** | `ENH-PVP-03` | Multi-Slot Base Layout Editor (War/Farm/Showcase) | CoC Layout Editor | **P1** | Med |
+| **PvP & Meta** | `ENH-PVP-04` | Revenge Raids & Defense Battle Log | CoC Battle Log | **P1** | Med |
+| **Guthi Clans**| `ENH-SOC-01` | Guthi Clan Wars (15v15 & 25v25 Territory Siege) | CoC Clan Wars | **P1** | High |
+| **Guthi Clans**| `ENH-SOC-02` | Guthi Durbar Castle Reinforcements & Perks | CoC Clan Castle | **P1** | Med |
+| **Guthi Clans**| `ENH-SOC-03` | Himalayan Regional Province Map (Hegemony Mode) | Risk / Total War Map | **P2** | High |
+| **Campaign** | `ENH-CMP-01` | Act I: The Strategic Ridge of Nuwakot (1744) | AoE Historical Campaign | **P1** | Med |
+| **Campaign** | `ENH-CMP-02` | Act II: Three Pagoda Sisters of the Valley (1768) | AoE Narrative Campaign | **P1** | Med |
+| **Campaign** | `ENH-CMP-03` | Act III: The Kinloch Ambush at Sindhuligadhi (1767) | Guerilla RTS Campaign | **P1** | Med |
+| **Campaign** | `ENH-CMP-04` | Act IV: The Ramparts of Nalapani & Khalanga (1814) | Last Stand Heroic Defense | **P1** | Med |
+| **Campaign** | `ENH-CMP-05` | Historical Codex & Nepalese Weaponry Encyclopedia | Lore & Education | **P2** | Low |
+| **Riverine** | `ENH-RIV-01` | Trisuli & Marsyangdi River Docks & Log Rafts | AoE Docks / Transport | **P2** | Med |
+| **Riverine** | `ENH-RIV-02` | Mountain Gorge Suspension Bridges (*Jhulunge Pul*) | Tactical Chokepoints | **P2** | Med |
+| **Platform** | `ENH-PRD-01` | Cloud Account Sync (Unity 3D $\leftrightarrow$ Flutter Flame) | Cross-Platform Parity | **P1** | High |
+| **Platform** | `ENH-PRD-02` | Full Localization (English & Nepali Devanagari) | Cultural Accessibility | **P1** | Low |
+| **Platform** | `ENH-PRD-03` | Scenic Photo Mode & Tilt-Shift Miniature Camera | Showcase & Community | **P2** | Low |
+
+---
+
+### 👑 1. Historic Hero Generals & Royal Avatars (`ENH-HERO`)
+
+Historical commanders who lead battalions on the battlefield, providing active tactical abilities, passive command auras, and defensive garrison duty.
+
+#### `ENH-HERO-01`: Prithvi Narayan Shah (The Great Unifier)
+- **Role:** Commander-in-Chief & Morale Rallyer (Available at Era III Town Center).
+- **Passive Skill — *Divine Sun Aura*:** Boosts movement speed of all friendly units within an $11\text{m}$ radius by $+15\%$ and increases weapon damage by $+20\%$.
+- **Active Ability 1 — *Call to Arms (Khas Rakshak)*:** Blows a ceremonial buffalo horn (*Singha Baja*), summoning 4 elite Royal Bodyguards with reinforced pavise shields and curved Khukuris directly to his side (Cooldown: $45\text{s}$).
+- **Active Ability 2 — *Chhatrapati's Decree*:** Inspires the entire settlement, boosting resource gathering rates and building repair speeds by $+50\%$ for $20\text{s}$ (Village Mode only).
+- **3D Model & Regalia:** Ornate Daura Suruwal with woven Dhaka embroidery, crimson velvet cape, jeweled Sirpech feather crown, and curved heirloom steel Khukuri.
+
+#### `ENH-HERO-02`: Kalu Pande (Grand Commander / Kaji)
+- **Role:** Tactical Infantry Bastion & Ambush Specialist.
+- **Passive Skill — *Bastion of Gorkha*:** All nearby infantry within $10\text{m}$ gain $+25\%$ armor resistance against enemy ranged arrows and bullet fire.
+- **Active Ability 1 — *Shield Wall Phalanx (Dhal Killa)*:** Commands all nearby spearmen and warriors to interlock shields, absorbing $70\%$ of incoming ranged damage and reflecting $20\%$ back to melee attackers for $10\text{s}$ (Cooldown: $40\text{s}$).
+- **Active Ability 2 — *Mountain Ambush*:** Calls 3 concealed scout infiltrators from the battlefield perimeter to flank behind enemy defensive lines (Cooldown: $50\text{s}$).
+- **3D Model & Regalia:** Heavy scale armor with iron shoulder plates, conical iron helmet with crimson horsehair crest, and heavy 2.4m commander's lance.
+
+#### `ENH-HERO-03`: Bhakti Thapa (The Lion of Nalapani - 73-Year-Old Legend)
+- **Role:** Berserker Shock General & Wall Breacher.
+- **Passive Skill — *Unyielding Valour*:** As Bhakti Thapa takes damage, his attack speed and damage scale inversely: gains $+1.5\%$ attack speed for every $1\%$ missing health.
+- **Active Ability — *Khukuri Whirlwind (Khanda Prahaar)*:** Spins in a devastating $360^\circ$ circle with dual heavy blades, dealing $250$ burst physical damage and knocking back all enemy infantry in a $4\text{m}$ radius (Cooldown: $25\text{s}$).
+- **Passive Perk — *Heroic Last Stand*:** Upon taking fatal damage, refuses to fall for $6\text{s}$, becoming invulnerable with $+50\%$ movement speed before honorably collapsing.
+- **3D Model & Regalia:** Flowing white beard, blood-red battle sash, dual heavy Bhojpure Khukuris, and scarred veteran leather chest plate.
+
+#### `ENH-HERO-04`: Queen Regent Rajendra Lakshmi (Diplomatic Sovereign)
+- **Role:** Governance, Logistics & Defensive Reinforcement.
+- **Passive Skill — *Prosperity of the Realm*:** Increases passive gold collection from all raids and merchant caravans by $+25\%$.
+- **Active Ability — *Guthi Mobilization*:** Sounds the temple alarm bells, temporarily mobilizing all civilian villagers into armed militia with bucklers and daggers to defend the village against incoming raiders for $30\text{s}$.
+
+---
+
+### 🔬 2. Vidya Kendra & Himalayan Warfare Tech Tree (`ENH-TECH`)
+
+Expanding `AGE-03` into a multi-tiered Academy of Warfare with 4 distinct historical research branches.
+
+```mermaid
+flowchart TD
+    VK["🏛️ Vidya Kendra (Academy of Warfare)"]
+    VK --> B1["⚔️ Sainik Vidya<br/>(Military Metallurgy)"]
+    VK --> B2["🏰 Durbar Vidya<br/>(Architecture & Defense)"]
+    VK --> B3["🌾 Krishi Vidya<br/>(Agrarian & Logistics)"]
+    VK --> B4["🕉️ Dharma Vidya<br/>(Spiritual & Morale)"]
+
+    B1 --> B1_1["Forged Carbon Khukuris (+20% Melee)"]
+    B1_1 --> B1_2["Salwood Recurve Bows (+15% Range)"]
+    B1_2 --> B1_3["Bronze Kaman Rifling (+25% Blast)"]
+    B1_3 --> B1_4["Gorkhali Matchlocks (Armor Pierce)"]
+
+    B2 --> B2_1["Timber Joinery (+25% Structure HP)"]
+    B2_1 --> B2_2["Boiling Pitch Cauldrons (Gate Defense)"]
+    B2_2 --> B2_3["Machicolated Parapets (+35% High Ground)"]
+    B2_3 --> B2_4["Rolling Boulder Chutes (Terrace Traps)"]
+
+    B3 --> B3_1["Kulo Irrigation Canals (+30% Food)"]
+    B3_1 --> B3_2["Slate Quarry Masonry (+25% Stone)"]
+    B3_2 --> B3_3["Trans-Himalayan Salt Route (+20% Gold)"]
+    B3_3 --> B3_4["Yak Pack Carters (+150% Villager Bag)"]
+
+    B4 --> B4_1["Bhasma Sacred Ashes (+10% Unit HP)"]
+    B4_1 --> B4_2["Lungta Wind Prayer Flags (Auto-Heal)"]
+    B4_2 --> B4_3["Madal & Dhimay War Cadence (+15% Spd)"]
+    B4_3 --> B4_4["Gumba Philosophy (-15% Research Cost)"]
+```
+
+#### Detailed Tech Tree Specifications:
+1. **Military Metallurgy (`ENH-TECH-01`):**
+   - *Tier 1: Forged Carbon Khukuri Edges* — Increases base damage of all Khukuri Warriors by $+20\%$.
+   - *Tier 2: Salwood Composite Recurve Bows* — Increases Mountain Archer range from $7.5\text{m} \to 9.0\text{m}$ and projectile speed by $+25\%$.
+   - *Tier 3: Bronze Cannon Rifling (Kaman Bandobast)* — Tightens shell spread by $40\%$ and expands explosive blast radius by $+25\%$.
+   - *Tier 4: Matchlock Musket Drill (Bandukdhari Talim)* — Reduces musket reload time by $30\%$ and grants armor-piercing damage against cavalry and armored heroes.
+2. **Architecture & Fortifications (`ENH-TECH-02`):**
+   - *Tier 1: Interlocking Timber Pagoda Joists* — Traditional Newari strut engineering absorbs siege impacts, granting $+25\%$ building HP.
+   - *Tier 2: Boiling Terracotta Pitch Cauldrons* — Mounts hot oil dispensers over Watchtowers and Fortress Gates, pouring fire on wall breachers.
+   - *Tier 3: Machicolated Stone Parapets* — Elevates archers on perimeter walls with arrow slits, increasing critical hit chance by $+20\%$.
+   - *Tier 4: Concealed Terraced Pit Traps* — Increases concealed trap trigger radius by $+30\%$ and cuts trap re-arming costs in half.
+3. **Agrarian & Logistics (`ENH-TECH-03`):**
+   - *Tier 1: Kulo Mountain Aqueducts* — Carves gravity-fed irrigation channels into stepped hillside paddies, increasing Farm yield by $+30\%$.
+   - *Tier 2: Slate Chisel Quarrying* — Increases Stone mining speed by $+25\%$.
+   - *Tier 3: Trans-Himalayan Salt & Wool Caravan* — Unlocks recurring merchant caravans traveling between Tibet and Kathmandu, yielding $+50\text{ Gold/min}$.
+   - *Tier 4: Domesticated Yak Pack Teams* — Equips villagers with sturdy pack yaks, raising maximum resource backpack limit from $10 \to 25$ items per haul.
+4. **Cultural Morale & Dharma (`ENH-TECH-04`):**
+   - *Tier 1: Bhasma Holy Ashes* — Priests anoint soldiers before battle, increasing base survivability and maximum health by $+10\%$.
+   - *Tier 2: Lungta Wind Prayer Flags* — Strung between pagoda roofs; fluttering flags radiate a passive aura that regenerates $2\text{ HP/sec}$ to nearby structures.
+   - *Tier 3: Dhimay & Madal War Cadence* — 110 BPM percussive battle rhythm raises friendly unit movement speed by $+15\%$ during combat charges.
+   - *Tier 4: Gumba Wisdom* — Monastic scholars optimize research scrolls, reducing all subsequent technology upgrade costs by $15\%$.
+
+---
+
+### 🕉️ 3. Spiritual Sanctuaries, Monasteries & Support Units (`ENH-REL`)
+
+Introducing spiritual structures, faith currency, and non-combat support units based on Nepal's rich Buddhist and Hindu monastic heritage.
+
+#### `ENH-REL-01`: Bajrayana Gumba & Hindu Kot Mandir
+- **Concept:** Cultural sanctuary buildings constructed from dressed stone and tiered pagoda roofs with copper pinnacles (*Gajur*).
+- **Resource Output:** Generates *Faith Points (Dharma)* used for casting battlefield blessings and training support units.
+- **Atmosphere:** Plays deep Tibetan singing bowls, brass cymbals (*Jhyali*), and fluttering prayer flag visual effects.
+
+#### `ENH-REL-02`: Monastic Support Units (Lama & Pujari)
+- **Lama (Buddhist Monk Healer):**
+  - Wears traditional saffron and maroon robes with wooden prayer beads (*Mala*).
+  - Non-combatant unit that auto-targets injured friendly soldiers within $8\text{m}$, chanting sacred mantras that restore $18\text{ HP/sec}$.
+  - Special Channeling Ability: *Medicine Buddha Radiance* — Creates a glowing golden lotus mandala on the ground, healing all units inside for $35\text{ HP/sec}$ for $8\text{s}$.
+- **Pujari (Temple Priest / Infiltrator Exorcist):**
+  - Carries a ceremonial brass water pot (*Kalash*) and bell.
+  - Channels spiritual authority to counter enemy raiders: converts wandering neutral mountain bandits and enemy militia into loyal Gorkha defenders over a $6\text{s}$ chant (Classic *Age of Empires* "Wololo" conversion homage!).
+  - Casts *Sankha Dhwani* (Conch Shell Blast), disorienting hostile troops and reducing their attack speed by $30\%$.
+
+#### `ENH-REL-03`: Sacred Relics & Pilgrimage Caravans
+- **Holy Relics:** Ancient gold-gilded Vajras, sacred bronze bells, and historical battle swords found hidden in high-altitude caves and ruined shrines across raid maps.
+- **Relic Garrison:** Monks can pick up relics and carry them back to the settlement's Gumba. Each captured relic yields $+30\text{ Gold}$ and $+15\text{ Faith}$ every minute.
+- **Relic Victory (AoE Style):** In special scenarios, holding 3 sacred relics for 10 minutes wins the match!
+
+---
+
+### 🪵 4. Siege Engines & Mountain Assault Machinery (`ENH-SGE`)
+
+Heavy wooden siege engines engineered specifically for mountain terrain and fortified gate breaching.
+
+#### `ENH-SGE-01`: Battering Ram (*Gajraj Dhoka Todak*)
+- **Concept:** Massive Salwood log with an iron-sheathed ram head suspended inside a sloped wooden shed covered in wet mountain ox-hides.
+- **Combat Mechanics:**
+  - Carried and propelled by 4 infantrymen.
+  - Possesses $85\%$ damage resistance against archer arrows and watchtower ballistics.
+  - Deals $500\%$ damage multiplier against stone walls, fortress gatehouses, and Town Hall keeps.
+  - Vulnerable to melee Khukuri flankers and Kaman cannon splash damage.
+
+#### `ENH-SGE-02`: Rolling Mountain Log Catapult (*Pahadi Dhunga Yantra*)
+- **Concept:** Heavy timber winch mechanism positioned on high terraced ridges or pulled by mountain oxen.
+- **Combat Mechanics:**
+  - Fires concentrated volleys of heavy slate stones or releases massive chained logs down slope inclines.
+  - Rolling logs crush and knock down advancing infantry formations in a direct linear trajectory, breaking enemy shield walls.
+
+#### `ENH-SGE-03`: Mobile Swivel Gun Yak (*Zumburuk / Chhota Kaman*)
+- **Concept:** Historical mountain light artillery featuring a light bronze swivel gun mounted on a reinforced wooden saddle atop a hardy Himalayan yak.
+- **Combat Mechanics:**
+  - High mobility artillery capable of traversing steep alpine slopes where heavy wheeled cannons cannot pass.
+  - Fires rapid grape-shot canisters effective against packed infantry lines.
+
+#### `ENH-SGE-04`: Sappers & Wall Breachers (*Khukuri Surang Karmi*)
+- **Concept:** Dedicated demolition squad equipped with pickaxes, black-powder explosive casks, and heavy leather pavises.
+- **Combat Mechanics:**
+  - Sprints directly toward enemy outer walls (ignoring defensive troops).
+  - Plants explosive powder kegs at the base of stone walls, detonating to blow a wide 3-tile breach for the main army to storm through.
+
+---
+
+### ❄️ 5. Dynamic Himalayan Climate, Seasons & Weather Hazards (`ENH-ENV`)
+
+High-altitude mountain weather dynamically affecting tactical visibility, movement speed, and farm economics.
+
+```mermaid
+flowchart TD
+    S1["🌸 Basanta (Spring)<br/>• Wild Rhododendrons<br/>• +15% Gather & Move Speed"] --> S2["🌧️ Barkha (Monsoon)<br/>• Heavy Rains & Mud<br/>• -20% Heavy Unit Speed<br/>• +30% Farm Food Yield"]
+    S2 --> S3["🍂 Sharad (Autumn)<br/>• Golden Sunshine<br/>• Dashain Temple Festivals<br/>• +20% Troop Morale"]
+    S3 --> S4["❄️ Shishir (Winter)<br/>• Deep Snow & Blizzards<br/>• -25% Speed Outside Fires<br/>• Reduced Archer Sight"]
+    S4 --> S1
+```
+
+#### Detailed Weather Mechanics:
+1. **Four Dynamic Seasons (`ENH-ENV-01`):**
+   - **Basanta (Spring):** Mountain rhododendrons (*Lali Gurans*) burst into crimson bloom across alpine forests; optimal gathering weather provides $+15\%$ villager movement speed.
+   - **Barkha (Monsoon):** Heavy torrential downpours with dynamic rain streaks and mist. Terraced paddies flood, boosting Farm Food production by $+30\%$; unpaved mud trails slow heavy infantry and siege rams by $-20\%$.
+   - **Sharad (Autumn):** Crisp blue skies and golden sunshine. Settlement celebrates Dashain and Tihar with decorative oil lamps (*Diyo*), boosting troop attack morale by $+20\%$.
+   - **Shishir / Hemanta (Winter):** Snow blankets the pagoda roofs and cobblestone roads. Freezing blizzards reduce archer sight range by $-30\%$. Units outside warm brazier or hearth radii suffer $-25\%$ movement penalties.
+2. **Dynamic Day-Night Cycle & Nighttime Lanterns (`ENH-ENV-02`):**
+   - Seamless 12-minute cycle: Dawn $\to$ Noon $\to$ Golden Dusk $\to$ Starlit Mountain Night.
+   - At dusk, villagers light hand lanterns and perimeter wall torches flickers to life.
+   - Under cover of night, enemy raiders gain stealth camouflage, remaining undetected until entering within $6\text{m}$ of watchtower torchlight.
+3. **Living Himalayan Wildlife Ecosystem (`ENH-ENV-03`):**
+   - Mountain Yaks graze in meadow pastures; villagers can herd them into pens for sustained food production.
+   - Himalayan Eagles soar on thermals high above the citadel.
+   - Wild Snow Leopards and Mountain Bears prowl wilderness perimeter zones, attacking stray solitary villagers.
+4. **Mountain Terrain Hazards (`ENH-ENV-04`):**
+   - Dynamic rockfalls and winter snow avalanches trigger on steep mountain pass choke points, crushing units caught in the runout zone.
+
+---
+
+### ⚔️ 6. Asynchronous PvP, Matchmaking & Replay Theater (`ENH-PVP`)
+
+Transforming raid battles into a complete competitive multiplayer ecosystem with base defense logs and replay analysis.
+
+#### `ENH-PVP-01`: Asynchronous Trophy Matchmaking (CoC Style)
+- **Trophy System:** Players earn or lose Himalayan War Trophies based on attack outcomes (1, 2, or 3 stars).
+- **Matchmaking Algorithm:** Matches players against hostile bases of similar Town Center tier and trophy rating with balanced loot pools.
+- **Peace Treaty Shield:**
+  - Suffering $30\%$ destruction grants an $8\text{-hour}$ defensive shield.
+  - Suffering $60\%$ destruction grants a $12\text{-hour}$ defensive shield.
+  - Suffering $100\%$ obliteration grants a $16\text{-hour}$ defensive shield.
+  - Players can safely harvest and rebuild without fear of constant consecutive raiding.
+
+#### `ENH-PVP-02`: Deterministic Battle Replay Theater
+- **Compact Event Recording:** Records all unit spawn coordinates, timestamps, and target selections as lightweight deterministic event streams ($<15\text{ KB}$ per match).
+- **In-Engine Playback:** Replays the entire raid in full 3D graphics inside the Unity and Flutter clients.
+- **Controls:** Fast-forward buttons ($1\times$, $2\times$, $4\times$), pause, rewind step, and health bar overlays.
+- **Defensive Analysis:** Allows players to inspect weak spots in their fortress walls and trap placements.
+
+#### `ENH-PVP-03`: Multi-Slot Base Layout Editor
+- **3 Dedicated Layout Slots:**
+  - *Active Home Base:* Balanced for daily harvesting and aesthetic beauty.
+  - *War Base:* Fortified specifically for Guthi Clan Wars with central Town Center and compartmentalized walls.
+  - *Farming Base:* Prioritizes defending resource storages deep inside nested ramparts.
+- **Quick-Edit Tools:** "Stash All Buildings", "Clear Debris", and "Drag-Line Wall Placer" for fast base redesigns.
+
+#### `ENH-PVP-04`: Revenge Raids & Defense Battle Log
+- Comprehensive battle inbox showing incoming attacks over the past 7 days: attacker name, Guthi emblem, troops deployed, percentage destroyed, and loot stolen.
+- One-click **"Revenge"** button: scout the attacker's base and launch a retaliatory raid when their shield expires!
+
+---
+
+### 🛡️ 7. Guthi (Clan) System, Guild Wars & Regional Hegemony (`ENH-SOC`)
+
+Deep community cooperative mechanics based on the historic Nepalese *Guthi* social institution.
+
+```mermaid
+flowchart TD
+    subgraph Guthi["Guthi Brotherhood (Clan Hierarchy)"]
+        Maji["👑 Guthi Nayo (Clan Leader)"]
+        Kaji["⚔️ Kaji (Co-Leaders)"]
+        Sipahi["🛡️ Sipahi (Warriors & Members)"]
+    end
+
+    subgraph Activities["Guthi Collaborative Operations"]
+        CW["⚔️ 20v20 Guthi Clan Wars<br/>(48h Cycle: Prep + Battle)"]
+        DON["🏰 Guthi Castle Reinforcements<br/>(Donated Troops Defend Base)"]
+        MAP["🗺️ Himalayan Regional Hegemony<br/>(Capture Nuwakot & Makwanpur)"]
+        PERK["📜 Guthi Perk Tree<br/>(Fast Train, Refund, Extra Loot)"]
+    end
+
+    Guthi --> Activities
+```
+
+#### `ENH-SOC-01`: Guthi Clan Wars (15v15 & 25v25)
+- **48-Hour Structured War Rhythm:**
+  - *Day 1 (Preparation Day - 24h):* Clan members donate elite troops to war base clan castles, scout enemy fortifications, and formulate battle strategies.
+  - *Day 2 (Battle Day - 24h):* Each member receives 2 attacks against enemy bases.
+- **Victory Condition:** Clan with the highest total stars (or highest destruction percentage in tie-breaks) wins the war, unlocking massive gold and gem war bonus chests.
+
+#### `ENH-SOC-02`: Guthi Castle Reinforcements & Perks
+- **Troop Housing:** Guthi Durbar holds up to 25 housing spaces of donated troops (e.g. 5 Archers, 2 Spearmen, 1 Musketman).
+- **Active Base Defense:** When enemy raiders breach the village perimeter, donated warriors march out of the Guthi Durbar with custom war cries (*"जय महाकाली! (Jai Mahakali!)"*) to eliminate attackers.
+- **Offensive Reinforcements:** Players can deploy their clan castle troops during offensive raids as an elite vanguard.
+- **Guthi Perks:** Leveling up the clan grants progressive perks: $-20\%$ troop training time, $+30\%$ donation refund, and $+20\%$ clan war treasury storage.
+
+#### `ENH-SOC-03`: Himalayan Regional Hegemony Map
+- **Grand Mountain Map:** A persistent strategic map of medieval Nepal divided into historical principalities:
+  - *Gorkha, Lamjung, Tanahun, Palpa, Nuwakot, Kathmandu, Patan, Bhaktapur, Makwanpur, Mustang, Jumla.*
+- **Territory Control:** Guthis compete for control of iconic mountain forts. Holding a province awards weekly tax tributes, trade caravan income, and exclusive heraldic banners.
+
+---
+
+### 📜 8. Historical Narrative Campaign Chronicles (`ENH-CMP`)
+
+An authentic single-player narrative campaign tracing the historical unification of Nepal through episodic military engagements.
+
+```
+       [ Act I: Nuwakot (1744) ]  -->  Master cliffside logistics & mountain night assaults
+                 |
+       [ Act II: Sindhuligadhi (1767) ] --> Ambush British Kinloch Expedition in mountain passes
+                 |
+       [ Act III: Kathmandu Valley (1768) ] --> Infiltrate Indra Jatra & conquer walled pagoda cities
+                 |
+       [ Act IV: Nalapani Fort (1814) ] --> Legendary 600-warrior last stand at Khalanga
+```
+
+#### Detailed Campaign Acts:
+1. **Act I: The Ridge of Nuwakot (1744):**
+   - *Historical Context:* The strategic gateway connecting the Kathmandu Valley to Tibet.
+   - *Mission:* Lead young King Prithvi Narayan Shah and Kaji Kalu Pande scaling the sheer cliffs of Mahamandal under cover of darkness to take the three-tiered Newari fortress.
+2. **Act II: The Ambush of Sindhuligadhi (1767):**
+   - *Historical Context:* British East India Company forces under Captain Kinloch march north to relieve the besieged Malla kings.
+   - *Mission:* Command Gorkha guerilla fighters hidden in dense mountain defiles. Trigger rolling boulder traps, unleash wild hornet hives onto British supply lines, and unleash a downhill Khukuri charge!
+3. **Act III: Valley of the Gods (1768–1769):**
+   - *Historical Context:* Unification of Kathmandu, Patan, and Bhaktapur.
+   - *Mission:* Infiltrate Kathmandu during the holy *Indra Jatra* chariot festival. Capture the Hanuman Dhoka royal square with minimal civilian casualties, unifying the valley kingdoms.
+4. **Act IV: The Ramparts of Nalapani (1814):**
+   - *Historical Context:* The opening battle of the Anglo-Gorkha War.
+   - *Mission:* Command Captain Balbhadra Kunwar and 600 soldiers (including women and children) defending Khalanga Fort against 3,500 British troops and heavy artillery. Endure water supply cutoffs and repulse repeated breaches.
+5. **Historical Codex & Weaponry Encyclopedia (`ENH-CMP-05`):**
+   - Illustrated in-game codex providing historical background on Gorkhali architecture, weapon smithing (Bhojpure vs Sirupate Khukuris), tactical doctrines, and historical biographies.
+
+---
+
+### 🛶 9. Riverine & Mountain Gorge Operations (`ENH-RIV`)
+
+Exploiting Nepal's rapid snow-fed river networks and precipitous mountain gorges for tactical maneuver warfare.
+
+#### `ENH-RIV-01`: Trisuli & Marsyangdi River Docks & Rafts
+- Construct wooden river docks (*Ghat*) along glacial mountain rivers and alpine lakes.
+- Build pine-log rafts and dugout canoes (*Nawa*) to ferry battalions across roaring river torrents, completely bypassing fortified land mountain passes.
+- Riverine trade barges generate passive income between connected settlements.
+
+#### `ENH-RIV-02`: Mountain Suspension Bridges (*Jhulunge Pul*) & Sabotage
+- Interlocking bamboo and cable suspension bridges spanning deep gorges.
+- **Tactical Sabotage:** Sappers can plant explosive charges or cut cables on bridges to send advancing hostile raiding columns tumbling into the gorge below!
+
+---
+
+### 📱 10. Production Polish, Accessibility & Multi-Platform Parity (`ENH-PRD`)
+
+Studio-grade enhancements ensuring seamless performance across mobile, tablet, and desktop platforms.
+
+#### `ENH-PRD-01`: Seamless Cloud Account Sync (Unity 3D $\leftrightarrow$ Flutter Flame)
+- Unified backend account authentication via Google Play Games, Apple Game Center, and guest recovery keys.
+- Real-time cloud sync ensures base layout, resource stockpiles, era progression, and army compositions seamlessly transfer between the high-fidelity Unity 3D client and the lightweight Flutter/Flame mobile client.
+
+#### `ENH-PRD-02`: Comprehensive Cultural Localization (Nepali & International)
+- Dual-language engine supporting authentic **Nepali (Devanagari script with idiomatic vocabulary)** and **International English**.
+- All building titles, unit classes, tech descriptions, and voice callouts available in both scripts with one-click language toggle.
+- High-legibility custom Himalayan typography optimized for high-DPI smartphone displays.
+
+#### `ENH-PRD-03`: Scenic Photo Mode & Tilt-Shift Miniature Camera
+- One-click "Camera" tool hiding all HUD elements and enabling smooth free-flight camera controls.
+- Adjustable parameters: Depth of Field (DoF), Tilt-Shift miniature blur, sunlight angle slider, and cinematic color vignettes for capturing stunning community screenshots of player settlements.
+- Watermarked instant screenshot export with settlement name and Guthi heraldic emblem.
