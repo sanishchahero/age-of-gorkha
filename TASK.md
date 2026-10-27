@@ -454,10 +454,19 @@ flowchart LR
   - `CBT-05` CoC-Style Asynchronous Village Raid Mode (3 Outpost Tiers, 3-Star Rating, Real-Time Plunder) ✅
   - `AUD-01`..`AUD-03` Authentic Procedural Himalayan Audio (Bansuri, Madal, Nepali Voice Barks) ✅
 
-### ⚡ Active Sprint (Sprint 3: Tech Tree, Hero Generals & Foundations)
-1. **`AGE-03` Academy of Warfare (Vidya Kendra Tech Tree):** Build dedicated tech research building with 4 tech trees (Metallurgy, Architecture, Agrarian, Morale).
-2. **`CBT-06` Historic Hero Generals:** Prithvi Narayan Shah (Divine Sun Aura & Royal Bodyguards) and Kalu Pande (Shield Wall Phalanx & Tactical Ambush).
-3. **`SOC-01` Guthi Brotherhood Foundation:** In-game clan registry, custom Himalayan heraldic emblems, and Guthi Durbar structure.
+- **Sprint 3 (Tech Tree, Hero Generals, Guthi & CoC UI/UX Overhaul):**
+  - `AGE-03` Academy of Warfare (Vidya Kendra Tech Tree with 6 Technologies across 4 branches) ✅
+  - `AGE-04` Himalayan Monumental Wonder of the World (5-Minute Survival Countdown Victory) ✅
+  - `CBT-06` Historic Hero Generals (King Prithvi Narayan Shah & General Kalu Pande with passive auras, active skills `[Q]`, `[W]`, `[E]`, `[R]`, and procedural regalia) ✅
+  - `SOC-01` Guthi Brotherhood Clan System (Donations, Garrison Defense & Requests) ✅
+  - `SOC-03` Five Historical Unification Campaign Acts (Nuwakot, Makwanpur, Kirtipur, Kathmandu Valley, Sindhuligadhi) ✅
+  - `ENV-02` Himalayan Day-Night Cycle (Dawn, Noon, Sunset, Night) with cinematic visibility calibration and village night lanterns ✅
+  - `UX-07` Full Clash of Clans Studio UI/UX Overhaul:
+    - Top Screen: Non-clipping Kingdom/Era profile (Left) and High-contrast Resource Capsules with Time of Day pill (Right)
+    - Bottom-Right: Iconic CoC Action Hub (`[BUILD]` `[B]`, `[RAID]`, `[GUTHI]` `[G]`, `[TECH]` `[T]`)
+    - Bottom-Left: Non-overlapping Mini-map Radar View
+    - Bottom-Center: Contextual Floating Drawers (Building Construction Tray, Building Inspector, Army Battalion Bar)
+    - Fullscreen Modals: Vidya Kendra Tech Tree and Guthi Brotherhood with scrollable containers ✅
 
 ---
 
