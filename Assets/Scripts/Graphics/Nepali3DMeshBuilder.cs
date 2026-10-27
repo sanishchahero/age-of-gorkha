@@ -227,6 +227,112 @@ namespace Gorkha.Graphics
             return mesh;
         }
 
+        /// <summary>
+        /// Creates a double-capped solid 3D cylinder disc in the XY plane with thickness along Z.
+        /// Front cap (normal pointing towards -Z, facing camera lens) at z = -halfT.
+        /// Back cap (normal pointing towards +Z) at z = +halfT.
+        /// Outer rim barrel normals pointing radially outwards in XY.
+        /// </summary>
+        public static Mesh CreateDiscMesh(float radius, float thickness, int segments = 24)
+        {
+            Mesh mesh = new Mesh { name = "DiscMesh" };
+            List<Vector3> verts = new List<Vector3>();
+            List<Vector3> norms = new List<Vector3>();
+            List<Vector2> uvs = new List<Vector2>();
+            List<int> tris = new List<int>();
+
+            float halfT = thickness * 0.5f;
+
+            // 1. Front Cap (facing -Z, towards viewer)
+            int frontCenterIdx = verts.Count;
+            verts.Add(new Vector3(0, 0, -halfT));
+            norms.Add(new Vector3(0, 0, -1));
+            uvs.Add(new Vector2(0.5f, 0.5f));
+
+            int frontStart = verts.Count;
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = (float)i / segments * Mathf.PI * 2f;
+                float cos = Mathf.Cos(angle);
+                float sin = Mathf.Sin(angle);
+                verts.Add(new Vector3(cos * radius, sin * radius, -halfT));
+                norms.Add(new Vector3(0, 0, -1));
+                uvs.Add(new Vector2(0.5f + cos * 0.5f, 0.5f + sin * 0.5f));
+            }
+
+            for (int i = 0; i < segments; i++)
+            {
+                tris.Add(frontCenterIdx);
+                tris.Add(frontStart + i + 1);
+                tris.Add(frontStart + i);
+            }
+
+            // 2. Back Cap (facing +Z)
+            int backCenterIdx = verts.Count;
+            verts.Add(new Vector3(0, 0, halfT));
+            norms.Add(new Vector3(0, 0, 1));
+            uvs.Add(new Vector2(0.5f, 0.5f));
+
+            int backStart = verts.Count;
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = (float)i / segments * Mathf.PI * 2f;
+                float cos = Mathf.Cos(angle);
+                float sin = Mathf.Sin(angle);
+                verts.Add(new Vector3(cos * radius, sin * radius, halfT));
+                norms.Add(new Vector3(0, 0, 1));
+                uvs.Add(new Vector2(0.5f + cos * 0.5f, 0.5f + sin * 0.5f));
+            }
+
+            for (int i = 0; i < segments; i++)
+            {
+                tris.Add(backCenterIdx);
+                tris.Add(backStart + i);
+                tris.Add(backStart + i + 1);
+            }
+
+            // 3. Outer Rim Barrel
+            int rimStart = verts.Count;
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = (float)i / segments * Mathf.PI * 2f;
+                float cos = Mathf.Cos(angle);
+                float sin = Mathf.Sin(angle);
+                Vector3 normal = new Vector3(cos, sin, 0);
+
+                verts.Add(new Vector3(cos * radius, sin * radius, -halfT));
+                norms.Add(normal);
+                uvs.Add(new Vector2((float)i / segments, 0));
+
+                verts.Add(new Vector3(cos * radius, sin * radius, halfT));
+                norms.Add(normal);
+                uvs.Add(new Vector2((float)i / segments, 1));
+            }
+
+            for (int i = 0; i < segments; i++)
+            {
+                int f0 = rimStart + i * 2;
+                int b0 = f0 + 1;
+                int f1 = rimStart + (i + 1) * 2;
+                int b1 = f1 + 1;
+
+                tris.Add(f0);
+                tris.Add(b1);
+                tris.Add(b0);
+
+                tris.Add(f0);
+                tris.Add(f1);
+                tris.Add(b1);
+            }
+
+            mesh.SetVertices(verts);
+            mesh.SetNormals(norms);
+            mesh.SetUVs(0, uvs);
+            mesh.SetTriangles(tris, 0);
+            mesh.RecalculateBounds();
+            return mesh;
+        }
+
         public static Mesh CreateQuadMesh(float width, float height)
         {
             Mesh mesh = new Mesh { name = "BillboardQuad" };
@@ -843,28 +949,72 @@ namespace Gorkha.Graphics
 
         /// <summary>
         /// Stylized Clash of Clans / Fantasy Kingdom floating harvest medallion.
-        /// Beautiful circular coin badge facing the 45°/45° isometric camera.
+        /// Beautiful circular coin badge facing the camera with distinct 3D resource emblems.
         /// </summary>
         public static GameObject BuildHarvestMedallion(Transform parent = null, ResourceType type = ResourceType.Gold)
         {
             GameObject root = new GameObject("HarvestMedallion_3D");
             if (parent != null) root.transform.SetParent(parent, false);
 
-            root.transform.localRotation = Quaternion.Euler(45f, -45f, 0f);
+            root.transform.localRotation = Quaternion.identity;
 
-            // 1. Outer golden coin rim
-            CreateSubMesh("CoinRim", CreateCylinderMesh(0.42f, 0.05f), GorkhaMaterials.GoldenGajur, root.transform);
+            // 1. Outer Coin Rim / Bezel
+            Material rimMat = type == ResourceType.Food ? GorkhaMaterials.PolishedBrass :
+                              type == ResourceType.Wood ? GorkhaMaterials.PagodaWood :
+                              type == ResourceType.Stone ? GorkhaMaterials.SlateStone :
+                              GorkhaMaterials.GoldenGajur;
 
-            // 2. Inner resource emblem plate
-            Material emblemMat = type == ResourceType.Food ? GorkhaMaterials.GoldenWheat :
-                                 type == ResourceType.Wood ? GorkhaMaterials.PagodaWood :
-                                 type == ResourceType.Stone ? GorkhaMaterials.SlateStone :
-                                 GorkhaMaterials.GoldenGajur;
+            CreateSubMesh("CoinRim", CreateDiscMesh(0.48f, 0.08f, 24), rimMat, root.transform, new Vector3(0, 0, 0.01f));
 
-            CreateSubMesh("InnerDisc", CreateCylinderMesh(0.35f, 0.07f), emblemMat, root.transform, new Vector3(0, 0.005f, 0));
+            // 2. Inner Emblem Plate
+            Material plateMat = type == ResourceType.Food ? GorkhaMaterials.GoldenWheat :
+                                type == ResourceType.Wood ? GorkhaMaterials.SalWoodDark :
+                                type == ResourceType.Stone ? GorkhaMaterials.ForgedSteel :
+                                GorkhaMaterials.PolishedBrass;
 
-            // 3. Center faceted jewel/star
-            CreateSubMesh("CenterStar", CreatePyramidMesh(0.20f, 0.12f), GorkhaMaterials.WhitePlaster, root.transform, new Vector3(0, 0.04f, 0));
+            CreateSubMesh("InnerDisc", CreateDiscMesh(0.38f, 0.10f, 24), plateMat, root.transform, new Vector3(0, 0, -0.01f));
+
+            // 3. Center 3D Resource Emblem (protruding towards camera on -Z)
+            switch (type)
+            {
+                case ResourceType.Food:
+                {
+                    // Golden Wheat Sheaf: 3 stalks branching upward
+                    CreateSubMesh("WheatCenter", CreateCubeMesh(new Vector3(0.06f, 0.32f, 0.06f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0, 0.02f, -0.06f));
+                    CreateSubMesh("WheatLeft", CreateCubeMesh(new Vector3(0.05f, 0.28f, 0.05f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(-0.08f, 0.01f, -0.06f), Quaternion.Euler(0, 0, 18f));
+                    CreateSubMesh("WheatRight", CreateCubeMesh(new Vector3(0.05f, 0.28f, 0.05f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0.08f, 0.01f, -0.06f), Quaternion.Euler(0, 0, -18f));
+                    // Tie ribbon
+                    CreateSubMesh("WheatTie", CreateCubeMesh(new Vector3(0.20f, 0.05f, 0.08f)), GorkhaMaterials.RoyalRedFlag, root.transform, new Vector3(0, -0.05f, -0.07f));
+                    break;
+                }
+                case ResourceType.Wood:
+                {
+                    // Two crossed Himalayan Salwood timber logs
+                    CreateSubMesh("Log1", CreateCubeMesh(new Vector3(0.42f, 0.10f, 0.08f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 0, -0.05f), Quaternion.Euler(0, 0, 35f));
+                    CreateSubMesh("Log2", CreateCubeMesh(new Vector3(0.42f, 0.10f, 0.08f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 0, -0.07f), Quaternion.Euler(0, 0, -35f));
+                    // Axe / wedge notch accent in center
+                    CreateSubMesh("Wedge", CreateCubeMesh(new Vector3(0.08f, 0.08f, 0.08f)), GorkhaMaterials.ForgedSteel, root.transform, new Vector3(0, 0, -0.09f));
+                    break;
+                }
+                case ResourceType.Stone:
+                {
+                    // Mountain Slate & Ore Crystal Cluster: 3 faceted shards
+                    CreateSubMesh("SlateOreMain", CreatePyramidMesh(0.26f, 0.28f), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.02f, -0.06f), Quaternion.Euler(-90f, 0, 0));
+                    CreateSubMesh("SlateOreLeft", CreatePyramidMesh(0.18f, 0.20f), GorkhaMaterials.ForgedSteel, root.transform, new Vector3(-0.10f, -0.04f, -0.06f), Quaternion.Euler(-90f, 0, 25f));
+                    CreateSubMesh("SlateOreRight", CreatePyramidMesh(0.18f, 0.20f), GorkhaMaterials.ForgedSteel, root.transform, new Vector3(0.10f, -0.04f, -0.06f), Quaternion.Euler(-90f, 0, -25f));
+                    break;
+                }
+                case ResourceType.Gold:
+                default:
+                {
+                    // Royal Gorkha Sun Star: radiant central 8-pointed star & diamond jewel
+                    CreateSubMesh("SunStar1", CreateCubeMesh(new Vector3(0.22f, 0.22f, 0.06f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0, 0, -0.06f), Quaternion.Euler(0, 0, 0));
+                    CreateSubMesh("SunStar2", CreateCubeMesh(new Vector3(0.22f, 0.22f, 0.06f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0, 0, -0.06f), Quaternion.Euler(0, 0, 45f));
+                    // Center faceted diamond gem
+                    CreateSubMesh("CenterDiamond", CreatePyramidMesh(0.16f, 0.14f), GorkhaMaterials.WhitePlaster, root.transform, new Vector3(0, 0, -0.08f), Quaternion.Euler(-90f, 0, 0));
+                    break;
+                }
+            }
 
             return root;
         }

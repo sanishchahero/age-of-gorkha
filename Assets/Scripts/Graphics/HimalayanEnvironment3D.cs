@@ -107,10 +107,10 @@ namespace Gorkha.Graphics
             ground.transform.position = new Vector3(mapWidth * 0.5f, -0.05f, mapHeight * 0.5f);
 
             MeshFilter filter = ground.AddComponent<MeshFilter>();
-            // 16x16 UV tiling gives crisp rock pebbles, grass tufts, and mountain loam
+            // 10x10 UV tiling gives lush, natural grass blade density and seamless mountain loam
             filter.sharedMesh = Nepali3DMeshBuilder.CreateTiledPlaneMesh(
                 new Vector3(mapWidth + 12f, 0.2f, mapHeight + 12f),
-                new Vector2(16f, 16f)
+                new Vector2(10f, 10f)
             );
 
             MeshRenderer renderer = ground.AddComponent<MeshRenderer>();

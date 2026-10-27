@@ -180,10 +180,14 @@ namespace Gorkha.Buildings
                     {
                         _bubbleBobTime += Time.deltaTime * 2.8f;
                         float bobOffset = Mathf.Sin(_bubbleBobTime) * 0.18f;
-                        if (_bubbleAnchor != null)
+                        float hOffset = GetBubbleHeight();
+                        _resourceBubble.transform.localPosition = new Vector3(0, hOffset + bobOffset, 0);
+
+                        // Keep badge billboarded facing the camera
+                        Camera cam = Camera.main;
+                        if (cam != null)
                         {
-                            _resourceBubble.transform.localPosition = new Vector3(0, (_data.buildingType == BuildingType.TownCenter ? 5.2f : 3.2f) + bobOffset, 0);
-                            _resourceBubble.transform.Rotate(Vector3.up, 35f * Time.deltaTime, Space.Self);
+                            _resourceBubble.transform.rotation = cam.transform.rotation;
                         }
 
                         // Smooth scale recovery after harvesting
@@ -350,6 +354,30 @@ namespace Gorkha.Buildings
             }
         }
 
+        private float GetBubbleHeight()
+        {
+            if (_data == null) return 4.2f;
+            switch (_data.buildingType)
+            {
+                case BuildingType.TownCenter:
+                    return 7.8f;
+                case BuildingType.Farm:
+                    return 6.2f;
+                case BuildingType.Watchtower:
+                    return 7.0f;
+                case BuildingType.Barracks:
+                    return 5.0f;
+                case BuildingType.WoodCamp:
+                    return 4.0f;
+                case BuildingType.StoneQuarry:
+                    return 3.8f;
+                case BuildingType.House:
+                    return 4.6f;
+                default:
+                    return 4.2f;
+            }
+        }
+
         public void EnsureVisuals()
         {
             if (_data != null)
@@ -505,7 +533,7 @@ namespace Gorkha.Buildings
             {
                 _resourceBubble = new GameObject("ResourceBubble_3D");
                 _resourceBubble.transform.SetParent(transform, false);
-                float hOffset = _data.buildingType == BuildingType.TownCenter ? 5.2f : 3.2f;
+                float hOffset = GetBubbleHeight();
                 _resourceBubble.transform.localPosition = new Vector3(0, hOffset, 0);
                 Nepali3DMeshBuilder.BuildHarvestMedallion(_resourceBubble.transform, _data.productionType);
 
@@ -562,7 +590,7 @@ namespace Gorkha.Buildings
 
             if (_scaffoldingVisual != null) _scaffoldingVisual.SetActive(isUnderConstruction);
             if (_completedVisual != null) _completedVisual.SetActive(!isUnderConstruction);
-            if (_resourceBubble != null) _resourceBubble.SetActive(_state == BuildingState.Active && _data != null && _data.hasProduction);
+            if (_resourceBubble != null) _resourceBubble.SetActive(_state == BuildingState.Active && _data != null && _data.hasProduction && _uncollectedYield >= 4.0);
             if (_selectionRing != null) _selectionRing.SetActive(_isSelected);
         }
 

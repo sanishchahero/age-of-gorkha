@@ -17,6 +17,7 @@ namespace Gorkha.Core
         [SerializeField] private int _gridHeight = 24;
         [SerializeField] private float _cellSize = 2.0f; // Each grid cell is 2x2 meters in 3D world
         [SerializeField] private Vector3 _gridOrigin = Vector3.zero;
+        [SerializeField] private bool _showDebugGrid = false;
 
         // 2D Occupancy matrix: tracks which building (if any) occupies cell (x, y)
         private string[,] _occupancyGrid;
@@ -121,8 +122,10 @@ namespace Gorkha.Core
         /// </summary>
         public void FreeArea(int col, int row, int width, int height) => ClearArea(col, row, width, height);
 
-        private void OnDrawGizmos()
+        private void OnDrawGizmosSelected()
         {
+            if (!_showDebugGrid) return;
+
             Gizmos.color = new Color(0.2f, 0.8f, 0.2f, 0.25f);
             for (int x = 0; x <= _gridWidth; x++)
             {
