@@ -1,6 +1,6 @@
 # Gorkha: Rise of the Kingdom (Unity 3D Client)
 
-Historically grounded Nepali 3D grand-strategy settlement builder and tactical battle simulation.
+Historically grounded Nepali 3D grand-strategy settlement builder, Age of Empires style RTS combat, and Clash of Clans base-building simulation.
 
 ---
 
@@ -16,24 +16,48 @@ Historically grounded Nepali 3D grand-strategy settlement builder and tactical b
 7. **One-Click 3D Scene Setup:**
    In the Unity menu bar, select:  
    **`Gorkha` -> `Generate 3D Settlement Scene & Prefabs`**  
-   This automatically constructs all 3D building prefabs, terrain, lighting, materials, and saves `Assets/Scenes/MainSettlementScene.unity`.
+   This constructs all 3D building prefabs, terrain, lighting, materials, and saves `Assets/Scenes/MainSettlementScene.unity`.
 8. Click **Play (▶️)** to experience the 3D Himalayan kingdom immediately!
 
 ---
 
-## 🎨 3D Graphics Architecture
+## 🏛️ Key Gameplay Systems
 
-The Unity client includes an authentic Nepali 3D procedural graphics engine:
+### 1. Four Historical Eras of Gorkha (Age Progression)
+- **Era I: Baise-Chaubisi Principality (1559–1740):** Founding of Gorkha atop the ridge by King Dravya Shah. Single-tier timber/thatch lodge, basic spear militia, and agrarian gathering economy.
+- **Era II: Fortified Kot Era (1740–1768):** Kalu Pande military reforms. Two-tier red brick pagoda keep, slate stone plinth, Khukuri shock troops, Watchtowers, and Granaries.
+- **Era III: Unification Era (1768–1814):** Prithvi Narayan Shah & Kathmandu Valley conquest. Three-tier grand royal palace, golden Gajur spire, waving royal standard, bronze Kaman cannons, and Mountain Archers.
+- **Era IV: Himalayan Empire Era (1814+):** Grand imperial citadel with 4 tiers, 4 corner fortress bastions, dual battle standards, and Wonder of the World foundation.
+- **Town Center Visual Morphing:** Upgrading the Town Center instantly morphs the 3D architecture to the new era tier with celebration fanfare!
 
-| Module | Description |
-| :--- | :--- |
-| **[`GorkhaMaterials.cs`](file:///Users/sanishmaharjanengineering/Downloads/free/game/unity-client/Assets/Scripts/Graphics/GorkhaMaterials.cs)** | Centralized PBR material registry (URP Lit & Standard shader compatible). Includes Terracotta Red Brick, Sal Wood, Metallic Gold (*Gajur*), Slate Stone, Alpine Grass, Wheat Fields, and glowing translucent placement grids. |
-| **[`Nepali3DMeshBuilder.cs`](file:///Users/sanishmaharjanengineering/Downloads/free/game/unity-client/Assets/Scripts/Graphics/Nepali3DMeshBuilder.cs)** | Procedural 3D model generator for 3-tiered pagoda Durbar roofs, carved timber columns, stone plinths, golden spires, terraced farms, Kot fortress bastions, timber lodges, and stylized Gorkha soldiers. |
-| **[`FlagClothAnimator.cs`](file:///Users/sanishmaharjanengineering/Downloads/free/game/unity-client/Assets/Scripts/Graphics/FlagClothAnimator.cs)** | Simulates real-time Himalayan mountain wind physics on the iconic double-triangle Nepali royal standard banner via vertex displacement. |
-| **[`HimalayanEnvironment3D.cs`](file:///Users/sanishmaharjanengineering/Downloads/free/game/unity-client/Assets/Scripts/Graphics/HimalayanEnvironment3D.cs)** | Builds stepped terraced valley terrain, golden-hour sunlight with soft shadows, atmospheric mountain mist fog, alpine pine trees, and slate boulders. |
-| **[`ProceduralUnitBob.cs`](file:///Users/sanishmaharjanengineering/Downloads/free/game/unity-client/Assets/Scripts/Graphics/ProceduralUnitBob.cs)** | Procedural walk-bobbing, tilt, and idle breathing animations for 3D Gorkha warriors and villagers. |
-| **[`GorkhaGameInitializer.cs`](file:///Users/sanishmaharjanengineering/Downloads/free/game/unity-client/Assets/Scripts/Core/GorkhaGameInitializer.cs)** | Self-bootstrapping runtime manager that builds the 3D world, spawns the Town Center, Farm, Barracks, Wood Camp, and ambient units, with an interactive on-screen construction HUD. |
-| **[`GorkhaVisualSceneBuilder.cs`](file:///Users/sanishmaharjanengineering/Downloads/free/game/unity-client/Assets/Scripts/Editor/GorkhaVisualSceneBuilder.cs)** | Editor automation tool that generates prefab assets and saves the complete 3D scene file with one click. |
+### 2. RTS Tactical Combat & Control System (AoE Style)
+- **Marquee Selection:** Click-and-drag green selection box to select multiple units simultaneously. Double-click any unit to select all visible units of that type.
+- **Control Groups (`Ctrl + 1..9`):** Assign military squads to number keys; single-tap recalls group; double-tap centers camera.
+- **Tactical Stances & Hotkeys:**
+  - `[A]` **Attack-Move:** March in formation towards destination, automatically scanning and engaging any hostile enemies or structures encountered along the path.
+  - `[H]` **Hold Position:** Units anchor to their ground spot, refusing to break formation or chase fleeing targets, engaging only enemies within weapon reach.
+  - `[P]` **Patrol:** Units march continuously between two waypoints, engaging enemies encountered and resuming their patrol loop after combat.
+  - `[S]` **Halt / Stop:** Instantly cancels current movement, stances, and targeting.
+  - `[Z/X/C/V]` **Formations:** Line [Z], Box [X], Wedge [C], and Staggered [V] with dynamic slot calculation.
+- **Authentic Combat Triangle:**
+  - *Spearmen* counter Khukuri Warriors (+35% damage, Spear Wall).
+  - *Khukuri Warriors* flank and shred Archers (+50% damage, Flank Slash).
+  - *Mountain Archers* counter Spearmen (+40% damage, Ranged Standoff).
+
+### 3. Clash of Clans Style Raid Battle Mode
+- **Outpost Raid Expeditions:** Launch invasions against 3 distinct difficulty outposts:
+  - *Tier 1: Rival Chaubisi Kot (Easy)* — 600 Food, 450 Gold, 5 Gems, 4 Bandit defenders.
+  - *Tier 2: Bandit Mountain Stronghold (Medium)* — 1,600 Food, 1,200 Gold, 12 Gems, Watchtowers & Cannons.
+  - *Tier 3: Valley Warlord Citadel (Hard)* — 3,800 Food, 3,000 Gold, 25 Gems, 14 Elite defenders.
+- **CoC 3-Star Victory Evaluation:**
+  - ⭐ **Star 1:** Awarded upon reaching 50% Outpost Destruction.
+  - ⭐ **Star 2:** Awarded upon destroying the Enemy Town Center Keep.
+  - ⭐ **Star 3:** Awarded upon 100% Total Obliteration of the outpost.
+- **Real-time Plundering:** Plunder loot from damaged/destroyed enemy storages. Return to village to deposit spoils directly into kingdom resources.
+
+### 4. Audio & Cultural Immersion
+- **Spoken Nepali Voice Barks:** 18 synthesized authentic spoken Nepali WAV clips (*"Hajur, aadesh dinuhos"*, *"Aakraman!"*, *"Rokkinuhos"*, *"Gorkhali aayo!"*).
+- **Himalayan Soundscape:** Ambient mountain breezes, spatial pine forest bird calls, distant monastery prayer chimes, pastoral farm audio, and dynamic 110 BPM Madal war drum combat cadence.
 
 ---
 
@@ -41,43 +65,61 @@ The Unity client includes an authentic Nepali 3D procedural graphics engine:
 
 ```text
 Assets/
+├── Audio/
+│   └── VoiceBarks/                          # 18 Spoken Nepali voice clips (.wav + .meta)
+├── Prefabs/                                 # 3D Unit and building prefabs
 ├── Scripts/
-│   ├── Core/
-│   │   ├── GorkhaGameInitializer.cs         # Master scene bootstrapper & runtime 3D HUD
-│   │   └── IsometricGrid.cs                 # 3D Grid mapping, tile queries, and occupancy tracking
-│   ├── Graphics/
-│   │   ├── GorkhaMaterials.cs               # Centralized PBR materials (Brick, Wood, Gold, Slate, Grass)
-│   │   ├── Nepali3DMeshBuilder.cs           # Procedural 3D model & mesh builder for Nepali architecture
-│   │   ├── FlagClothAnimator.cs             # Real-time cloth wind simulation for Nepal flag
-│   │   ├── HimalayanEnvironment3D.cs        # 3D valley terrain, golden hour sun, mist, and pine forests
-│   │   └── ProceduralUnitBob.cs             # Procedural step-walking bobbing & idle breathing animations
-│   ├── Economy/
-│   │   ├── ResourceType.cs                  # Food, Wood, Stone, Iron, Gold, Gems
-│   │   └── ResourceManager.cs               # Live ticking production, transactions, capacity
+│   ├── Audio/
+│   │   ├── GorkhaAudio.cs                   # Master procedural audio synthesizer & sound effects
+│   │   ├── GorkhaVoiceBarks.cs              # Voice bark dispatch with fallback direct WAV parser
+│   │   └── HimalayanSoundscape.cs           # Living procedural soundscape & dynamic war drums
 │   ├── Buildings/
 │   │   ├── BuildingData.cs                  # ScriptableObject blueprints (costs, footprint, timers)
-│   │   ├── BuildingInstance.cs              # 3D world building, levels, scaffolding, harvest bubble
-│   │   └── BuildingPlacementController.cs   # Clash of Clans style 3D drag-to-place with green/red preview
+│   │   ├── BuildingInstance.cs              # 3D building lifecycle, health, harvest bubbles, levels
+│   │   ├── BuildingPlacementController.cs   # CoC-style 3D drag-to-place with green/red footprint
+│   │   └── WallInstance.cs                  # Connectable dynamic 1x1 stone/timber fortress walls
 │   ├── Camera/
 │   │   └── IsometricCameraController.cs     # 45° smooth isometric pan, drag, and pinch-zoom
-│   ├── Units/
-│   │   └── UnitController.cs                # Ambient villagers & Gorkha military patrols with Dhaka topi & Khukuri
+│   ├── Combat/
+│   │   └── GorkhaRaidBattleController.cs    # CoC Outpost Raid Battles, 3-star rating, plunder tally
+│   ├── Core/
+│   │   ├── GorkhaGameInitializer.cs         # Master scene bootstrapper & manager lifecycle
+│   │   ├── IsometricGrid.cs                 # 3D Grid mapping, tile queries, and occupancy tracking
+│   │   └── GorkhaInput.cs                   # Cross-platform unified mouse & keyboard input
+│   ├── Economy/
+│   │   ├── BuilderManager.cs                # Craftsman (Dakshya Karmi) queue & hut assignment
+│   │   ├── ResourceManager.cs               # Live resource ticking, capacities, peace treaty shields
+│   │   ├── ResourceNode.cs                  # Harvestable SpeedTree pine trees and slate boulders
+│   │   └── ResourceType.cs                  # Food, Wood, Stone, Iron, Gold, Gems
+│   ├── Graphics/
+│   │   ├── BallisticProjectile.cs           # Gravitational parabolic arrow flight & sticking impact
+│   │   ├── FantasyKingdomAssetRegistry.cs   # Modular 3D asset bindings & calibration
+│   │   ├── FlagClothAnimator.cs             # Real-time cloth wind simulation for double-triangle flag
+│   │   ├── GorkhaMaterials.cs               # Centralized PBR material registry (URP Lit & Standard)
+│   │   ├── GorkhaVFX.cs                     # Particle systems (chimney smoke, torches, placement dust)
+│   │   ├── HimalayanAtmosphericVFX.cs       # Atmospheric falling leaves, wind motes, soaring eagles
+│   │   ├── HimalayanEnvironment3D.cs        # 3D terraced terrain, golden sun, fog, and water stream
+│   │   ├── Nepali3DMeshBuilder.cs           # 4-tier procedural Town Center, defenses & character rigs
+│   │   └── WorldCombatHealthBar.cs          # Billboarded floating combat health bars with auto-fade
+│   ├── Progression/
+│   │   ├── AgeManager.cs                    # 4 Historical Eras of Gorkha & advancement fanfare
+│   │   └── BuildingGatingManager.cs         # CoC Town Hall style building caps & unit gating
 │   ├── UI/
-│   │   └── HUDController.cs                 # Top resource bar, population cap, shop controls
-│   └── Editor/
-│       └── GorkhaVisualSceneBuilder.cs      # One-click 3D scene & prefab generator menu item
-└── Textures/
-    ├── buildings/                           # Reference building sprites & textures
-    ├── terrain/                             # Mountain & valley terrain textures
-    └── units/                               # Unit textures
+│   │   ├── GorkhaMiniMap.cs                 # Radar mini-map with camera viewport and click-to-pan
+│   │   └── GorkhaPlayableHUD.cs             # Studio HUD, era banner, build dock, tactical unit inspector
+│   └── Units/
+│       ├── ArmyFormationController.cs       # Line, Box, Wedge, Staggered formation slot math
+│       ├── RTSSelectionManager.cs           # Marquee drag selection, control groups, tactical hotkeys
+│       ├── UnitController.cs                # Tactical stances (Attack-Move, Hold, Patrol, Stop)
+│       └── UnitProceduralAnimator.cs        # Rigged walk cycles, slashes, spear lunges, bow releases
 ```
 
 ---
 
-## 🎮 Gameplay Features Ready in 3D
-- **45° Isometric Camera:** Smooth panning with WASD / Mouse drag and mouse wheel zooming.
-- **Clash of Clans Grid Placement:** Snaps to integer grid coordinates, shows green/red boundary preview, and verifies terrain collision.
-- **Kingdom Economy Loop:** Continuous per-second resource accumulation (Food, Wood, Stone, Gold).
-- **Construction & Upgrades:** Timed construction with 3D timber scaffolding state and progression.
-- **Floating Harvest Bubbles:** Tap-to-collect 3D resource orbs directly above active farms and camps.
-- **Ambient Life:** Roaming 3D Gorkha warriors and villagers with walking animations and pathing.
+## 🧪 Headless Build Verification
+
+To verify C# script compilation without opening the Unity Editor:
+```bash
+bash tools/compile_check.sh
+```
+Guaranteed `0 errors, 0 warnings` at all times.

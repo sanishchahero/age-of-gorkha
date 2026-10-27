@@ -365,19 +365,24 @@ flowchart LR
 - **Archers (*Dhanurdhari*):** High range; picks off spearmen and unarmored targets; vulnerable to fast flankers.
 - **Musketeers (*Bandukdhari* - Era III):** High single-target armor piercing damage with slow reload time.
 
-#### CBT-05: Village Raid / Siege Mode (CoC Style)
-- **Concept:** Deploy recruited armies onto the perimeter of an enemy settlement to destroy their defenses and loot resources.
-- **Gameplay Mechanics:**
-  - Red deployment border around the perimeter of the defending village.
-  - Deploy units by clicking on the boundary.
-  - Units automatically seek targets according to their AI preference:
-    - Spearmen attack nearest structure.
-    - Khukuri warriors target enemy defense towers first.
-    - Villagers/Looters prioritize resource storages and granaries.
-  - 3-Star Victory Metric:
-    - ⭐ 1 Star: 50% settlement destruction OR Town Center destroyed.
-    - ⭐ 2 Stars: 50% destruction AND Town Center destroyed.
-    - ⭐ 3 Stars: 100% total eradication of enemy base.
+#### CBT-04: Attack-Move, Hold Position & Patrol Commands (AoE RTS Stances)
+- **Attack-Move (`[A]`):** Units march in formation towards destination, actively scanning a $11\text{m}$ radius for hostiles. Upon detecting enemy troops or defense towers, units halt, engage, eliminate the threat, and resume pathing to the destination.
+- **Hold Position (`[H]`):** Units lock onto their current coordinates (`_holdAnchorPos`), refusing to break formation or chase fleeing enemies, attacking only targets entering their weapon range (Archers 7.5m, Spearmen 1.9m, Khukuri 1.35m).
+- **Patrol (`[P]`):** Units march continuously between two waypoints, engaging enemies encountered along the patrol path and returning to their route post-combat.
+- **Halt / Stop (`[S]`):** Clears manual orders, halts movement immediately, and resets to guard stance.
+- **Interactive HUD Integration:** Tactical action dock provides 4 buttons with live cursor aiming indicators (`⚔️ [A] Aiming...`, `🚶 [P] Aiming...`) and cancel prompts.
+
+#### CBT-05: CoC-Style Asynchronous Village Raid Mode
+- **Concept:** Launch offensive expeditions against fortified hostile enemy outposts with real-time loot plundering.
+- **3 Difficulty Outpost Tiers (`GorkhaRaidBattleController`):**
+  - *Tier 1: Rival Chaubisi Kot (Easy)* — 600 Food, 450 Gold, 5 Gems, 4 Bandit defenders.
+  - *Tier 2: Bandit Mountain Stronghold (Medium)* — 1,600 Food, 1,200 Gold, 12 Gems, 8 defenders, Watchtowers & Cannons.
+  - *Tier 3: Valley Warlord Citadel (Hard)* — 3,800 Food, 3,000 Gold, 25 Gems, 14 Elite defenders.
+- **3-Star Victory Evaluation:**
+  - ⭐ **Star 1:** Awarded upon reaching 50% Outpost Destruction.
+  - ⭐ **Star 2:** Awarded upon destroying the Enemy Town Center Keep.
+  - ⭐ **Star 3:** Awarded upon 100% Total Obliteration of the outpost.
+- **Real-Time Plundering & Tally Modal:** Loot is extracted continuously as enemy storages and buildings take damage. The victory summary modal deposits all spoils directly into the kingdom's storages.
 
 #### CBT-06: Historic Hero Generals (CoC Hero / AoE Hero Units)
 - **Prithvi Narayan Shah (The Unifier):** Aura increases nearby unit attack damage by +20%; Special ability: *Call to Arms* (instantly summons 4 royal bodyguards).
