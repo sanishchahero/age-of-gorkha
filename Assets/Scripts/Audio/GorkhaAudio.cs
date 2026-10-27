@@ -260,6 +260,14 @@ namespace Gorkha.Audio
             }
         }
 
+        public static void PlayHorn(float volume = 0.95f)
+        {
+            if (Instance != null && !Instance._isMuted && Instance._hornClip != null)
+            {
+                Instance._sfxSource.PlayOneShot(Instance._hornClip, volume);
+            }
+        }
+
         public static void PlayClick()
         {
             if (Instance != null && !Instance._isMuted && Instance._clickClip != null)

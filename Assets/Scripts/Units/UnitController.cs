@@ -208,10 +208,15 @@ namespace Gorkha.Units
 
         public void SetSelected(bool selected)
         {
+            bool wasSelected = _isSelected;
             _isSelected = selected;
             if (_selectionRing != null)
             {
                 _selectionRing.SetActive(selected);
+            }
+            if (selected && !wasSelected)
+            {
+                GorkhaVoiceBarks.PlaySelectBark(this);
             }
         }
 
@@ -513,6 +518,7 @@ namespace Gorkha.Units
             _workState = VillagerWorkState.MovingToNode;
             _carriedType = node.YieldType;
             UpdateSackVisual();
+            GorkhaVoiceBarks.PlayHarvestOrderBark(this, node.YieldType);
         }
 
         public void AssignFarmTask(BuildingInstance farm)
@@ -526,6 +532,7 @@ namespace Gorkha.Units
             _workState = VillagerWorkState.WorkingFarm;
             _carriedType = ResourceType.Food;
             UpdateSackVisual();
+            GorkhaVoiceBarks.PlayHarvestOrderBark(this, ResourceType.Food);
         }
 
         public void OrderMove(Vector3 destination)
@@ -537,6 +544,7 @@ namespace Gorkha.Units
             _targetFarm = null;
             _workState = VillagerWorkState.IdlePatrol;
             UpdateSackVisual();
+            GorkhaVoiceBarks.PlayMoveOrderBark(this, destination);
         }
 
         public void OrderAttack(UnitController target)
@@ -548,6 +556,7 @@ namespace Gorkha.Units
             _targetNode = null;
             _workState = VillagerWorkState.IdlePatrol;
             UpdateSackVisual();
+            GorkhaVoiceBarks.PlayAttackOrderBark(this);
         }
 
         public void ClearManualOrder()
