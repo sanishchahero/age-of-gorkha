@@ -6,6 +6,8 @@ using Gorkha.CameraSystem;
 using Gorkha.Units;
 using Gorkha.Audio;
 using Gorkha.UI;
+using Gorkha.Progression;
+using Gorkha.Combat;
 
 namespace Gorkha.Core
 {
@@ -146,6 +148,20 @@ namespace Gorkha.Core
             {
                 GameObject rtsObj = new GameObject("RTSSelectionManager_Manager");
                 rtsObj.AddComponent<RTSSelectionManager>();
+            }
+
+            // 10. Historical Age Progression Manager (AGE-01 / AGE-02)
+            if (AgeManager.Instance == null && FindAnyObjectByType<AgeManager>() == null)
+            {
+                GameObject ageObj = new GameObject("AgeManager_Manager");
+                ageObj.AddComponent<AgeManager>();
+            }
+
+            // 11. CoC-Style Outpost Raid Battle Controller (CBT-05)
+            if (GorkhaRaidBattleController.Instance == null && FindAnyObjectByType<GorkhaRaidBattleController>() == null)
+            {
+                GameObject raidObj = new GameObject("RaidBattleController_Manager");
+                raidObj.AddComponent<GorkhaRaidBattleController>();
             }
 
             // 9. Isometric Camera Setup & Framing

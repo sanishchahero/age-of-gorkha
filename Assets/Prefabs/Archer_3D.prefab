@@ -1666,16 +1666,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b64e20f446c042bab2ae3c780ec136a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Gorkha.Graphics.UnitProceduralAnimator
-  _hipLeft: {fileID: 431600611034920049}
-  _hipRight: {fileID: 5935669148667971950}
-  _shoulderLeft: {fileID: 3746023365723682171}
-  _shoulderRight: {fileID: 1560991950427973031}
+  _hips: {fileID: 0}
+  _spine: {fileID: 0}
   _torso: {fileID: 4530828133256109216}
   _head: {fileID: 4902070835369502140}
+  _hipLeft: {fileID: 431600611034920049}
+  _kneeLeft: {fileID: 0}
+  _ankleLeft: {fileID: 0}
+  _hipRight: {fileID: 5935669148667971950}
+  _kneeRight: {fileID: 0}
+  _ankleRight: {fileID: 0}
+  _shoulderLeft: {fileID: 3746023365723682171}
+  _elbowLeft: {fileID: 0}
+  _handLeft: {fileID: 0}
+  _shoulderRight: {fileID: 1560991950427973031}
+  _elbowRight: {fileID: 0}
+  _handRight: {fileID: 0}
   _walkBobSpeed: 11.5
   _legSwingAngle: 32
+  _kneeBendAngle: 42
   _armSwingAngle: 24
-  _torsoBounceAmount: 0.055
+  _pelvisBounceAmount: 0.038
   _idleBreatheSpeed: 2.4
   _idleBreatheAmount: 0.02
 --- !u!1 &3982366538763927853

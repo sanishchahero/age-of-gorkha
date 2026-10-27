@@ -18,6 +18,14 @@ namespace Gorkha.Units
         Archer
     }
 
+    public enum TacticalStance
+    {
+        Normal,
+        AttackMove,
+        HoldPosition,
+        Patrol
+    }
+
     public enum VillagerWorkState
     {
         IdlePatrol,
@@ -62,9 +70,15 @@ namespace Gorkha.Units
         [Header("RTS Selection & Orders")]
         [SerializeField] private bool _isSelected = false;
         [SerializeField] private bool _hasManualOrder = false;
+        [SerializeField] private TacticalStance _tacticalStance = TacticalStance.Normal;
         private GameObject _selectionRing;
         private Vector3 _manualDestination;
         private UnitController _manualTargetUnit;
+        private BuildingInstance _manualTargetBuilding;
+        private Vector3 _patrolPointA;
+        private Vector3 _patrolPointB;
+        private bool _patrollingToB = true;
+        private Vector3 _holdAnchorPos;
 
         private Vector3 _targetPosition;
         private Coroutine _behaviorRoutine;
@@ -73,6 +87,7 @@ namespace Gorkha.Units
 
         public UnitType Type => _unitType;
         public VillagerWorkState WorkState => _workState;
+        public TacticalStance Stance => _tacticalStance;
         public bool IsVillager => _unitType == UnitType.Villager;
         public bool IsIdle => _workState == VillagerWorkState.IdlePatrol;
         public int Health => _currentHealth;
@@ -81,6 +96,7 @@ namespace Gorkha.Units
         public bool IsAlive => _currentHealth > 0;
         public bool IsSelected => _isSelected;
         public bool HasManualOrder => _hasManualOrder;
+        public BuildingInstance ManualTargetBuilding => _manualTargetBuilding;
         public UnitProceduralAnimator Animator => _animator;
 
         private void OnEnable()
@@ -442,6 +458,27 @@ namespace Gorkha.Units
             return best;
         }
 
+        public static BuildingInstance FindNearestHostileBuilding(Vector3 origin, float maxRange)
+        {
+            BuildingInstance best = null;
+            float bestDistSq = maxRange * maxRange;
+
+            for (int i = 0; i < BuildingInstance.AllBuildings.Count; i++)
+            {
+                var b = BuildingInstance.AllBuildings[i];
+                if (b != null && b.IsHostile && b.State == BuildingState.Active && b.Health > 0)
+                {
+                    float dSq = (b.transform.position - origin).sqrMagnitude;
+                    if (dSq <= bestDistSq)
+                    {
+                        bestDistSq = dSq;
+                        best = b;
+                    }
+                }
+            }
+            return best;
+        }
+
         public static UnitController FindNearestDefender(Vector3 origin, float maxRange)
         {
             UnitController best = null;
@@ -537,9 +574,11 @@ namespace Gorkha.Units
 
         public void OrderMove(Vector3 destination)
         {
+            _tacticalStance = TacticalStance.Normal;
             _hasManualOrder = true;
             _manualDestination = destination;
             _manualTargetUnit = null;
+            _manualTargetBuilding = null;
             _targetNode = null;
             _targetFarm = null;
             _workState = VillagerWorkState.IdlePatrol;
@@ -550,8 +589,10 @@ namespace Gorkha.Units
         public void OrderAttack(UnitController target)
         {
             if (target == null || !target.IsAlive) return;
+            _tacticalStance = TacticalStance.Normal;
             _hasManualOrder = true;
             _manualTargetUnit = target;
+            _manualTargetBuilding = null;
             _manualDestination = target.transform.position;
             _targetNode = null;
             _workState = VillagerWorkState.IdlePatrol;
@@ -559,10 +600,87 @@ namespace Gorkha.Units
             GorkhaVoiceBarks.PlayAttackOrderBark(this);
         }
 
+        public void OrderAttackBuilding(BuildingInstance targetBuilding)
+        {
+            if (targetBuilding == null || targetBuilding.Health <= 0) return;
+            _tacticalStance = TacticalStance.Normal;
+            _hasManualOrder = true;
+            _manualTargetUnit = null;
+            _manualTargetBuilding = targetBuilding;
+            _manualDestination = targetBuilding.transform.position;
+            _targetNode = null;
+            _workState = VillagerWorkState.IdlePatrol;
+            UpdateSackVisual();
+            GorkhaVoiceBarks.PlayAttackOrderBark(this);
+        }
+
+        public void OrderAttackMove(Vector3 destination)
+        {
+            _tacticalStance = TacticalStance.AttackMove;
+            _hasManualOrder = true;
+            _manualDestination = destination;
+            _manualTargetUnit = null;
+            _manualTargetBuilding = null;
+            _targetNode = null;
+            _targetFarm = null;
+            _workState = VillagerWorkState.IdlePatrol;
+            UpdateSackVisual();
+            GorkhaVoiceBarks.PlayAttackOrderBark(this);
+            GorkhaPlayableHUD.SpawnFloatingText(transform.position + Vector3.up * 2.2f, "⚔️ Attack-Moving!", new Color(1f, 0.45f, 0.2f));
+        }
+
+        public void OrderHoldPosition()
+        {
+            _tacticalStance = TacticalStance.HoldPosition;
+            _hasManualOrder = true;
+            _holdAnchorPos = transform.position;
+            _manualTargetUnit = null;
+            _manualTargetBuilding = null;
+            _targetNode = null;
+            _targetFarm = null;
+            _workState = VillagerWorkState.IdlePatrol;
+            UpdateSackVisual();
+            GorkhaVoiceBarks.PlaySelectBark(this);
+            GorkhaPlayableHUD.SpawnFloatingText(transform.position + Vector3.up * 2.2f, "🛡️ Holding Position!", new Color(0.35f, 1f, 0.5f));
+        }
+
+        public void OrderPatrol(Vector3 destination)
+        {
+            _tacticalStance = TacticalStance.Patrol;
+            _hasManualOrder = true;
+            _patrolPointA = transform.position;
+            _patrolPointB = destination;
+            _patrollingToB = true;
+            _manualDestination = destination;
+            _manualTargetUnit = null;
+            _manualTargetBuilding = null;
+            _targetNode = null;
+            _targetFarm = null;
+            _workState = VillagerWorkState.IdlePatrol;
+            UpdateSackVisual();
+            GorkhaVoiceBarks.PlayMoveOrderBark(this, destination);
+            GorkhaPlayableHUD.SpawnFloatingText(transform.position + Vector3.up * 2.2f, "🚶 Patrolling Waypoint!", new Color(0.4f, 0.85f, 1f));
+        }
+
+        public void OrderStop()
+        {
+            _tacticalStance = TacticalStance.Normal;
+            _hasManualOrder = false;
+            _manualTargetUnit = null;
+            _manualTargetBuilding = null;
+            _targetNode = null;
+            _targetFarm = null;
+            _workState = VillagerWorkState.IdlePatrol;
+            UpdateSackVisual();
+            GorkhaPlayableHUD.SpawnFloatingText(transform.position + Vector3.up * 2.2f, "🛑 Halt!", Color.yellow);
+        }
+
         public void ClearManualOrder()
         {
             _hasManualOrder = false;
             _manualTargetUnit = null;
+            _manualTargetBuilding = null;
+            _tacticalStance = TacticalStance.Normal;
         }
 
         public void MoveDirect(Vector3 worldPos)
@@ -597,9 +715,242 @@ namespace Gorkha.Units
             }
         }
 
+        private IEnumerator AttackHostileTarget(UnitController target)
+        {
+            if (target == null || !target.IsAlive) yield break;
+            float attackRange = _unitType == UnitType.Archer ? 7.5f : (_unitType == UnitType.Spearman ? 1.9f : 1.35f);
+            float dist = Vector3.Distance(transform.position, target.transform.position);
+
+            if (dist > attackRange)
+            {
+                MoveTowardPoint(target.transform.position, attackRange * 0.95f);
+                yield return null;
+            }
+            else
+            {
+                Vector3 bPos = target.transform.position;
+                transform.LookAt(new Vector3(bPos.x, transform.position.y, bPos.z));
+
+                if (_unitType == UnitType.Archer)
+                {
+                    if (_animator != null)
+                    {
+                        _animator.PlayBowRelease(() => {
+                            if (target != null && target.IsAlive)
+                            {
+                                BallisticProjectile.LaunchArcherArrow(transform.position + Vector3.up * 1.1f, target, damage: 22, attacker: this);
+                            }
+                        });
+                        yield return new WaitForSeconds(1.15f);
+                    }
+                    else
+                    {
+                        BallisticProjectile.LaunchArcherArrow(transform.position + Vector3.up * 1.1f, target, damage: 22, attacker: this);
+                        yield return new WaitForSeconds(1.15f);
+                    }
+                }
+                else if (_unitType == UnitType.Spearman)
+                {
+                    if (_animator != null)
+                    {
+                        _animator.PlaySpearLunge(() => {
+                            if (target != null && target.IsAlive)
+                            {
+                                target.TakeDamageFrom(this, 25);
+                            }
+                        });
+                        yield return new WaitForSeconds(0.85f);
+                    }
+                    else
+                    {
+                        target.TakeDamageFrom(this, 25);
+                        yield return new WaitForSeconds(0.85f);
+                    }
+                }
+                else
+                {
+                    int dmg = _unitType == UnitType.KhukuriWarrior ? 20 : 10;
+                    if (_animator != null)
+                    {
+                        _animator.PlayKhukuriSlash(() => {
+                            if (target != null && target.IsAlive)
+                            {
+                                target.TakeDamageFrom(this, dmg);
+                            }
+                        });
+                        yield return new WaitForSeconds(0.70f);
+                    }
+                    else
+                    {
+                        target.TakeDamageFrom(this, dmg);
+                        yield return new WaitForSeconds(0.70f);
+                    }
+                }
+            }
+        }
+
+        private IEnumerator AttackHostileBuilding(BuildingInstance building)
+        {
+            if (building == null || building.Health <= 0) yield break;
+            float attackRange = _unitType == UnitType.Archer ? 8.0f : (_unitType == UnitType.Spearman ? 2.4f : 1.8f);
+            float dist = Vector3.Distance(transform.position, building.transform.position);
+
+            if (dist > attackRange)
+            {
+                MoveTowardPoint(building.transform.position, attackRange * 0.95f);
+                yield return null;
+            }
+            else
+            {
+                Vector3 bPos = building.transform.position;
+                transform.LookAt(new Vector3(bPos.x, transform.position.y, bPos.z));
+
+                if (_unitType == UnitType.Archer)
+                {
+                    if (_animator != null)
+                    {
+                        _animator.PlayBowRelease(() => {
+                            if (building != null && building.Health > 0)
+                            {
+                                BallisticProjectile.LaunchArrow(transform.position + Vector3.up * 1.1f, building.transform.position + Vector3.up * 1.5f, null, damage: 20, attacker: this);
+                                building.TakeDamage(20);
+                            }
+                        });
+                        yield return new WaitForSeconds(1.15f);
+                    }
+                    else
+                    {
+                        building.TakeDamage(20);
+                        yield return new WaitForSeconds(1.15f);
+                    }
+                }
+                else if (_unitType == UnitType.Spearman)
+                {
+                    if (_animator != null)
+                    {
+                        _animator.PlaySpearLunge(() => {
+                            if (building != null && building.Health > 0)
+                            {
+                                building.TakeDamage(22);
+                            }
+                        });
+                        yield return new WaitForSeconds(0.85f);
+                    }
+                    else
+                    {
+                        building.TakeDamage(22);
+                        yield return new WaitForSeconds(0.85f);
+                    }
+                }
+                else
+                {
+                    int dmg = _unitType == UnitType.KhukuriWarrior ? 25 : 12;
+                    if (_animator != null)
+                    {
+                        _animator.PlayKhukuriSlash(() => {
+                            if (building != null && building.Health > 0)
+                            {
+                                building.TakeDamage(dmg);
+                            }
+                        });
+                        yield return new WaitForSeconds(0.70f);
+                    }
+                    else
+                    {
+                        building.TakeDamage(dmg);
+                        yield return new WaitForSeconds(0.70f);
+                    }
+                }
+            }
+        }
+
         private IEnumerator HandleManualOrderBehavior()
         {
-            // 1. Attack Order against specific hostile unit
+            // Case A: Hold Position Stance (AoE CBT-04)
+            if (_tacticalStance == TacticalStance.HoldPosition)
+            {
+                float reach = _unitType == UnitType.Archer ? 7.5f : (_unitType == UnitType.Spearman ? 1.9f : 1.35f);
+                UnitController inReach = FindNearestHostileTarget(_holdAnchorPos, reach);
+                if (inReach != null && inReach.IsAlive)
+                {
+                    yield return AttackHostileTarget(inReach);
+                }
+                else
+                {
+                    if (Vector3.Distance(transform.position, _holdAnchorPos) > 0.2f)
+                    {
+                        MoveTowardPoint(_holdAnchorPos, 0.15f);
+                    }
+                    yield return new WaitForSeconds(0.25f);
+                }
+                yield break;
+            }
+
+            // Case B: Attack-Move Stance (AoE CBT-04)
+            if (_tacticalStance == TacticalStance.AttackMove)
+            {
+                UnitController hostileNearby = FindNearestHostileTarget(transform.position, 11.0f);
+                if (hostileNearby != null && hostileNearby.IsAlive)
+                {
+                    yield return AttackHostileTarget(hostileNearby);
+                    yield break;
+                }
+
+                BuildingInstance hostileBuilding = FindNearestHostileBuilding(transform.position, 12.0f);
+                if (hostileBuilding != null && hostileBuilding.Health > 0)
+                {
+                    yield return AttackHostileBuilding(hostileBuilding);
+                    yield break;
+                }
+
+                float distToDest = Vector3.Distance(transform.position, _manualDestination);
+                if (distToDest > 0.35f)
+                {
+                    MoveTowardPoint(_manualDestination, 0.30f);
+                    yield return null;
+                }
+                else
+                {
+                    _tacticalStance = TacticalStance.Normal;
+                    _hasManualOrder = false;
+                    yield return new WaitForSeconds(0.2f);
+                }
+                yield break;
+            }
+
+            // Case C: Patrol Stance (AoE CBT-04)
+            if (_tacticalStance == TacticalStance.Patrol)
+            {
+                UnitController hostileNearby = FindNearestHostileTarget(transform.position, 11.0f);
+                if (hostileNearby != null && hostileNearby.IsAlive)
+                {
+                    yield return AttackHostileTarget(hostileNearby);
+                    yield break;
+                }
+
+                BuildingInstance hostileBuilding = FindNearestHostileBuilding(transform.position, 12.0f);
+                if (hostileBuilding != null && hostileBuilding.Health > 0)
+                {
+                    yield return AttackHostileBuilding(hostileBuilding);
+                    yield break;
+                }
+
+                Vector3 currentWp = _patrollingToB ? _patrolPointB : _patrolPointA;
+                float distToWp = Vector3.Distance(transform.position, currentWp);
+                if (distToWp > 0.45f)
+                {
+                    MoveTowardPoint(currentWp, 0.40f);
+                    yield return null;
+                }
+                else
+                {
+                    _patrollingToB = !_patrollingToB;
+                    yield return new WaitForSeconds(0.6f);
+                }
+                yield break;
+            }
+
+            // Case D: Direct Unit Attack Order
             if (_manualTargetUnit != null)
             {
                 if (!_manualTargetUnit.IsAlive)
@@ -608,91 +959,34 @@ namespace Gorkha.Units
                     _hasManualOrder = false;
                     yield break;
                 }
-
-                float attackRange = _unitType == UnitType.Archer ? 7.5f : (_unitType == UnitType.Spearman ? 1.9f : 1.35f);
-                float dist = Vector3.Distance(transform.position, _manualTargetUnit.transform.position);
-
-                if (dist > attackRange)
-                {
-                    MoveTowardPoint(_manualTargetUnit.transform.position, attackRange * 0.95f);
-                    yield return null;
-                }
-                else
-                {
-                    Vector3 bPos = _manualTargetUnit.transform.position;
-                    transform.LookAt(new Vector3(bPos.x, transform.position.y, bPos.z));
-
-                    if (_unitType == UnitType.Archer)
-                    {
-                        if (_animator != null)
-                        {
-                            _animator.PlayBowRelease(() => {
-                                if (_manualTargetUnit != null && _manualTargetUnit.IsAlive)
-                                {
-                                    BallisticProjectile.LaunchArcherArrow(transform.position + Vector3.up * 1.1f, _manualTargetUnit, damage: 22, attacker: this);
-                                }
-                            });
-                            yield return new WaitForSeconds(1.15f);
-                        }
-                        else
-                        {
-                            BallisticProjectile.LaunchArcherArrow(transform.position + Vector3.up * 1.1f, _manualTargetUnit, damage: 22, attacker: this);
-                            yield return new WaitForSeconds(1.15f);
-                        }
-                    }
-                    else if (_unitType == UnitType.Spearman)
-                    {
-                        if (_animator != null)
-                        {
-                            _animator.PlaySpearLunge(() => {
-                                if (_manualTargetUnit != null && _manualTargetUnit.IsAlive)
-                                {
-                                    _manualTargetUnit.TakeDamageFrom(this, 25);
-                                }
-                            });
-                            yield return new WaitForSeconds(0.85f);
-                        }
-                        else
-                        {
-                            _manualTargetUnit.TakeDamageFrom(this, 25);
-                            yield return new WaitForSeconds(0.85f);
-                        }
-                    }
-                    else
-                    {
-                        int dmg = _unitType == UnitType.KhukuriWarrior ? 20 : 10;
-                        if (_animator != null)
-                        {
-                            _animator.PlayKhukuriSlash(() => {
-                                if (_manualTargetUnit != null && _manualTargetUnit.IsAlive)
-                                {
-                                    _manualTargetUnit.TakeDamageFrom(this, dmg);
-                                }
-                            });
-                            yield return new WaitForSeconds(0.70f);
-                        }
-                        else
-                        {
-                            _manualTargetUnit.TakeDamageFrom(this, dmg);
-                            yield return new WaitForSeconds(0.70f);
-                        }
-                    }
-                }
+                yield return AttackHostileTarget(_manualTargetUnit);
+                yield break;
             }
-            // 2. Move Order to ground slot
+
+            // Case E: Direct Building Attack Order
+            if (_manualTargetBuilding != null)
+            {
+                if (_manualTargetBuilding.Health <= 0)
+                {
+                    _manualTargetBuilding = null;
+                    _hasManualOrder = false;
+                    yield break;
+                }
+                yield return AttackHostileBuilding(_manualTargetBuilding);
+                yield break;
+            }
+
+            // Case F: Standard Direct Move Order
+            float dist = Vector3.Distance(transform.position, _manualDestination);
+            if (dist > 0.35f)
+            {
+                MoveTowardPoint(_manualDestination, 0.30f);
+                yield return null;
+            }
             else
             {
-                float dist = Vector3.Distance(transform.position, _manualDestination);
-                if (dist > 0.35f)
-                {
-                    MoveTowardPoint(_manualDestination, 0.30f);
-                    yield return null;
-                }
-                else
-                {
-                    _hasManualOrder = false;
-                    yield return new WaitForSeconds(0.2f);
-                }
+                _hasManualOrder = false;
+                yield return new WaitForSeconds(0.2f);
             }
         }
 

@@ -11,6 +11,13 @@ using Gorkha.Economy;
 
 namespace Gorkha.Units
 {
+    public enum RTSCommandMode
+    {
+        Normal,
+        TargetingAttackMove,
+        TargetingPatrol
+    }
+
     /// <summary>
     /// Master RTS Multi-Unit Drag-Box Selection & Control Group Manager.
     /// Features:
@@ -27,6 +34,14 @@ namespace Gorkha.Units
 
         public readonly List<UnitController> SelectedUnits = new();
         public TacticalFormationType CurrentFormation { get; private set; } = TacticalFormationType.Line;
+        public RTSCommandMode CommandMode { get; private set; } = RTSCommandMode.Normal;
+
+        public void SetCommandMode(RTSCommandMode mode)
+        {
+            if (SelectedUnits.Count == 0 && mode != RTSCommandMode.Normal) return;
+            CommandMode = mode;
+            GorkhaAudio.PlayClick();
+        }
 
         public event Action OnSelectionChanged;
         public event Action<TacticalFormationType> OnFormationChanged;
@@ -89,6 +104,7 @@ namespace Gorkha.Units
         {
             PruneDeadUnits();
 
+            HandleTacticalHotkeys();
             HandleFormationHotkeys();
             HandleControlGroupHotkeys();
             HandleMouseSelection();
@@ -144,6 +160,47 @@ namespace Gorkha.Units
             else if (GorkhaInput.GetKeyDown(KeyCode.X)) SetFormation(TacticalFormationType.Box);
             else if (GorkhaInput.GetKeyDown(KeyCode.C)) SetFormation(TacticalFormationType.Wedge);
             else if (GorkhaInput.GetKeyDown(KeyCode.V)) SetFormation(TacticalFormationType.Staggered);
+        }
+
+        private void HandleTacticalHotkeys()
+        {
+            if (SelectedUnits.Count == 0)
+            {
+                if (CommandMode != RTSCommandMode.Normal) CommandMode = RTSCommandMode.Normal;
+                return;
+            }
+
+            // [A] Attack-Move
+            if (GorkhaInput.GetKeyDown(KeyCode.A))
+            {
+                CommandMode = CommandMode == RTSCommandMode.TargetingAttackMove ? RTSCommandMode.Normal : RTSCommandMode.TargetingAttackMove;
+                GorkhaAudio.PlayClick();
+            }
+            // [P] Patrol
+            else if (GorkhaInput.GetKeyDown(KeyCode.P))
+            {
+                CommandMode = CommandMode == RTSCommandMode.TargetingPatrol ? RTSCommandMode.Normal : RTSCommandMode.TargetingPatrol;
+                GorkhaAudio.PlayClick();
+            }
+            // [H] Hold Ground
+            else if (GorkhaInput.GetKeyDown(KeyCode.H))
+            {
+                ExecuteHoldPositionOrder();
+            }
+            // [S] Stop / Halt
+            else if (GorkhaInput.GetKeyDown(KeyCode.S))
+            {
+                ExecuteStopOrder();
+            }
+            // [Escape] Cancel Targeting
+            else if (GorkhaInput.GetKeyDown(KeyCode.Escape))
+            {
+                if (CommandMode != RTSCommandMode.Normal)
+                {
+                    CommandMode = RTSCommandMode.Normal;
+                    GorkhaAudio.PlayClick();
+                }
+            }
         }
 
         #endregion
@@ -244,6 +301,21 @@ namespace Gorkha.Units
             if (GorkhaPlayableHUD.Instance != null && GorkhaPlayableHUD.Instance.IsPointerOverHUD(mousePos))
             {
                 if (!_isDragging) return;
+            }
+
+            // Tactical Command Targeting Mode (AoE Attack-Move [A] & Patrol [P])
+            if (CommandMode != RTSCommandMode.Normal)
+            {
+                if (GorkhaInput.GetMouseButtonDown(0))
+                {
+                    HandleTargetingClick(mousePos);
+                }
+                else if (GorkhaInput.GetMouseButtonDown(1) || GorkhaInput.GetKeyDown(KeyCode.Escape))
+                {
+                    CommandMode = RTSCommandMode.Normal;
+                    GorkhaAudio.PlayClick();
+                }
+                return;
             }
 
             // Left Mouse Down: begin tracking drag start
@@ -496,6 +568,14 @@ namespace Gorkha.Units
                     return;
                 }
 
+                // 1b. Check if clicked a hostile building (Siege Order)
+                var hostileBuilding = hit.collider.GetComponentInParent<BuildingInstance>();
+                if (hostileBuilding != null && hostileBuilding.IsHostile && hostileBuilding.Health > 0)
+                {
+                    ExecuteAttackBuildingOrder(hostileBuilding);
+                    return;
+                }
+
                 // 2. Check if clicked a harvestable resource node with villagers
                 var resNode = hit.collider.GetComponentInParent<ResourceNode>();
                 if (resNode != null && !resNode.IsDepleted)
@@ -663,12 +743,204 @@ namespace Gorkha.Units
             GorkhaVoiceBarks.PlayMoveOrderBark(SelectedUnits[0], targetCenter);
         }
 
+        private void HandleTargetingClick(Vector3 mousePos)
+        {
+            if (Camera.main == null) return;
+            Ray ray = Camera.main.ScreenPointToRay(mousePos);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 250f))
+            {
+                var hostile = hit.collider.GetComponentInParent<UnitController>();
+                if (hostile != null && hostile.IsHostile && hostile.IsAlive)
+                {
+                    ExecuteAttackOrder(hostile);
+                    CommandMode = RTSCommandMode.Normal;
+                    return;
+                }
+
+                var hostileBuilding = hit.collider.GetComponentInParent<BuildingInstance>();
+                if (hostileBuilding != null && hostileBuilding.IsHostile && hostileBuilding.Health > 0)
+                {
+                    ExecuteAttackBuildingOrder(hostileBuilding);
+                    CommandMode = RTSCommandMode.Normal;
+                    return;
+                }
+            }
+
+            Vector3 groundPoint = Vector3.zero;
+            bool groundHit = false;
+
+            if (Physics.Raycast(ray, out RaycastHit gHit, 250f))
+            {
+                groundPoint = gHit.point;
+                groundHit = true;
+            }
+            else
+            {
+                Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+                if (groundPlane.Raycast(ray, out float enter))
+                {
+                    groundPoint = ray.GetPoint(enter);
+                    groundHit = true;
+                }
+            }
+
+            if (groundHit)
+            {
+                if (CommandMode == RTSCommandMode.TargetingAttackMove)
+                {
+                    ExecuteAttackMoveOrder(groundPoint);
+                }
+                else if (CommandMode == RTSCommandMode.TargetingPatrol)
+                {
+                    ExecutePatrolOrder(groundPoint);
+                }
+            }
+
+            CommandMode = RTSCommandMode.Normal;
+        }
+
+        public void ExecuteAttackBuildingOrder(BuildingInstance building)
+        {
+            if (building == null || building.Health <= 0) return;
+
+            int count = 0;
+            foreach (var u in SelectedUnits)
+            {
+                if (u != null && u.IsAlive)
+                {
+                    u.OrderAttackBuilding(building);
+                    count++;
+                }
+            }
+
+            if (count > 0 && SelectedUnits.Count > 0)
+            {
+                GorkhaVoiceBarks.PlayAttackOrderBark(SelectedUnits[0]);
+                GorkhaPlayableHUD.SpawnFloatingText(building.transform.position + Vector3.up * 3f, "⚔️ Siege Order!", Color.red);
+            }
+        }
+
+        public void ExecuteAttackMoveOrder(Vector3 targetCenter)
+        {
+            if (SelectedUnits.Count == 0) return;
+
+            Vector3 centroid = Vector3.zero;
+            foreach (var u in SelectedUnits) centroid += u.transform.position;
+            centroid /= SelectedUnits.Count;
+
+            Vector3 marchDir = (targetCenter - centroid);
+            marchDir.y = 0;
+            if (marchDir.sqrMagnitude < 0.01f) marchDir = Vector3.forward;
+            else marchDir.Normalize();
+
+            Vector3[] slots = ArmyFormationController.CalculateFormationSlots(CurrentFormation, SelectedUnits, targetCenter, marchDir, spacing: 1.6f);
+
+            for (int i = 0; i < SelectedUnits.Count && i < slots.Length; i++)
+            {
+                if (SelectedUnits[i] != null && SelectedUnits[i].IsAlive)
+                {
+                    SelectedUnits[i].OrderAttackMove(slots[i]);
+                }
+            }
+
+            GorkhaAudio.PlayHorn();
+            GorkhaVFX.SpawnPlacementDust(targetCenter, Vector2.one * 1.5f);
+            GorkhaPlayableHUD.SpawnFloatingText(targetCenter + Vector3.up * 2.0f, "⚔️ Attack-Move March!", new Color(1f, 0.45f, 0.2f));
+        }
+
+        public void ExecutePatrolOrder(Vector3 targetCenter)
+        {
+            if (SelectedUnits.Count == 0) return;
+
+            Vector3 centroid = Vector3.zero;
+            foreach (var u in SelectedUnits) centroid += u.transform.position;
+            centroid /= SelectedUnits.Count;
+
+            Vector3 marchDir = (targetCenter - centroid);
+            marchDir.y = 0;
+            if (marchDir.sqrMagnitude < 0.01f) marchDir = Vector3.forward;
+            else marchDir.Normalize();
+
+            Vector3[] slots = ArmyFormationController.CalculateFormationSlots(CurrentFormation, SelectedUnits, targetCenter, marchDir, spacing: 1.6f);
+
+            for (int i = 0; i < SelectedUnits.Count && i < slots.Length; i++)
+            {
+                if (SelectedUnits[i] != null && SelectedUnits[i].IsAlive)
+                {
+                    SelectedUnits[i].OrderPatrol(slots[i]);
+                }
+            }
+
+            GorkhaAudio.PlayClick();
+            GorkhaVFX.SpawnPlacementDust(targetCenter, Vector2.one * 1.2f);
+            GorkhaPlayableHUD.SpawnFloatingText(targetCenter + Vector3.up * 2.0f, "🚶 Patrol Waypoint Established!", new Color(0.4f, 0.85f, 1f));
+        }
+
+        public void ExecuteHoldPositionOrder()
+        {
+            if (SelectedUnits.Count == 0) return;
+
+            foreach (var u in SelectedUnits)
+            {
+                if (u != null && u.IsAlive)
+                {
+                    u.OrderHoldPosition();
+                }
+            }
+
+            GorkhaAudio.PlayHorn(0.7f);
+            if (SelectedUnits.Count > 0)
+            {
+                GorkhaPlayableHUD.SpawnFloatingText(SelectedUnits[0].transform.position + Vector3.up * 2.5f, "🛡️ Battalion Holding Position!", new Color(0.35f, 1f, 0.5f));
+            }
+        }
+
+        public void ExecuteStopOrder()
+        {
+            if (SelectedUnits.Count == 0) return;
+
+            foreach (var u in SelectedUnits)
+            {
+                if (u != null && u.IsAlive)
+                {
+                    u.OrderStop();
+                }
+            }
+
+            GorkhaAudio.PlayClick();
+            if (SelectedUnits.Count > 0)
+            {
+                GorkhaPlayableHUD.SpawnFloatingText(SelectedUnits[0].transform.position + Vector3.up * 2.5f, "🛑 Battalion Halted!", Color.yellow);
+            }
+        }
+
         #endregion
 
         #region Marquee Selection GUI Rendering
 
         private void OnGUI()
         {
+            // Targeting Banner Indicator (CBT-04)
+            if (CommandMode != RTSCommandMode.Normal && SelectedUnits.Count > 0)
+            {
+                string prompt = CommandMode == RTSCommandMode.TargetingAttackMove
+                    ? "⚔️ [ATTACK-MOVE] Click ground or target to march & engage  •  (Esc / Right-Click to Cancel)"
+                    : "🚶 [PATROL] Click ground to set patrol waypoint  •  (Esc / Right-Click to Cancel)";
+
+                GUIStyle bannerStyle = new GUIStyle(GUI.skin.box)
+                {
+                    fontSize = 14,
+                    fontStyle = FontStyle.Bold,
+                    alignment = TextAnchor.MiddleCenter
+                };
+                bannerStyle.normal.textColor = CommandMode == RTSCommandMode.TargetingAttackMove ? new Color(1f, 0.5f, 0.2f) : new Color(0.4f, 0.9f, 1f);
+
+                float bw = Mathf.Min(Screen.width - 40f, 620f);
+                Rect bRect = new Rect((Screen.width - bw) * 0.5f, 76f, bw, 32f);
+                GUI.Box(bRect, prompt, bannerStyle);
+            }
+
             if (!_isDragging) return;
 
             InitializeMarqueeTextures();

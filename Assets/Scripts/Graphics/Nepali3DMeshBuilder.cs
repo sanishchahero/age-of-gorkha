@@ -401,64 +401,215 @@ namespace Gorkha.Graphics
         #region Complete Building Visual Generators
 
         /// <summary>
-        /// Generates the Gorkha Durbar / Town Center:
-        /// 3D slate stone plinth steps, 3D red terracotta brick core, 3-tier curved pagoda roofs,
-        /// golden Gajur pinnacle, fluttering royal double-triangle flag, and facade artwork.
+        /// Generates the Gorkha Durbar / Town Center across the 4 Historical Eras:
+        /// Level 1: Era I Principality Keep (Rustic stone & timber lodge, 1-tier broad roof).
+        /// Level 2: Era II Fortified Kot Durbar (Stepped slate plinth, terracotta brick core, 2 pagoda roof tiers).
+        /// Level 3: Era III Unification Palace (3-tier royal pagoda, golden Gajur pinnacle, waving royal flag).
+        /// Level 4: Era IV Himalayan Citadel (4-tier imperial fortress, 4 corner watch-turrets, dual battle standards).
         /// </summary>
-        public static GameObject BuildTownCenter(Transform parent = null)
+        public static GameObject BuildTownCenter(Transform parent = null, int level = 1)
         {
             GameObject root = new GameObject("TownCenter_3D");
             if (parent != null) root.transform.SetParent(parent, false);
 
-            // 1. Plinth Foundation (Stepped Slate Stone)
-            CreateSubMesh("Plinth_Tier1", CreateCubeMesh(new Vector3(3.8f, 0.25f, 3.8f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.125f, 0));
-            CreateSubMesh("Plinth_Tier2", CreateCubeMesh(new Vector3(3.4f, 0.20f, 3.4f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.35f, 0));
+            int tier = Mathf.Clamp(level, 1, 4);
 
-            // 2. 3D Architectural Pagoda Core (Red Brick & Sal Wood Pillars)
-            CreateSubMesh("GroundFloorCore", CreateCubeMesh(new Vector3(2.6f, 1.4f, 2.6f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 1.15f, 0));
-
-            float colOff = 1.25f;
-            Vector3[] cols = {
-                new Vector3(-colOff, 1.15f, -colOff), new Vector3(colOff, 1.15f, -colOff),
-                new Vector3(colOff, 1.15f, colOff), new Vector3(-colOff, 1.15f, colOff)
-            };
-            foreach (var pos in cols)
+            if (tier == 1)
             {
-                CreateSubMesh("TimberColumn", CreateCubeMesh(new Vector3(0.20f, 1.4f, 0.20f)), GorkhaMaterials.PagodaWood, root.transform, pos);
+                // ==========================================
+                // ERA I: Baise-Chaubisi Principality Keep
+                // ==========================================
+                CreateSubMesh("Plinth_Tier1", CreateCubeMesh(new Vector3(3.2f, 0.20f, 3.2f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.10f, 0));
+                CreateSubMesh("LodgeCore", CreateCubeMesh(new Vector3(2.2f, 1.30f, 2.2f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 0.85f, 0));
+
+                float colOff = 1.05f;
+                Vector3[] cols = {
+                    new Vector3(-colOff, 0.85f, -colOff), new Vector3(colOff, 0.85f, -colOff),
+                    new Vector3(colOff, 0.85f, colOff), new Vector3(-colOff, 0.85f, colOff)
+                };
+                foreach (var pos in cols)
+                {
+                    CreateSubMesh("TimberColumn", CreateCubeMesh(new Vector3(0.18f, 1.30f, 0.18f)), GorkhaMaterials.PagodaWood, root.transform, pos);
+                }
+
+                // 1-Tier Broad Rustic Roof
+                CreateSubMesh("ThatchRoof", CreatePyramidMesh(3.0f, 0.85f, flare: 0.35f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 1.65f, 0));
+                CreateSubMesh("ApexPinnacle", CreateCubeMesh(new Vector3(0.20f, 0.25f, 0.20f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0, 2.55f, 0));
+
+                // Small Principality Pennant
+                CreateSubMesh("FlagPole", CreateCylinderMesh(0.03f, 1.4f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0.9f, 2.0f, -0.6f));
+                GameObject flagObj = CreateSubMesh("WavingFlag", CreateDoubleTriangleFlagMesh(0.6f, 0.8f), GorkhaMaterials.RoyalRedFlag, root.transform, new Vector3(0.92f, 1.8f, -0.6f));
+                flagObj.AddComponent<FlagClothAnimator>();
+
+                // Entrance Doorway
+                CreateSubMesh("LodgeDoor", CreateCubeMesh(new Vector3(0.85f, 1.0f, 0.08f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 0.70f, -1.11f));
+                GorkhaVFX.AttachChimneySmoke(root.transform, new Vector3(-0.7f, 2.2f, 0.3f));
+
+                BoxCollider col = root.AddComponent<BoxCollider>();
+                col.center = new Vector3(0, 1.4f, 0);
+                col.size = new Vector3(3.4f, 3.0f, 3.4f);
             }
+            else if (tier == 2)
+            {
+                // ==========================================
+                // ERA II: Fortified Kot Durbar (2-Tier Pagoda)
+                // ==========================================
+                CreateSubMesh("Plinth_Tier1", CreateCubeMesh(new Vector3(3.5f, 0.22f, 3.5f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.11f, 0));
+                CreateSubMesh("Plinth_Tier2", CreateCubeMesh(new Vector3(3.1f, 0.18f, 3.1f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.31f, 0));
 
-            // 3. Roof Tier 1 (Lowest Pagoda)
-            CreateSubMesh("RoofTier1", CreatePyramidMesh(3.4f, 0.65f, flare: 0.35f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 1.85f, 0));
+                CreateSubMesh("GroundFloorCore", CreateCubeMesh(new Vector3(2.4f, 1.35f, 2.4f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 1.08f, 0));
+                float colOff = 1.15f;
+                Vector3[] cols = {
+                    new Vector3(-colOff, 1.08f, -colOff), new Vector3(colOff, 1.08f, -colOff),
+                    new Vector3(colOff, 1.08f, colOff), new Vector3(-colOff, 1.08f, colOff)
+                };
+                foreach (var pos in cols)
+                {
+                    CreateSubMesh("TimberColumn", CreateCubeMesh(new Vector3(0.18f, 1.35f, 0.18f)), GorkhaMaterials.PagodaWood, root.transform, pos);
+                }
 
-            // 4. Middle Floor Core & Roof Tier 2
-            CreateSubMesh("MidFloorCore", CreateCubeMesh(new Vector3(1.9f, 0.95f, 1.9f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 2.80f, 0));
-            CreateSubMesh("RoofTier2", CreatePyramidMesh(2.6f, 0.55f, flare: 0.25f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 3.25f, 0));
+                // Roof Tier 1
+                CreateSubMesh("RoofTier1", CreatePyramidMesh(3.2f, 0.60f, flare: 0.30f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 1.75f, 0));
 
-            // 5. Top Floor & Roof Tier 3 (Apex)
-            CreateSubMesh("TopFloorCore", CreateCubeMesh(new Vector3(1.3f, 0.70f, 1.3f)), GorkhaMaterials.WhitePlaster, root.transform, new Vector3(0, 4.05f, 0));
-            CreateSubMesh("RoofTier3", CreatePyramidMesh(1.8f, 0.50f, flare: 0.20f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 4.35f, 0));
+                // 2nd Floor & Roof Tier 2
+                CreateSubMesh("TopFloorCore", CreateCubeMesh(new Vector3(1.7f, 0.85f, 1.7f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 2.50f, 0));
+                CreateSubMesh("RoofTier2", CreatePyramidMesh(2.3f, 0.50f, flare: 0.25f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 2.95f, 0));
 
-            // 6. Golden Gajur Spire (Metallic pinnacle)
-            CreateSubMesh("GoldenGajurSpire", CreateCylinderMesh(0.10f, 0.85f), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0f, 5.10f, 0f));
-            CreateSubMesh("GoldenGajurApex", CreateCubeMesh(new Vector3(0.22f, 0.22f, 0.22f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0f, 5.55f, 0f));
+                // Gajur Pinnacle
+                CreateSubMesh("GoldenGajurSpire", CreateCylinderMesh(0.08f, 0.60f), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0f, 3.50f, 0f));
+                CreateSubMesh("GoldenGajurApex", CreateCubeMesh(new Vector3(0.18f, 0.18f, 0.18f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0f, 3.85f, 0f));
 
-            // 7. Fluttering Royal Flag on Mast
-            CreateSubMesh("FlagPole", CreateCylinderMesh(0.04f, 2.0f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(1.1f, 3.2f, -0.6f));
-            GameObject flagObj = CreateSubMesh("WavingFlag", CreateDoubleTriangleFlagMesh(0.9f, 1.2f), GorkhaMaterials.RoyalRedFlag, root.transform, new Vector3(1.12f, 2.9f, -0.6f));
-            flagObj.AddComponent<FlagClothAnimator>();
+                // Royal Flag
+                CreateSubMesh("FlagPole", CreateCylinderMesh(0.035f, 1.8f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(1.0f, 2.7f, -0.6f));
+                GameObject flagObj = CreateSubMesh("WavingFlag", CreateDoubleTriangleFlagMesh(0.75f, 1.0f), GorkhaMaterials.RoyalRedFlag, root.transform, new Vector3(1.02f, 2.4f, -0.6f));
+                flagObj.AddComponent<FlagClothAnimator>();
 
-            // 8. Front Facade Authentic 3D Architectural Entrance Portal
-            CreateSubMesh("PalaceDoorArch", CreateCubeMesh(new Vector3(1.1f, 1.25f, 0.12f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 0.95f, -1.31f));
-            CreateSubMesh("PalaceDoorPanels", CreateCubeMesh(new Vector3(0.85f, 1.05f, 0.08f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 0.90f, -1.33f));
-            CreateSubMesh("PalaceDoorGajur", CreatePyramidMesh(0.28f, 0.16f), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0, 1.62f, -1.31f));
+                // Entrance Arch
+                CreateSubMesh("PalaceDoorArch", CreateCubeMesh(new Vector3(1.0f, 1.15f, 0.10f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 0.88f, -1.21f));
+                CreateSubMesh("PalaceDoorPanels", CreateCubeMesh(new Vector3(0.75f, 0.95f, 0.08f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 0.82f, -1.22f));
 
-            // 9. Palace Chimney Smoke Plume
-            GorkhaVFX.AttachChimneySmoke(root.transform, new Vector3(-0.85f, 4.4f, 0.4f));
+                GorkhaVFX.AttachChimneySmoke(root.transform, new Vector3(-0.75f, 3.2f, 0.35f));
 
-            // BoxCollider for selection
-            BoxCollider col = root.AddComponent<BoxCollider>();
-            col.center = new Vector3(0, 2.5f, 0);
-            col.size = new Vector3(3.8f, 5.2f, 3.8f);
+                BoxCollider col = root.AddComponent<BoxCollider>();
+                col.center = new Vector3(0, 1.9f, 0);
+                col.size = new Vector3(3.6f, 4.0f, 3.6f);
+            }
+            else if (tier == 3)
+            {
+                // ==========================================
+                // ERA III: Unification Era (Classic 3-Tier Durbar)
+                // ==========================================
+                CreateSubMesh("Plinth_Tier1", CreateCubeMesh(new Vector3(3.8f, 0.25f, 3.8f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.125f, 0));
+                CreateSubMesh("Plinth_Tier2", CreateCubeMesh(new Vector3(3.4f, 0.20f, 3.4f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.35f, 0));
+
+                CreateSubMesh("GroundFloorCore", CreateCubeMesh(new Vector3(2.6f, 1.4f, 2.6f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 1.15f, 0));
+                float colOff = 1.25f;
+                Vector3[] cols = {
+                    new Vector3(-colOff, 1.15f, -colOff), new Vector3(colOff, 1.15f, -colOff),
+                    new Vector3(colOff, 1.15f, colOff), new Vector3(-colOff, 1.15f, colOff)
+                };
+                foreach (var pos in cols)
+                {
+                    CreateSubMesh("TimberColumn", CreateCubeMesh(new Vector3(0.20f, 1.4f, 0.20f)), GorkhaMaterials.PagodaWood, root.transform, pos);
+                }
+
+                // Roof Tier 1
+                CreateSubMesh("RoofTier1", CreatePyramidMesh(3.4f, 0.65f, flare: 0.35f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 1.85f, 0));
+
+                // Middle Floor & Roof Tier 2
+                CreateSubMesh("MidFloorCore", CreateCubeMesh(new Vector3(1.9f, 0.95f, 1.9f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 2.80f, 0));
+                CreateSubMesh("RoofTier2", CreatePyramidMesh(2.6f, 0.55f, flare: 0.25f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 3.25f, 0));
+
+                // Top Floor & Roof Tier 3
+                CreateSubMesh("TopFloorCore", CreateCubeMesh(new Vector3(1.3f, 0.70f, 1.3f)), GorkhaMaterials.WhitePlaster, root.transform, new Vector3(0, 4.05f, 0));
+                CreateSubMesh("RoofTier3", CreatePyramidMesh(1.8f, 0.50f, flare: 0.20f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 4.35f, 0));
+
+                // Golden Gajur Spire
+                CreateSubMesh("GoldenGajurSpire", CreateCylinderMesh(0.10f, 0.85f), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0f, 5.10f, 0f));
+                CreateSubMesh("GoldenGajurApex", CreateCubeMesh(new Vector3(0.22f, 0.22f, 0.22f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0f, 5.55f, 0f));
+
+                // Fluttering Royal Flag
+                CreateSubMesh("FlagPole", CreateCylinderMesh(0.04f, 2.0f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(1.1f, 3.2f, -0.6f));
+                GameObject flagObj = CreateSubMesh("WavingFlag", CreateDoubleTriangleFlagMesh(0.9f, 1.2f), GorkhaMaterials.RoyalRedFlag, root.transform, new Vector3(1.12f, 2.9f, -0.6f));
+                flagObj.AddComponent<FlagClothAnimator>();
+
+                // Entrance Portal
+                CreateSubMesh("PalaceDoorArch", CreateCubeMesh(new Vector3(1.1f, 1.25f, 0.12f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 0.95f, -1.31f));
+                CreateSubMesh("PalaceDoorPanels", CreateCubeMesh(new Vector3(0.85f, 1.05f, 0.08f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 0.90f, -1.33f));
+                CreateSubMesh("PalaceDoorGajur", CreatePyramidMesh(0.28f, 0.16f), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0, 1.62f, -1.31f));
+
+                GorkhaVFX.AttachChimneySmoke(root.transform, new Vector3(-0.85f, 4.4f, 0.4f));
+
+                BoxCollider col = root.AddComponent<BoxCollider>();
+                col.center = new Vector3(0, 2.5f, 0);
+                col.size = new Vector3(3.8f, 5.2f, 3.8f);
+            }
+            else
+            {
+                // ==========================================
+                // ERA IV: Himalayan Empire Era (Grand Citadel)
+                // ==========================================
+                // 3 Stepped Slate Plinths
+                CreateSubMesh("Plinth_Tier1", CreateCubeMesh(new Vector3(4.3f, 0.28f, 4.3f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.14f, 0));
+                CreateSubMesh("Plinth_Tier2", CreateCubeMesh(new Vector3(3.9f, 0.22f, 3.9f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.39f, 0));
+                CreateSubMesh("Plinth_Tier3", CreateCubeMesh(new Vector3(3.5f, 0.18f, 3.5f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 0.59f, 0));
+
+                // 4 Corner Fortress Bastions (Defensive mini-towers)
+                float bOff = 1.65f;
+                Vector3[] bastionPos = {
+                    new Vector3(-bOff, 1.2f, -bOff), new Vector3(bOff, 1.2f, -bOff),
+                    new Vector3(bOff, 1.2f, bOff), new Vector3(-bOff, 1.2f, bOff)
+                };
+                foreach (var bPos in bastionPos)
+                {
+                    CreateSubMesh("BastionTower", CreateCylinderMesh(0.35f, 1.8f), GorkhaMaterials.SlateStone, root.transform, bPos);
+                    CreateSubMesh("BastionRoof", CreatePyramidMesh(0.85f, 0.55f, flare: 0.15f), GorkhaMaterials.PagodaWood, root.transform, bPos + Vector3.up * 1.15f);
+                    CreateSubMesh("BastionFinial", CreateCubeMesh(new Vector3(0.12f, 0.12f, 0.12f)), GorkhaMaterials.GoldenGajur, root.transform, bPos + Vector3.up * 1.5f);
+                }
+
+                // 1st Floor Base Core & 1st Roof
+                CreateSubMesh("GroundFloorCore", CreateCubeMesh(new Vector3(2.8f, 1.50f, 2.8f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 1.40f, 0));
+                CreateSubMesh("RoofTier1", CreatePyramidMesh(3.8f, 0.70f, flare: 0.40f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 2.20f, 0));
+
+                // 2nd Floor Core & 2nd Roof
+                CreateSubMesh("Floor2Core", CreateCubeMesh(new Vector3(2.2f, 1.10f, 2.2f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 3.10f, 0));
+                CreateSubMesh("RoofTier2", CreatePyramidMesh(3.0f, 0.60f, flare: 0.30f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 3.65f, 0));
+
+                // 3rd Floor Core & 3rd Roof
+                CreateSubMesh("Floor3Core", CreateCubeMesh(new Vector3(1.6f, 0.85f, 1.6f)), GorkhaMaterials.RedBrick, root.transform, new Vector3(0, 4.45f, 0));
+                CreateSubMesh("RoofTier3", CreatePyramidMesh(2.2f, 0.50f, flare: 0.25f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 4.90f, 0));
+
+                // 4th Imperial Apex Floor & 4th Roof
+                CreateSubMesh("ApexFloorCore", CreateCubeMesh(new Vector3(1.1f, 0.75f, 1.1f)), GorkhaMaterials.WhitePlaster, root.transform, new Vector3(0, 5.65f, 0));
+                CreateSubMesh("RoofTier4", CreatePyramidMesh(1.6f, 0.45f, flare: 0.20f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 6.05f, 0));
+
+                // Grand Imperial Gajur with Sun Disc
+                CreateSubMesh("ImperialGajurSpire", CreateCylinderMesh(0.12f, 1.10f), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0f, 6.85f, 0f));
+                CreateSubMesh("ImperialGajurRing", CreateCylinderMesh(0.24f, 0.15f), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0f, 7.15f, 0f));
+                CreateSubMesh("ImperialGajurApex", CreateCubeMesh(new Vector3(0.26f, 0.26f, 0.26f)), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0f, 7.55f, 0f));
+
+                // Dual Imperial Battle Standards
+                CreateSubMesh("LeftFlagPole", CreateCylinderMesh(0.04f, 2.2f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(-1.3f, 3.6f, -0.7f));
+                GameObject lFlag = CreateSubMesh("LeftFlag", CreateDoubleTriangleFlagMesh(0.85f, 1.15f), GorkhaMaterials.RoyalRedFlag, root.transform, new Vector3(-1.32f, 3.3f, -0.7f));
+                lFlag.AddComponent<FlagClothAnimator>();
+
+                CreateSubMesh("RightFlagPole", CreateCylinderMesh(0.04f, 2.2f), GorkhaMaterials.PagodaWood, root.transform, new Vector3(1.3f, 3.6f, -0.7f));
+                GameObject rFlag = CreateSubMesh("RightFlag", CreateDoubleTriangleFlagMesh(0.85f, 1.15f), GorkhaMaterials.RoyalRedFlag, root.transform, new Vector3(1.32f, 3.3f, -0.7f));
+                rFlag.AddComponent<FlagClothAnimator>();
+
+                // Grand Entrance Portal
+                CreateSubMesh("ImperialDoorArch", CreateCubeMesh(new Vector3(1.3f, 1.45f, 0.15f)), GorkhaMaterials.PagodaWood, root.transform, new Vector3(0, 1.15f, -1.41f));
+                CreateSubMesh("ImperialDoorPanels", CreateCubeMesh(new Vector3(1.0f, 1.20f, 0.10f)), GorkhaMaterials.SlateStone, root.transform, new Vector3(0, 1.05f, -1.43f));
+                CreateSubMesh("ImperialDoorGajur", CreatePyramidMesh(0.35f, 0.22f), GorkhaMaterials.GoldenGajur, root.transform, new Vector3(0, 1.95f, -1.41f));
+
+                // Dual Chimneys
+                GorkhaVFX.AttachChimneySmoke(root.transform, new Vector3(-1.1f, 5.0f, 0.5f));
+                GorkhaVFX.AttachChimneySmoke(root.transform, new Vector3(1.1f, 5.0f, 0.5f));
+
+                BoxCollider col = root.AddComponent<BoxCollider>();
+                col.center = new Vector3(0, 3.2f, 0);
+                col.size = new Vector3(4.3f, 6.8f, 4.3f);
+            }
 
             return root;
         }

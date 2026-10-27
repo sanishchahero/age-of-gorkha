@@ -4,6 +4,7 @@ using Gorkha.Economy;
 using Gorkha.Graphics;
 using Gorkha.Audio;
 using Gorkha.UI;
+using Gorkha.Progression;
 
 namespace Gorkha.Buildings
 {
@@ -113,10 +114,11 @@ namespace Gorkha.Buildings
             else
             {
                 _previewInstance = new GameObject($"Preview_{blueprint.buildingType}");
+                int tcTier = AgeManager.Instance != null ? AgeManager.Instance.CurrentAgeIndex + 1 : 1;
                 switch (blueprint.buildingType)
                 {
                     case BuildingType.TownCenter:
-                        Nepali3DMeshBuilder.BuildTownCenter(_previewInstance.transform);
+                        Nepali3DMeshBuilder.BuildTownCenter(_previewInstance.transform, tcTier);
                         break;
                     case BuildingType.Farm:
                         Nepali3DMeshBuilder.BuildFarm(_previewInstance.transform);
@@ -313,6 +315,14 @@ namespace Gorkha.Buildings
             {
                 GorkhaAudio.PlayError();
                 GorkhaPlayableHUD.SpawnFloatingText(_previewInstance.transform.position + Vector3.up * 2f, "Position Blocked!", Color.red);
+                return false;
+            }
+
+            // Check Historical Age and Capacity Gating (AGE-01 / AGE-02)
+            if (!BuildingGatingManager.CanConstruct(_currentBlueprint.buildingType, out string lockReason))
+            {
+                GorkhaAudio.PlayError();
+                GorkhaPlayableHUD.SpawnFloatingText(_previewInstance.transform.position + Vector3.up * 2f, lockReason, Color.red);
                 return false;
             }
 

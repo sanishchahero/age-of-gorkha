@@ -5,6 +5,7 @@ using Gorkha.Economy;
 using Gorkha.Graphics;
 using Gorkha.Audio;
 using Gorkha.UI;
+using Gorkha.Progression;
 
 namespace Gorkha.Buildings
 {
@@ -27,11 +28,13 @@ namespace Gorkha.Buildings
     {
         public static readonly System.Collections.Generic.List<BuildingInstance> AllBuildings = new();
         public static event Action<BuildingInstance> OnBuildingSelected;
+        public static event Action<BuildingInstance> OnBuildingDestroyed;
 
         [Header("Building Data")]
         [SerializeField] private BuildingData _data;
         [SerializeField] private int _level = 1;
         [SerializeField] private BuildingState _state = BuildingState.Active;
+        [SerializeField] private bool _isHostile = false;
 
         [Header("Health & Durability")]
         [SerializeField] private int _maxHealth = 500;
@@ -68,6 +71,12 @@ namespace Gorkha.Buildings
         public BuildingState State => _state;
         public int Health => _currentHealth;
         public int MaxHealth => _maxHealth;
+        public bool IsHostile => _isHostile;
+
+        public void SetHostile(bool hostile)
+        {
+            _isHostile = hostile;
+        }
         public bool IsAlive => _currentHealth > 0;
         public float RemainingConstructionTime => Mathf.Max(0f, _constructionTimer);
         public float TotalConstructionTime => _totalConstructionTime;
@@ -226,7 +235,22 @@ namespace Gorkha.Buildings
             _level++;
             _state = BuildingState.Active;
             BuilderManager.Instance?.ReleaseBuilder(this);
-            UpdateVisuals();
+
+            if (_data != null && _data.buildingType == BuildingType.TownCenter)
+            {
+                // Rebuild visuals so Town Center morphs to the new Historical Era architecture
+                if (_completedVisual != null)
+                {
+                    Destroy(_completedVisual);
+                    _completedVisual = null;
+                }
+                EnsureVisuals();
+                AgeManager.Instance?.OnTownCenterUpgraded(_level);
+            }
+            else
+            {
+                UpdateVisuals();
+            }
 
             GorkhaAudio.PlayUpgrade();
             GorkhaVFX.SpawnUpgradeConfetti(transform.position);
@@ -339,6 +363,7 @@ namespace Gorkha.Buildings
                 {
                     IsometricGrid.Instance.FreeArea(_gridCol, _gridRow, _data.tileWidth, _data.tileHeight);
                 }
+                OnBuildingDestroyed?.Invoke(this);
             }
         }
 
@@ -403,7 +428,7 @@ namespace Gorkha.Buildings
                     switch (_data.buildingType)
                     {
                         case BuildingType.TownCenter:
-                            _completedVisual = Nepali3DMeshBuilder.BuildTownCenter(transform);
+                            _completedVisual = Nepali3DMeshBuilder.BuildTownCenter(transform, _level);
                             break;
                         case BuildingType.Farm:
                             _completedVisual = Nepali3DMeshBuilder.BuildFarm(transform);
@@ -448,7 +473,7 @@ namespace Gorkha.Buildings
                             _completedVisual = Nepali3DMeshBuilder.BuildVault(transform);
                             break;
                         default:
-                            _completedVisual = Nepali3DMeshBuilder.BuildTownCenter(transform);
+                            _completedVisual = Nepali3DMeshBuilder.BuildTownCenter(transform, _level);
                             break;
                     }
                 }
