@@ -28,12 +28,20 @@ flowchart LR
 | **GFX-02** | **Ground Terrain Shading, Cobblestone Walkways & Foliage** | AoE / CoC | **P0** | ✅ Completed |
 | **GFX-03** | **Dynamic Particle Systems (Chimney Smoke, Torches, Dust Puffs)** | CoC | **P0** | ✅ Completed |
 | **GFX-04** | **Procedural Himalayan Soundscape (Mountain Wind & Melodic Chimes)** | AoE | **P1** | ✅ Completed |
+| **GFX-05** | **Fantasy Kingdom Unity 6 3D Asset Integration (Modular Buildings & SpeedTree Pines)** | Unity 6 / Synty | **P0** | ✅ Completed |
+| **GFX-06** | **Bloom Glare Clamp & Lighting Shading Calibration (No Glare, 3D Medallions)** | Studio Standard | **P0** | ✅ Completed |
+| **GFX-07** | **Himalayan Army Archetypes & Stylized Weapons (Khukuris, Spears, Bows, Shields)** | Synty / AoE | **P0** | ✅ Completed |
+| **GFX-08** | **Kinetic Machinery & Armory Outpost Dressing (Spinning Windmill & Armory Props)** | Synty / CoC | **P0** | ✅ Completed |
+| **GFX-09** | **Fantasy Kingdom Environment Parity (Tiled Ground, Lake, Grass, Walls, SSAO, VFX)** | Fantasy Kingdom | **P0** | ✅ Completed |
+| **GFX-10** | **Articulated Procedural Skeletal Animations (Walk Cycles, Weapon Strikes, Flinch)** | AoE / Synty | **P0** | ✅ Completed |
+| **GFX-11** | **Parabolic Ballistic Projectiles (Gravitational Flight & Sticking Arrow Impact)** | AoE / CoC | **P0** | ✅ Completed |
+| **GFX-12** | **Synty POLYGON Humanoid 3D Character Models (`SM_Chr_Male_01` / `Female_01`)** | Synty Studios | **P0** | ✅ Completed |
 | **UX-01** | **Clash of Clans Studio HUD Redesign (Resource Bars & Dock)** | CoC | **P0** | ✅ Completed |
 | **UX-02** | **Tactile 3D Building Selection Ring & Bounce Hop** | CoC | **P0** | ✅ Completed |
 | **UX-03** | **Signature CoC Harvest Bubbles & Floating Popups** | CoC | **P0** | ✅ Completed |
 | **UX-04** | **Precision 3D Building Placement Grid & Snap Audio** | CoC / AoE | **P0** | ✅ Completed |
 | **UX-05** | **Cinematic RTS Camera Inertia & Edge Panning** | AoE | **P1** | ✅ Completed |
-| **GFX-05** | **Articulated Humanoid Kinematics & Dynamic Toolset** | AoE / CoC | **P0** | ✅ Completed |
+| **UX-06** | **World-Space Dynamic Combat Health Bars (Billboarded Gradient & Auto-Fade)** | CoC / AoE | **P0** | ✅ Completed |
 
 ### Detailed Specifications (Phase 0)
 
@@ -55,6 +63,46 @@ flowchart LR
 #### GFX-04: Procedural Himalayan Soundscape
 - Dynamic audio synthesizer enhancements: tactile wooden UI clicks, harp arpeggio harvest chimes, deep stone building thuds, and victory fanfare.
 - Ambient mountain breeze loop with subtle temple bell resonance.
+
+#### GFX-05: Fantasy Kingdom Unity 6 3D Asset Integration
+- Seamless binding of Unity 6 Fantasy Kingdom modular 3D prefabs via `FantasyKingdomAssetRegistry`:
+  - **Town Center (Durbar):** `Preset_Church_01_A.prefab` (grand stone foundation & soaring timber keep).
+  - **Barracks (Kot):** `Preset_Blacksmith_01.prefab` (fortified armory with outdoor training compound).
+  - **Farm (Krishi Kshetra):** `Preset_House_Windmill_01.prefab` (wind-driven mill with stone base).
+  - **Woodcutter Camp:** `Preset_Shelter_02.prefab` (timber logging shelter).
+  - **Stone Quarry:** `Preset_Hut_01.prefab` (stone masons' hut).
+  - **Residential Cottages:** `Preset_House_01_A.prefab` (multi-tier Newari/medieval cottage).
+  - **Watchtower (Suraksha Minar):** `Preset_Tower_01.prefab` (high defensive stone bastion).
+  - **Perimeter & Harvest Scenery:** SpeedTree 9 wind-animated pine trees (`TreePine_VarA/B/C.prefab`) and granite boulders (`Rocks_01/11.prefab`).
+- Exact mathematical bounding offsets and proportional RTS scaling so all models sit perfectly grounded on 2x2 grid footprints without floating or misalignment.
+- Automatic procedural mesh generation fallback (`Nepali3DMeshBuilder`) whenever a prefab is unassigned.
+
+#### GFX-06: Bloom Glare Clamp & Lighting Shading Calibration
+- Clamped URP Bloom maximum threshold to $1.25$ (previously unclamped at $65472$) with softened golden-hour tint in `SampleSceneProfile.asset`, eliminating the blinding white glare over the Town Hall.
+- Reduced Directional Sun intensity from $2.0$ down to natural Himalayan mountain ambient $1.15$ with softened shadow bias.
+- Updated Royal Red Flag material (`GorkhaMaterials.RoyalRedFlag`) with double-sided rendering (`_Cull 0`) and vibrant crimson non-specular diffuse, fixing the shadowed black backface silhouette bug.
+- Upgraded harvest floating bubbles from raw tilted yellow cubes to 3D golden coin medallions (`Nepali3DMeshBuilder.BuildHarvestMedallion`) with rim-glow and smooth collection popping animation.
+
+#### GFX-07: Himalayan Army Archetypes & Stylized Weapons
+- Multi-class 3D character generator (`Nepali3DMeshBuilder.BuildUnit`) matching Synty low-poly proportions:
+  - **Khukuri Warrior:** Daura Suruwal tunic, Patuka crimson sash, Dhaka Topi with golden crest, curved steel Khukuri with Kauda cho notch, and round wooden buckler shield with brass rim and iron center boss.
+  - **Gorkha Spearman:** Conical iron combat helmet with golden spire, 2.3m Salwood spear with steel leaf head and crimson pennant, and heavy infantry rectangular pavise tower shield with royal sun crest.
+  - **Mountain Archer:** Scout headband with crimson feather plume, carved horn/wood reflex recurve bow, and leather back quiver containing 3 fletched arrows.
+  - **Civilian Villager:** Woven bamboo straw sun hat, double-bitted lumber axe / mining pickaxe, and dynamic resource sack that visibly straps to the villager's back when harvesting timber or slate and disappears upon drop-off.
+  - **Hostile Raider Bandit:** Slate-iron war vest, crimson war bandana with spikes, and dual-wielded raiding blades.
+
+#### GFX-08: Kinetic Machinery & Armory Outpost Dressing
+- **Kinetic Windmill Sails (`SmoothRotator`):** Continuous frame-rate independent rotation (28 deg/sec around local Z axis) operating seamlessly in both Edit Mode and Play Mode, mounted precisely at the hub axle of `Preset_House_Windmill_01`.
+- **Kot Barracks Armory Yard:** Dressed with heavy forged blacksmith anvil on tree stump block, A-frame wooden weapon racks displaying upright spears, and straw concentric archery targets with stuck practice arrows.
+- **Outpost Supply Stacks:** Timber cargo crates and iron-banded storage barrels clustered outside logging camps, stone quarries, farms, and Town Center command posts.
+
+#### GFX-09: Fantasy Kingdom Environment Parity
+- **Textured Tiled Alpine Ground:** Replaced flat single-color boxes with a high-resolution 16x16 tiled terrain mesh utilizing `Atlas_Ground_Rocks.mat` (`Atlas_Ground_Base_Color.png` & `Atlas_Ground_Normal.png`), rendering sharp pebbles, grass tufts, and mountain loam.
+- **Living Alpine Lake & Stream:** Scenic western water plane (`WaterLake.mat`) with animated depth wave displacement, sun glints, depth foam shorelines, submerged lakebed, and shoreline granite boulders.
+- **Waving Meadow Grass Scatter:** Clustered `Scatter_Grass` prefabs with vertex wind sway (`Atlas_Foliage`) lining the road shoulders, boulders, and perimeter.
+- **Fortified Town Wall Perimeter:** Modular stone fortress battlements (`SM_Town_Wall_Border_01`), corner bastion watchtowers (`SM_Town_Wall_Border_04`), and fortified stone gatehouse archways (`SM_Town_Wall_Border_10`) enclosing the kingdom.
+- **Desktop Volume Profile & SSAO Contact Shadows:** Upgraded active scenes to `Global Volume Profile Desktop.asset` with Screen Space Ambient Occlusion (SSAO) eliminating floating artifacts, ACES Tonemapping, Color Adjustments, White Balance, and Vignette.
+- **Living Himalayan Atmospheric VFX (`HimalayanAtmosphericVFX`):** Integrated Visual Effect Graph systems for curling chimney smoke plumes, windblown autumn leaves tumbling through village streets, sunlit pollen dust motes, and soaring eagle/crow flocks.
 
 #### UX-01: Clash of Clans Studio HUD Redesign
 - Custom high-contrast slate cards with golden filigree borders for top resource trackers (Food, Wood, Stone, Gold, Gems).
@@ -79,16 +127,38 @@ flowchart LR
 - Optional RTS edge panning (moving mouse to viewport boundary pans the view).
 - Smooth exponential zoom and double-click building focus.
 
-#### GFX-05: Articulated Humanoid Kinematics & Dynamic Toolset
-- **15-Bone Skeletal Kinematics:** Full joint chain articulation across Hips, Spine_02, Head, Thighs, Knees, Ankles, Shoulders, Elbows, and Hands. Eliminates rigid pendulum movement with realistic knee flexion ($42^\circ$), ankle ground pitch, and elbow arm flexion.
-- **Independent Pelvic Sway & Step Bounce:** Hips bounce vertically ($0.038\text{m}$) and sway with stride cycles while upper-body spine counter-balances torque.
-- **Authentic Stances & Combat Attacks:**
-  - *Khukuri Warriors:* Dynamic waist guard stance with raised buckler; multi-axis cross-cleave attack with torso windup and recovery.
-  - *Spearmen:* Phalanx spear-ready stance; forward thrust piston lunge with recoil recovery.
-  - *Archers:* Scout stance with notched arrow; bowstring pull with shoulder draw and physical recoil kick.
-  - *Villagers:* Forward-leaning counter-balance stance for heavy back-mounted Doko loads; authentic two-handed overhead chop and farm cultivation.
-- **Dynamic Villager Toolset:** Right hand dynamically equips Woodcutter Broadaxe, Slate Mining Pickaxe, or forged steel Curved Sickle (*Hasiya* / *Khurpa*) matching the gathered resource.
-- **Damage Reaction & Death Physics:** Instant flinch wobble on taking damage, and physical multi-joint collapse animation on defeat before dissolution.
+#### GFX-10: Articulated Procedural Skeletal Animations
+- Articulated joint hierarchy (`HipLeft`, `HipRight`, `ShoulderLeft`, `ShoulderRight`, `Torso`, `Head`) driven by `UnitProceduralAnimator`.
+- Opposing harmonic hip walk cycles ($\pm 32^\circ$) and counter-phase shoulder swings ($\pm 24^\circ$) matching real human locomotion.
+- True weapon combat routines:
+  - **Khukuri Warrior:** High windup raise, downward cross slash across chest, and recovery.
+  - **Spearman:** Rear-foot plant and two-handed forward spear lunge ($0.45\text{ m}$ forward drive).
+  - **Mountain Archer:** Left-arm bow elevation, right-hand bowstring draw to cheek, and snap release with bow vibration recoil.
+  - **Villager:** Overhead two-handed axe/pickaxe power chop rhythmically striking trees and stone boulders.
+  - **Hit Flinch:** Knockback torso and head recoil with quick recovery.
+
+#### GFX-11: Parabolic Ballistic Projectiles
+- True gravitational parabolic flight paths (`BallisticProjectile`) for physical arrows fired by Watchtowers and Archers.
+- Real-time orientation matching trajectory velocity vector $\vec{v}(t)$ with dynamic target leading.
+- Sticking impact realism: arrows stick directly into targeted units or buildings upon impact for 2.8 seconds.
+
+#### UX-06: World-Space Dynamic Combat Health Bars
+- Camera-billboarded, high-contrast slate-bordered health bars (`WorldCombatHealthBar`) hovering above damaged units ($1.85\text{ m}$) and buildings ($3.2\text{ m}$ / $4.8\text{ m}$).
+- Smooth color gradient transition: Emerald Green ($>55\%$) $\to$ Golden Amber ($55\% - 25\%$) $\to$ Ruby Crimson ($<25\%$).
+- Auto-hides when units/buildings are at full health during peace, appearing instantly upon taking damage and fading after combat resolves.
+
+#### GFX-12: Synty POLYGON Humanoid 3D Character Integration
+- Replaced blocky procedural character models with Synty Studios **POLYGON - Starter Pack** rigged humanoid 3D character meshes (`SM_Chr_Male_01` and `SM_Chr_Female_01`).
+- Dynamically rigged and accessorized with authentic historic Nepali gear via `Nepali3DMeshBuilder`:
+  - **Khukuri Warrior (*Asal Sipahi*):** Traditional geometric Dhaka Topi with golden sun crest, curved steel Khukuri blade in right hand, round brass-rim buckler shield on left arm.
+  - **Gorkha Spearman (*Bhaledar*):** Conical iron combat helmet with golden Gajur spire, 2.3m Salwood spear with royal red pennant in right hand, heavy infantry rectangular pavise shield on left arm.
+  - **Mountain Archer (*Dhanurdhari*):** Scout headband with crimson feather plume, carved horn/wood reflex recurve bow in left hand, back leather quiver with fletched arrows.
+  - **Civilian Villager:** Woven bamboo straw sun hat (*Ghum*), lumberjack axe / mining pickaxe, dynamic carried resource back-sack.
+  - **Hostile Bandit Raider:** Spiked bandit war bandana, dark slate iron palette (`PolygonStarter_03.mat`), dual blades.
+- Sockets weapons directly into hand bones (`Hand_R`, `Hand_L`), headwear onto `Head`, and quivers/sacks onto `Spine_02`.
+- Hair mesh (`Character_Hair_Male_01` / `Female_01`) dynamically hidden when wearing enclosed helmets or hats to prevent clipping.
+- Procedural animator (`UnitProceduralAnimator`) upgraded to automatically bind Synty bone hierarchies (`UpperLeg_L/R`, `Shoulder_L/R`, `Hips`, `Head`) and multiply relative rotations onto rest poses, supporting both Synty humanoid and procedural rigs.
+- Auto-upgrades existing units in scenes upon launch via `UnitController.EnsureVisuals()`.
 
 ---
 
@@ -196,8 +266,8 @@ flowchart LR
 
 | Task ID | Feature Title | Inspiration | Priority | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **AGE-01** | **Four Historical Ages of Gorkha** | AoE | **P0** | ⏳ Planned |
-| **AGE-02** | **Town Center Upgrade Gating & Unlocks** | CoC / AoE | **P0** | ⏳ Planned |
+| **AGE-01** | **Four Historical Ages of Gorkha** | AoE | **P0** | ✅ Completed |
+| **AGE-02** | **Town Center Upgrade Gating & Unlocks** | CoC / AoE | **P0** | ✅ Completed |
 | **AGE-03** | **Academy of Arts & Warfare (Research Tech Tree)** | AoE | **P1** | ⏳ Planned |
 | **AGE-04** | **Wonder of the World Construction Victory** | AoE | **P2** | ⏳ Planned |
 
@@ -242,14 +312,24 @@ flowchart LR
 
 | Task ID | Feature Title | Inspiration | Priority | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **CBT-01** | **Multi-Unit Drag-Box Selection & Group Hotkeys** | AoE | **P0** | ⏳ Planned |
-| **CBT-02** | **Tactical Unit Formations (Line, Box, Wedge)** | AoE | **P1** | ⏳ Planned |
-| **CBT-03** | **Rock-Paper-Scissors Combat Triangle** | AoE | **P0** | ⏳ Planned |
-| **CBT-04** | **Attack-Move, Hold Position & Patrol Commands** | AoE | **P1** | ⏳ Planned |
-| **CBT-05** | **CoC-Style Asynchronous Village Raid Mode** | CoC | **P1** | ⏳ Planned |
+| **CBT-00** | **Living Garrison Active Defense & Raid AI (Melee & Ranged Combat)** | AoE / CoC | **P0** | ✅ Completed |
+| **CBT-01** | **Multi-Unit Drag-Box Selection & Group Hotkeys** | AoE | **P0** | ✅ Completed |
+| **CBT-02** | **Tactical Unit Formations (Line, Box, Wedge, Staggered)** | AoE | **P1** | ✅ Completed |
+| **CBT-03** | **Rock-Paper-Scissors Combat Triangle** | AoE | **P0** | ✅ Completed |
+| **CBT-04** | **Attack-Move, Hold Position & Patrol Commands** | AoE | **P1** | ✅ Completed |
+| **CBT-05** | **CoC-Style Asynchronous Village Raid Mode** | CoC | **P1** | ✅ Completed |
 | **CBT-06** | **Hero Generals (Prithvi Narayan Shah, Kalu Pande)** | CoC / AoE | **P2** | ⏳ Planned |
 
 ### Detailed Specifications
+
+#### CBT-00: Living Garrison Active Defense & Raid AI
+- **Garrison Defense AI:** Patrolling Gorkha military units (Khukuri Warriors, Spearmen, Archers) automatically detect hostile bandits within a 15-meter alert radius.
+- **Class-Specific Engagement Ranges:**
+  - *Khukuri Warriors:* Close into $1.35\text{ m}$ melee range and unleash swift downward cross slashes.
+  - *Gorkha Spearmen:* Stand at $1.9\text{ m}$ spear reach to pierce attackers with two-handed forward lunges.
+  - *Mountain Archers:* Hold position at $7.5\text{ m}$ standoff range, draw recurve bowstrings to cheek, and fire physical parabolic ballistic arrows.
+- **Bandit Raider AI:** Bandits prioritize attacking nearby defenders or siege village structures, retaliating with dual blade slashes.
+- **Watchtower Integration:** Archer Watchtowers fire parabolic ballistic arrows with arc trajectories and target leading, sticking into struck targets.
 
 #### CBT-01: Drag-Box Selection & Control Groups (AoE RTS Controls)
 - **Concept:** Click-and-drag green selection box to highlight multiple units simultaneously.
@@ -345,9 +425,10 @@ flowchart LR
 - [ ] **Dynamic Day-Night Cycle:** Himalayan sunrise, golden afternoon, and lantern-lit mountain night with glowing paper windows.
 - [ ] **Ambient Himalayan Wildlife:** Mountain yaks grazing in pastures, Himalayan eagles soaring overhead, and musk deer in forests.
 - [ ] **Weather & Seasons:** Mountain mist rising from valleys, monsoon rain effects on terracotta roofs, and winter snow caps on pagoda eaves.
-- [ ] **Authentic Traditional Audio:**
-  - Background music blending Bansuri (bamboo flute), Sarangi (strings), Madal (drums), and Dhimay percussion.
-  - Voice barks in authentic Nepali for unit orders (*"Hajur!"*, *"Aadesh garnuhos!"*, *"Aakraman!"*).
+- [x] **Authentic Traditional Audio (AUD-01, AUD-02, AUD-03):** ✅ Completed!
+  - **`AUD-01` Procedural Himalayan Instruments & Combat SFX:** Real-time synthesis of Bansuri bamboo flute (Raga Pahadi), Madal hand drums (Dayan treble slap & Bayan sub thud), Dhimay war drums, Sarangi strings, steel Khukuri clashes, pavise shield blocks, bowstring twangs, and structure breaches in `GorkhaAudio`.
+  - **`AUD-02` Authentic Nepali Voice Barks & Speech Callouts:** Real-time formant vocal synthesizer generating localized barks (*"हजुर! (Hajur!)"*, *"आदेश दिनुहोस्! (Aadesh!)"*, *"हुन्छ! (Hunchha!)"*, *"आक्रमण! (Aakraman!)"*, *"जय महाकाली! (Jai Mahakali!)"*) paired with floating speech balloons in `GorkhaVoiceBarks`.
+  - **`AUD-03` Dynamic Multi-Tier Himalayan Soundscape:** Real-time environmental soundscape blending village calm/busy murmurs, watershore lake waves, altitude wind, peace flute melodies, and 110 BPM Madal war drum battle cadence during raids in `HimalayanSoundscape`.
 
 ---
 
