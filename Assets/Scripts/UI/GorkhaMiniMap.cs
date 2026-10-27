@@ -132,7 +132,7 @@ namespace Gorkha.UI
             float vHeight = Screen.height / scale;
 
             float totalHeight = _isExpanded ? _mapSize + 28f : 30f;
-            _mapRect = new Rect(vWidth - _mapSize - _padding, vHeight - totalHeight - _padding, _mapSize, totalHeight);
+            _mapRect = new Rect(_padding, vHeight - totalHeight - _padding, _mapSize, totalHeight);
 
             // Background card
             GUI.DrawTexture(_mapRect, _bgCardTex);
